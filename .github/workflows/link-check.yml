@@ -23,12 +23,15 @@ jobs:
           # Relative hrefs are resolved against the live site so that the
           # cross-repo links (the book, its PDF) are checked for real.
           base="https://appliedpqc.io/"
-          grep -oE 'href="[^"]+"' index.html README.md | sed 's/^href="//; s/"$//' \
-            | sort -u > raw.txt
+          # -h matters: with several files, grep -o prefixes every match
+          # with "filename:", which silently corrupts every URL.
+          grep -hoE 'href="[^"]+"' index.html README.md 404.html \
+            | sed 's/^href="//; s/"$//' | sort -u > raw.txt
           : > urls.txt
           while read -r h; do
             case "$h" in
               http*) echo "$h" >> urls.txt ;;
+              /*)    echo "${base}${h#/}" >> urls.txt ;;
               *)     echo "${base}${h}" >> urls.txt ;;
             esac
           done < raw.txt
