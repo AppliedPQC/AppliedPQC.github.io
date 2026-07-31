@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Applied PQC: a book and open-source implementations for post-quantum cryptography, built from first principles and verified against the NIST test vectors." />
+<meta name="color-scheme" content="light dark" />
+<title>Applied PQC</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --rule: #d1d9e0;
+    --link: #0b57d0; --card: #f6f8fa; --accent: #0b57d0; --accent-fg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --rule: #3d444d;
+      --link: #8ab4f8; --card: #161b22; --accent: #8ab4f8; --accent-fg: #0d1117;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    font-size: 16px; line-height: 1.6;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 4rem 1.25rem 5rem; }
+  h1 { font-size: 2.4rem; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 0.6rem; }
+  .tagline { font-size: 1.15rem; color: var(--muted); margin: 0 0 2.5rem; }
+  h2 {
+    font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin: 3rem 0 1rem; font-weight: 600;
+  }
+  a { color: var(--link); }
+  .card {
+    display: block; background: var(--card); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 1.25rem 1.4rem; margin-bottom: 1rem;
+    text-decoration: none; color: inherit;
+  }
+  .card:hover { border-color: var(--link); }
+  .card h3 { margin: 0 0 0.35rem; font-size: 1.15rem; color: var(--link); }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.2rem 0 0; }
+  .button {
+    display: inline-block; padding: 0.5rem 1.05rem; border-radius: 6px;
+    background: var(--accent); color: var(--accent-fg);
+    text-decoration: none; font-weight: 600;
+  }
+  .button.secondary { background: transparent; color: var(--link); border: 1px solid var(--rule); }
+  .button:hover { filter: brightness(1.08); }
+  ul.plain { padding-left: 1.1rem; color: var(--muted); }
+  ul.plain li { margin: 0.35rem 0; }
+  footer {
+    margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+    color: var(--muted); font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Applied PQC</h1>
+  <p class="tagline">
+    Post-quantum cryptography built from first principles &mdash; and verified
+    against the standards' own test vectors.
+  </p>
+
+  <h2>The book</h2>
+
+  <a class="card" href="AppliedPQC/">
+    <h3>Applied Post-Quantum Cryptography</h3>
+    <p>
+      From the quantum threat and the mathematical foundations, through
+      lattices, LWE and the NTT, to the four NIST standards and their
+      deployment. Every chapter carries worked SageMath.
+    </p>
+  </a>
+
+  <div class="actions">
+    <a class="button" href="AppliedPQC/apqc.pdf">Download the PDF</a>
+    <a class="button secondary" href="https://github.com/AppliedPQC/AppliedPQC">Source on GitHub</a>
+  </div>
+
+  <h2>Implementations</h2>
+
+  <a class="card" href="https://github.com/AppliedPQC/AppliedPQC/tree/main/sage">
+    <h3>SageMath reference implementations</h3>
+    <p>
+      Complete, byte-exact implementations of FIPS&nbsp;203 (ML-KEM),
+      FIPS&nbsp;204 (ML-DSA), FIPS&nbsp;205 (SLH-DSA) and FIPS&nbsp;206
+      (FN-DSA). Every numbered algorithm of each standard is implemented,
+      and the coverage is machine-checked rather than asserted.
+    </p>
+  </a>
+
+  <ul class="plain">
+    <li>Checked against the NIST ACVP vectors, byte for byte.</li>
+    <li>FN-DSA follows the round-3 Falcon submission, since FIPS&nbsp;206 is
+        still unpublished, and is validated against Falcon's own KATs.</li>
+    <li>Teaching implementations: readable and standards-exact, but not
+        constant-time and not for production use.</li>
+  </ul>
+
+  <h2>Resources</h2>
+
+  <a class="card" href="https://github.com/AppliedPQC/awesome-pqc">
+    <h3>awesome-pqc</h3>
+    <p>
+      An implementation-first, link-verified list of PQC resources: standards,
+      conformance test vectors, libraries and deployment. Every link is checked
+      on a schedule, so the list does not quietly rot.
+    </p>
+  </a>
+
+  <footer>
+    <a href="https://github.com/AppliedPQC">github.com/AppliedPQC</a>
+  </footer>
+
+</div>
+</body>
+</html>
