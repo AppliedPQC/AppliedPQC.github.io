@@ -8,7 +8,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>$pagetitle$</title>
-{% include "_meta.html" %}
+{% with description="$description$", page="$page$", og_type="$ogtype$", og_title="$pagetitle$", jsonld=None %}{% include "_meta.html" %}{% endwith %}
 <style>
 {{ css }}
 </style>

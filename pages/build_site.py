@@ -59,6 +59,11 @@ def set_source(root):
     LISTINGS = os.path.join(ROOT, "sage", "playground", "book_listings.json")
 
 GH = "https://github.com/AppliedPQC"
+SITE = "https://appliedpqc.io"
+
+BOOK_DESC = ("A book that builds post-quantum cryptography from the ground up, from "
+             "lattices and Learning With Errors to byte-exact implementations of "
+             "ML-KEM, ML-DSA, SLH-DSA and FN-DSA.")
 RAW = "https://raw.githubusercontent.com/AppliedPQC/AppliedPQC/main/sage/playground.py"
 BOOT = ('import urllib.request\n'
         'exec(urllib.request.urlopen("%s").read())' % RAW)
@@ -181,10 +186,13 @@ def read_posts():
 TOC_MIN_SECTIONS = 6
 
 
-def pandoc(src, out, template, title, toc=False):
+def pandoc(src, out, template, title, toc=False, description="", page="",
+           ogtype="article"):
     cmd = ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
            "--standalone", "--template=" + template,
            "--variable=pagetitle=" + title, "--variable=lang=en",
+           "--variable=description=" + description,
+           "--variable=page=" + page, "--variable=ogtype=" + ogtype,
            "--output=" + out]
     if toc:
         cmd += ["--toc", "--toc-depth=2"]
@@ -219,24 +227,44 @@ def main():
         shutil.copyfile(os.path.join(ROOT, "apqc.pdf"), os.path.join(dest, name))
     pages = pdf_pages(os.path.join(dest, "apqc.pdf"))
 
-    base = dict(gh=GH, css=css("site.css"))
+    base = dict(gh=GH, site=SITE, css=css("site.css"))
 
     # --- landing page -----------------------------------------------------
+    book_ld = json.dumps({
+        "@context": "https://schema.org", "@type": "Book",
+        "name": "Applied Post-Quantum Cryptography",
+        "author": [{"@type": "Person", "name": "Stephen Duan"},
+                   {"@type": "Person", "name": "Wei Li"}],
+        "description": BOOK_DESC, "inLanguage": "en",
+        "url": SITE + "/", "isAccessibleForFree": True,
+        "numberOfPages": pages,
+        "workExample": {"@type": "Book", "bookFormat": "https://schema.org/EBook",
+                        "encodingFormat": "application/pdf",
+                        "url": SITE + "/apqc.pdf"},
+    }, separators=(",", ":"))
     open(os.path.join(dest, "index.html"), "w").write(
         env.get_template("home.html").render(
             base, title="Applied Post-Quantum Cryptography",
             css=css("site.css", "home.css"), main_class="home", here="home",
             n_listings=n_listings, pages=pages, posts=posts,
-            standards=STANDARDS))
+            standards=STANDARDS, description=BOOK_DESC, page="",
+            og_type="website", og_title="Applied Post-Quantum Cryptography",
+            jsonld=book_ld))
 
     # --- chapter pages ----------------------------------------------------
     tpl = env.get_template("chapter.html")
     for c in chapters:
-        open(os.path.join(dest, "playground-%s.html" % c["stem"]), "w").write(
+        n_run = sum(1 for l in c["listings"] if l["runnable"])
+        page = "playground-%s.html" % c["stem"]
+        open(os.path.join(dest, page), "w").write(
             tpl.render(base, title="%s — Applied Post-Quantum Cryptography" % c["title"],
                        css=css("site.css", "playground.css"), main_class="",
-                       here="playground", chapter=c, boot=BOOT,
-                       n_runnable=sum(1 for l in c["listings"] if l["runnable"])))
+                       here="playground", chapter=c, boot=BOOT, n_runnable=n_run,
+                       description="Every code listing from %s, runnable in your "
+                                   "browser: %d snippets, nothing to install."
+                                   % (c["title"], n_run),
+                       page=page, og_type="article",
+                       og_title=c["title"], jsonld=None))
     # book-code.html was a published URL before the pages merged.
     open(os.path.join(dest, "book-code.html"), "w").write(
         env.get_template("redirect.html").render(to="playground.html"))
@@ -264,16 +292,43 @@ def main():
     merged = os.path.join(build, "playground.md")
     open(merged, "w").write(open(os.path.join(HERE, "playground.md")).read() + table)
     pandoc(merged, os.path.join(dest, "playground.html"), play_tpl,
-           "Playground — Applied Post-Quantum Cryptography")
+           "Playground — Applied Post-Quantum Cryptography",
+           description="Run all %d code listings from the book and the four NIST "
+                       "reference implementations in your browser. Nothing to "
+                       "install." % n_listings,
+           page="playground.html", ogtype="website")
 
     for p in posts:
         pandoc(p["path"], os.path.join(dest, "blog-%s.html" % p["slug"]), blog_tpl,
                "%s — Applied Post-Quantum Cryptography" % p["title"],
-               toc=wants_toc(p["path"]))
+               toc=wants_toc(p["path"]),
+               description=p.get("summary") or BOOK_DESC,
+               page="blog-%s.html" % p["slug"], ogtype="article")
     index_md = os.path.join(build, "blog.md")
     open(index_md, "w").write(env.get_template("blog_index.md").render(posts=posts))
     pandoc(index_md, os.path.join(dest, "blog.html"), blog_tpl,
-           "Blog — Applied Post-Quantum Cryptography")
+           "Blog — Applied Post-Quantum Cryptography",
+           description="Notes and research from the Applied PQC project on "
+                       "post-quantum migration.",
+           page="blog.html", ogtype="website")
+
+    # Sitemap and robots, built from the files actually written rather than a
+    # hand-kept list, so a new page cannot be left undiscoverable.
+    urls = sorted(f for f in os.listdir(dest)
+                  if f.endswith(".html") and f != "book-code.html")
+    entries = []
+    for f in urls:
+        loc = SITE + "/" + ("" if f == "index.html" else f)
+        prio = "1.0" if f == "index.html" else (
+            "0.8" if f in ("playground.html", "blog.html") or f.startswith("blog-")
+            else "0.6")
+        entries.append("  <url><loc>%s</loc><priority>%s</priority></url>" % (loc, prio))
+    open(os.path.join(dest, "sitemap.xml"), "w").write(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(entries) + "\n</urlset>\n")
+    open(os.path.join(dest, "robots.txt"), "w").write(
+        "User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n" % SITE)
 
     open(os.path.join(dest, ".nojekyll"), "w").close()
     shutil.rmtree(build)

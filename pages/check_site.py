@@ -152,6 +152,50 @@ def main():
         check('class="button" href="apqc.pdf">Download the PDF' not in h,
               "%s: the PDF button is back in the topbar" % name)
 
+    # --- SEO: metadata must be per-page, and everything discoverable --------
+    import json as _json
+    descs, canons = {}, {}
+    for f in pages:
+        h, name = read(f), os.path.basename(f)
+        d = re.search(r'name="description" content="(.*?)"', h, re.S)
+        c = re.search(r'rel="canonical" href="(.*?)"', h, re.S)
+        check(d and d.group(1).strip(), "%s has no description" % name)
+        check(c and c.group(1).startswith("https://"), "%s has no canonical URL" % name)
+        if d: descs.setdefault(d.group(1), []).append(name)
+        if c: canons.setdefault(c.group(1), []).append(name)
+    for text, where in descs.items():
+        check(len(where) == 1,
+              "%d pages share one description (%s)" % (len(where), ", ".join(where[:3])))
+    for url, where in canons.items():
+        check(len(where) == 1,
+              "%d pages claim the same canonical URL %s" % (len(where), url))
+
+    check(os.path.exists(p("robots.txt")), "no robots.txt")
+    check(os.path.exists(p("sitemap.xml")), "no sitemap.xml")
+    if os.path.exists(p("sitemap.xml")):
+        import xml.etree.ElementTree as ET
+        try:
+            root = ET.parse(p("sitemap.xml")).getroot()
+        except ET.ParseError as e:
+            root = None
+            failures.append("sitemap.xml is not valid XML: %s" % e)
+        if root is not None:
+            ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+            listed = {u.find("s:loc", ns).text.rsplit("/", 1)[1] or "index.html"
+                      for u in root}
+            missing = {os.path.basename(f) for f in pages} - listed
+            check(not missing, "sitemap omits %s" % ", ".join(sorted(missing)[:3]))
+            notes.append("sitemap: %d urls" % len(listed))
+    # Structured data must parse; a malformed block is silently ignored by
+    # crawlers, which is the same as not having it.
+    for f in pages:
+        for block in re.findall(r'<script type="application/ld\+json">(.*?)</script>',
+                                read(f), re.S):
+            try:
+                _json.loads(block)
+            except ValueError as e:
+                failures.append("%s has invalid JSON-LD: %s" % (os.path.basename(f), e))
+
     notes.append("landing page %d bytes, PDF %d bytes"
                  % (len(index), os.path.getsize(p("apqc.pdf"))))
     notes.append("playground %d cells; book %d chapters, %d cells"
