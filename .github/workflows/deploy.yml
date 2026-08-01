@@ -14,12 +14,9 @@ on:
     branches: [main]
   schedule:
     - cron: '17 * * * *'      # hourly, offset off the hour
+  # A manual run always rebuilds: the source check below applies only to the
+  # scheduled poll, so asking for a build by hand always gets one.
   workflow_dispatch:
-    inputs:
-      force:
-        description: 'Rebuild even if the source has not changed'
-        type: boolean
-        default: false
 
 permissions:
   contents: read
