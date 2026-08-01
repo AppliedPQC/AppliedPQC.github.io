@@ -21,7 +21,7 @@ once rather than in two copies that drift.
 
 Nothing that could go stale is typed in. Listing and chapter counts come from
 ``book_listings.json`` (itself generated from ``chapters/*.tex``), the page
-count from the built PDF, and the posts from ``blog/``.
+count from the built PDF, and the posts from ``blog/`` beside this directory.
 
 The book itself lives in another repository, so its checkout is passed in::
 
@@ -42,21 +42,21 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES = os.path.join(HERE, "templates")
 STYLES = os.path.join(HERE, "styles")
+# The blog is this site's own content, so it sits beside pages/ rather than in
+# the book checkout.
+POSTS = os.path.join(os.path.dirname(HERE), "blog")
+SOURCES = os.path.join(POSTS, "sources.json")
 
 # Filled in from --source: the checkout of the book repository, which supplies
-# the PDF, the generated listing data and the blog content.
+# the PDF and the listing data generated from its chapters.
 ROOT = None
 LISTINGS = None
-POSTS = None
-SOURCES = None
 
 
 def set_source(root):
-    global ROOT, LISTINGS, POSTS, SOURCES
+    global ROOT, LISTINGS
     ROOT = os.path.abspath(root)
     LISTINGS = os.path.join(ROOT, "sage", "playground", "book_listings.json")
-    POSTS = os.path.join(ROOT, "blog")
-    SOURCES = os.path.join(POSTS, "sources.json")
 
 GH = "https://github.com/AppliedPQC"
 RAW = "https://raw.githubusercontent.com/AppliedPQC/AppliedPQC/main/sage/playground.py"

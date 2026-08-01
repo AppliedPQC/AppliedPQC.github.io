@@ -21,7 +21,8 @@ import sys
 
 # Filled in from --source: the checkout of the book repository.
 LISTINGS = None
-POSTS = None
+# The blog is this site's own content, beside pages/.
+POSTS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blog")
 
 failures = []
 notes = []
@@ -37,7 +38,7 @@ def read(path):
 
 
 def main():
-    global LISTINGS, POSTS
+    global LISTINGS
     ap = argparse.ArgumentParser(description="Check a rendered site.")
     ap.add_argument("site", help="the rendered site directory")
     ap.add_argument("--source", required=True,
@@ -45,7 +46,6 @@ def main():
     args = ap.parse_args()
     root = os.path.abspath(args.source)
     LISTINGS = os.path.join(root, "sage", "playground", "book_listings.json")
-    POSTS = os.path.join(root, "blog")
     site = os.path.abspath(args.site)
     p = lambda *a: os.path.join(site, *a)
 
