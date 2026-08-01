@@ -21,14 +21,20 @@
 </head>
 <body>
 {% include "_topbar.html" %}
-<main>
+<main$if(table-of-contents)$ class="has-toc"$endif$>
 $if(table-of-contents)$
-<details class="toc" open>
-<summary>Contents</summary>
+<div class="layout-toc">
+<aside class="toc" aria-label="Contents">
+<p class="toc-heading">Contents</p>
 $table-of-contents$
-</details>
-$endif$
+</aside>
+<article>
 $body$
+</article>
+</div>
+$else$
+$body$
+$endif$
 </main>
 {% include "_footer.html" %}
 </body>

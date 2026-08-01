@@ -125,10 +125,15 @@ def main():
             heads = html.count("<h2")
             if heads >= 6:
                 entries = len(re.findall(r'<li><a href="#', html))
-                check('class="toc"' in html and entries >= heads,
-                      "%s has %d sections but no usable contents block"
+                check('<aside class="toc"' in html and entries >= heads,
+                      "%s has %d sections but no usable contents sidebar"
                       % (os.path.basename(page), heads))
-                notes.append("%s: contents block, %d entries" % (e["slug"], entries))
+                # The sidebar only works if the body sits in the other column;
+                # without the wrapper the text renders under a 15rem gap.
+                check('class="layout-toc"' in html and "<article>" in html,
+                      "%s has a contents sidebar but no two-column wrapper"
+                      % os.path.basename(page))
+                notes.append("%s: contents sidebar, %d entries" % (e["slug"], entries))
             # Diagrams come from the sourced document as fenced mermaid blocks.
             # If the fence stops being recognised they degrade to plain code
             # blocks, which looks fine and conveys nothing.
