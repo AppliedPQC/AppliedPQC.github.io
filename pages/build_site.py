@@ -233,14 +233,16 @@ def main():
     # --- prose pages, via pandoc -----------------------------------------
     # One pandoc template per chrome variant, rendered from the same partials
     # the generated pages use.
-    def pandoc_template(name, sagecell, extra_css, here):
+    def pandoc_template(name, sagecell, extra_css, here, mermaid=False):
         p = os.path.join(build, name)
         open(p, "w").write(env.get_template("pandoc.html").render(
-            base, css=css("site.css", *extra_css), sagecell=sagecell, here=here))
+            base, css=css("site.css", *extra_css), sagecell=sagecell,
+            mermaid=mermaid, here=here))
         return p
 
     play_tpl = pandoc_template("t-playground.html", True, ("playground.css",), "playground")
-    blog_tpl = pandoc_template("t-blog.html", False, (), "blog")
+    # Posts carry diagrams; the playground does not, so only the blog pays for it.
+    blog_tpl = pandoc_template("t-blog.html", False, (), "blog", mermaid=True)
 
     # The playground is the single entry point for running code, so the
     # generated chapter table is appended to its prose.

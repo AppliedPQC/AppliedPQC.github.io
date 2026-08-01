@@ -119,6 +119,15 @@ def main():
                   % (os.path.basename(page), len(html)))
             check("Originally published" in html and e["repo"] in html,
                   "%s lost its link back to the source" % os.path.basename(page))
+            # Diagrams come from the sourced document as fenced mermaid blocks.
+            # If the fence stops being recognised they degrade to plain code
+            # blocks, which looks fine and conveys nothing.
+            diagrams = html.count('<pre class="mermaid">')
+            if diagrams:
+                check("mermaid.esm" in html,
+                      "%s has %d diagrams but never loads mermaid"
+                      % (os.path.basename(page), diagrams))
+                notes.append("%s: %d diagram(s)" % (e["slug"], diagrams))
             check("blog-%s.html" % e["slug"] in blog,
                   "blog index does not link %s" % e["slug"])
             notes.append("sourced post %s: %d bytes" % (e["slug"], len(html)))
