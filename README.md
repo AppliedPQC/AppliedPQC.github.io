@@ -29,3 +29,14 @@ gh workflow run deploy.yml --repo AppliedPQC/AppliedPQC.github.io
 
 Nothing here needs a secret. The source repository is public, so it is checked
 out with no token.
+
+## What is in this repository
+
+Only the workflow. Pages is set to build from Actions, so nothing in this
+repository is served — the deployed artifact is the site, and it carries its
+own `.nojekyll`. The page templates and stylesheets live with the book, in
+[`.github/pages/`](https://github.com/AppliedPQC/AppliedPQC/tree/main/.github/pages)
+of the source repository, because they render data generated from the book's
+own LaTeX. Keeping them there means a chapter change and the page that shows it
+are one review, and the source repository's CI can check the rendered site
+before a change is merged.
