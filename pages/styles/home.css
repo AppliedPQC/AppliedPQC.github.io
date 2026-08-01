@@ -1,6 +1,7 @@
   main.home { max-width: none; margin: 0; padding: 0; }
-  .band { border-bottom: 1px solid var(--rule); }
-  .band-inner { max-width: 62rem; margin: 0 auto; padding: 3.25rem 1.25rem; }
+  /* Sections are separated by space and by the tinted band, not by rules.
+     A hairline under every one of them stacked up down the page. */
+  .band-inner { max-width: 62rem; margin: 0 auto; padding: 4rem 1.25rem; }
   .band.tint { background: var(--code-bg); }
 
   .hero { text-align: center; }
@@ -47,8 +48,9 @@
   .band .sub { color: var(--muted); margin: 0 0 1.9rem; }
 
   .posts { list-style: none; padding: 0; margin: 0; }
+  /* Rules only between posts, so a single post draws none at all. */
   .posts li { padding: 0.95rem 0; border-top: 1px solid var(--rule); }
-  .posts li:last-child { border-bottom: 1px solid var(--rule); }
+  .posts li:first-child { border-top: 0; padding-top: 0; }
   .posts .date { color: var(--muted); font-size: 0.86rem; }
   .posts a { font-weight: 600; }
   .posts p { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.95rem; }
