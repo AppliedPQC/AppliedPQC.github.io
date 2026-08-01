@@ -1,0 +1,128 @@
+name: Build and deploy the site
+
+# The site is published from this repository, but its source -- the book, the
+# Sage implementations and the page templates -- lives in AppliedPQC/AppliedPQC.
+# That repository is public, so it is checked out without a token; nothing here
+# needs a secret.
+#
+# GitHub cannot notify this repository when the source changes, so a schedule
+# polls it. The poll is cheap: it compares the source commit against the one
+# recorded in the live site and stops before installing anything if they match.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 * * * *'      # hourly, offset off the hour
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild even if the source has not changed'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  SOURCE_REPO: AppliedPQC/AppliedPQC
+  PANDOC_VERSION: '3.1.3'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+    steps:
+      - name: Check out the site repository
+        uses: actions/checkout@v4
+
+      - name: Check out the book source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          path: source
+
+      - name: Decide whether a rebuild is needed
+        id: decide
+        run: |
+          set -euo pipefail
+          sha="$(git -C source rev-parse HEAD)"
+          echo "source_sha=$sha" >> "$GITHUB_OUTPUT"
+          live="$(curl -sf --max-time 20 https://appliedpqc.io/build-info.json \
+                  | python3 -c 'import json,sys; print(json.load(sys.stdin).get("source_sha",""))' \
+                  2>/dev/null || true)"
+          echo "live is ${live:-<none>}, source is $sha"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$sha" = "$live" ]; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "Source unchanged; skipping before any install."
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install TeX Live
+        if: steps.decide.outputs.build == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-pictures texlive-science
+
+      - name: Install pandoc
+        if: steps.decide.outputs.build == 'true'
+        run: |
+          set -euo pipefail
+          url="https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-linux-amd64.tar.gz"
+          curl -sSfL --retry 3 --retry-delay 5 -o /tmp/pandoc.tar.gz "$url"
+          tar -xzf /tmp/pandoc.tar.gz -C /tmp
+          sudo install -m 0755 "/tmp/pandoc-${PANDOC_VERSION}/bin/pandoc" /usr/local/bin/pandoc
+          pandoc --version | head -1 | grep -qw "${PANDOC_VERSION}" || {
+            echo "::error::expected pandoc ${PANDOC_VERSION}"
+            exit 1
+          }
+
+      - name: Build the book and the site
+        if: steps.decide.outputs.build == 'true'
+        working-directory: source
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet "jinja2==3.1.*"
+          make
+          python3 sage/playground/extract_listings.py --check
+          python3 .github/pages/build_site.py site
+
+      - name: Record what was built
+        if: steps.decide.outputs.build == 'true'
+        run: |
+          set -euo pipefail
+          printf '{\n "source_repo": "%s",\n "source_sha": "%s",\n "built_by": "%s",\n "run": "%s"\n}\n' \
+            "$SOURCE_REPO" "${{ steps.decide.outputs.source_sha }}" \
+            "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > source/site/build-info.json
+          cat source/site/build-info.json
+
+      - name: Check the rendered site
+        if: steps.decide.outputs.build == 'true'
+        working-directory: source
+        run: python3 .github/pages/check_site.py site
+
+      - name: Upload Pages artifact
+        if: steps.decide.outputs.build == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: source/site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

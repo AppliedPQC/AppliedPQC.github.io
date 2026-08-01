@@ -1,17 +1,31 @@
 # appliedpqc.io
 
-The organization site for [Applied PQC](https://appliedpqc.io/), served by
-GitHub Pages from this repository's `main` branch.
+The website for [Applied PQC](https://appliedpqc.io/), served by GitHub Pages
+from this repository.
 
-Because this is the organization site, the custom domain cascades to the
-organization's project sites, which are served under it by path:
+There is no page source here. The site is **built from
+[AppliedPQC/AppliedPQC](https://github.com/AppliedPQC/AppliedPQC)** — the book,
+the SageMath implementations and the page templates all live there — and
+published by `.github/workflows/deploy.yml`.
 
-| URL | Repository |
-| --- | --- |
-| <https://appliedpqc.io/> | this repository |
-| <https://appliedpqc.io/AppliedPQC/> | [AppliedPQC/AppliedPQC](https://github.com/AppliedPQC/AppliedPQC) — the book |
-| <https://appliedpqc.io/AppliedPQC/apqc.pdf> | the compiled book PDF |
+Keeping the source in one repository and publishing from another means this
+repository holds no copy that could drift. What it publishes is recorded in
+[`build-info.json`](https://appliedpqc.io/build-info.json), which names the
+exact source commit the live site was built from.
 
-The page is a single self-contained `index.html`: no build step, no
-dependencies, nothing to break between a commit and a deploy. Links are
-checked on every change and weekly by `.github/workflows/link-check.yml`.
+## How it updates
+
+GitHub cannot notify this repository when the source changes, so the workflow
+polls hourly. The poll is cheap: it compares the source commit against the one
+in the live `build-info.json` and stops before installing anything if they
+match. A build takes a few minutes, so a change to the book appears here within
+about an hour.
+
+To publish immediately, run the workflow by hand:
+
+```sh
+gh workflow run deploy.yml --repo AppliedPQC/AppliedPQC.github.io
+```
+
+Nothing here needs a secret. The source repository is public, so it is checked
+out with no token.
