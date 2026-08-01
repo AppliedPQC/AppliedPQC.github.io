@@ -1,9 +1,9 @@
 name: Build and deploy the site
 
-# The site is published from this repository, but its source -- the book, the
-# Sage implementations and the page templates -- lives in AppliedPQC/AppliedPQC.
-# That repository is public, so it is checked out without a token; nothing here
-# needs a secret.
+# The page templates, stylesheets and build scripts live in pages/ here. The
+# book they render -- the LaTeX, the Sage implementations, the generated listing
+# data and the blog content -- lives in AppliedPQC/AppliedPQC, which is public
+# and so is checked out without a token; nothing here needs a secret.
 #
 # GitHub cannot notify this repository when the source changes, so a schedule
 # polls it. The poll is cheap: it compares the source commit against the one
@@ -85,15 +85,22 @@ jobs:
             exit 1
           }
 
-      - name: Build the book and the site
+      - name: Build the book
         if: steps.decide.outputs.build == 'true'
         working-directory: source
         run: |
           set -euo pipefail
-          python3 -m pip install --quiet "jinja2==3.1.*"
           make
+          # The listing data is generated from chapters/*.tex; fail rather than
+          # publish a playground that disagrees with the book.
           python3 sage/playground/extract_listings.py --check
-          python3 .github/pages/build_site.py site
+
+      - name: Build the site
+        if: steps.decide.outputs.build == 'true'
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet "jinja2==3.1.*"
+          python3 pages/build_site.py --source source site
 
       - name: Record what was built
         if: steps.decide.outputs.build == 'true'
@@ -101,19 +108,18 @@ jobs:
           set -euo pipefail
           printf '{\n "source_repo": "%s",\n "source_sha": "%s",\n "built_by": "%s",\n "run": "%s"\n}\n' \
             "$SOURCE_REPO" "${{ steps.decide.outputs.source_sha }}" \
-            "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > source/site/build-info.json
-          cat source/site/build-info.json
+            "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > site/build-info.json
+          cat site/build-info.json
 
       - name: Check the rendered site
         if: steps.decide.outputs.build == 'true'
-        working-directory: source
-        run: python3 .github/pages/check_site.py site
+        run: python3 pages/check_site.py --source source site
 
       - name: Upload Pages artifact
         if: steps.decide.outputs.build == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: source/site
+          path: site
 
   deploy:
     needs: build

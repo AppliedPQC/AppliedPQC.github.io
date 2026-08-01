@@ -3,15 +3,20 @@
 The website for [Applied PQC](https://appliedpqc.io/), served by GitHub Pages
 from this repository.
 
-There is no page source here. The site is **built from
-[AppliedPQC/AppliedPQC](https://github.com/AppliedPQC/AppliedPQC)** — the book,
-the SageMath implementations and the page templates all live there — and
-published by `.github/workflows/deploy.yml`.
+`pages/` holds the site: the Jinja templates, the stylesheets, the playground
+prose, and the two scripts that build and check it.
 
-Keeping the source in one repository and publishing from another means this
-repository holds no copy that could drift. What it publishes is recorded in
-[`build-info.json`](https://appliedpqc.io/build-info.json), which names the
-exact source commit the live site was built from.
+What it renders comes from
+[AppliedPQC/AppliedPQC](https://github.com/AppliedPQC/AppliedPQC) — the LaTeX
+book, the SageMath implementations, the listing data generated from the
+chapters, and the blog content. That repository is checked out at build time and
+never copied here, so there is nothing to drift.
+[`build-info.json`](https://appliedpqc.io/build-info.json) names the exact source
+commit the live site was built from.
+
+The book repository checks out `pages/` in its own CI and runs the same build
+and the same checks on every pull request, so a chapter change that would break
+a page is caught in review rather than after publishing.
 
 ## How it updates
 
@@ -30,13 +35,15 @@ gh workflow run deploy.yml --repo AppliedPQC/AppliedPQC.github.io
 Nothing here needs a secret. The source repository is public, so it is checked
 out with no token.
 
-## What is in this repository
+## Layout
 
-Only the workflow. Pages is set to build from Actions, so nothing in this
-repository is served — the deployed artifact is the site, and it carries its
-own `.nojekyll`. The page templates and stylesheets live with the book, in
-[`.github/pages/`](https://github.com/AppliedPQC/AppliedPQC/tree/main/.github/pages)
-of the source repository, because they render data generated from the book's
-own LaTeX. Keeping them there means a chapter change and the page that shows it
-are one review, and the source repository's CI can check the rendered site
-before a change is merged.
+```text
+pages/build_site.py     builds the whole site
+pages/check_site.py     asserts the result is what it should be
+pages/templates/        Jinja templates; the chrome is defined once
+pages/styles/           stylesheets
+pages/playground.md     the playground's prose
+```
+
+Pages is set to build from Actions, so nothing in this repository is served
+directly: the deployed artifact is the site.
