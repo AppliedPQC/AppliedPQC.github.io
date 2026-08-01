@@ -241,8 +241,10 @@ def main():
         return p
 
     play_tpl = pandoc_template("t-playground.html", True, ("playground.css",), "playground")
-    # Posts carry diagrams; the playground does not, so only the blog pays for it.
-    blog_tpl = pandoc_template("t-blog.html", False, (), "blog", mermaid=True)
+    # Mermaid is only loaded if a post actually contains a diagram, so the blog
+    # does not pull a large module for nothing.
+    any_diagram = any("```mermaid" in open(p["path"]).read() for p in posts)
+    blog_tpl = pandoc_template("t-blog.html", False, (), "blog", mermaid=any_diagram)
 
     # The playground is the single entry point for running code, so the
     # generated chapter table is appended to its prose.
