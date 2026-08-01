@@ -177,13 +177,24 @@ def read_posts():
     return out
 
 
-def pandoc(src, out, template, title):
-    subprocess.run(
-        ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
-         "--standalone", "--template=" + template,
-         "--variable=pagetitle=" + title, "--variable=lang=en",
-         "--output=" + out],
-        check=True)
+# A contents block earns its place on a long post and clutters a short one.
+TOC_MIN_SECTIONS = 6
+
+
+def pandoc(src, out, template, title, toc=False):
+    cmd = ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
+           "--standalone", "--template=" + template,
+           "--variable=pagetitle=" + title, "--variable=lang=en",
+           "--output=" + out]
+    if toc:
+        cmd += ["--toc", "--toc-depth=2"]
+    subprocess.run(cmd, check=True)
+
+
+def wants_toc(path):
+    """True when a post has enough top-level sections to be worth navigating."""
+    n = len(re.findall(r"^##? ", open(path).read(), re.M))
+    return n >= TOC_MIN_SECTIONS
 
 
 def main():
@@ -257,7 +268,8 @@ def main():
 
     for p in posts:
         pandoc(p["path"], os.path.join(dest, "blog-%s.html" % p["slug"]), blog_tpl,
-               "%s — Applied Post-Quantum Cryptography" % p["title"])
+               "%s — Applied Post-Quantum Cryptography" % p["title"],
+               toc=wants_toc(p["path"]))
     index_md = os.path.join(build, "blog.md")
     open(index_md, "w").write(env.get_template("blog_index.md").render(posts=posts))
     pandoc(index_md, os.path.join(dest, "blog.html"), blog_tpl,

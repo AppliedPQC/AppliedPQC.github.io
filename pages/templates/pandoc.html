@@ -22,6 +22,12 @@
 <body>
 {% include "_topbar.html" %}
 <main>
+$if(table-of-contents)$
+<details class="toc" open>
+<summary>Contents</summary>
+$table-of-contents$
+</details>
+$endif$
 $body$
 </main>
 {% include "_footer.html" %}
