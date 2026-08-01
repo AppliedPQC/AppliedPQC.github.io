@@ -1,23 +1,39 @@
+  /* GitHub's Primer tokens, read from github.com's own light and dark
+     stylesheets rather than eyeballed. */
   :root {
     --bg: #ffffff;
+    --bg-muted: #f6f8fa;
     --fg: #1f2328;
     --muted: #59636e;
     --rule: #d1d9e0;
-    --link: #0b57d0;
-    --code-bg: #f6f8fa;
-    --accent: #0b57d0;
+    --link: #0969da;
+    --accent: #0969da;
     --accent-fg: #ffffff;
+    --code-bg: #818b981f;         /* bgColor-neutral-muted */
+    --btn-primary: #1f883d;       /* bgColor-success-emphasis */
+    --btn-primary-hover: #1c8139;
+    --btn-bg: #f6f8fa;            /* control-bgColor-rest */
+    --btn-bg-hover: #eff2f5;
+    --btn-border: #d1d9e0;
+    --btn-shadow: 0 1px 0 rgba(31, 35, 40, 0.04);
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0d1117;
-      --fg: #e6edf3;
+      --bg-muted: #151b23;
+      --fg: #f0f6fc;
       --muted: #9198a1;
       --rule: #3d444d;
-      --link: #8ab4f8;
-      --code-bg: #161b22;
-      --accent: #8ab4f8;
-      --accent-fg: #0d1117;
+      --link: #4493f8;
+      --accent: #4493f8;
+      --accent-fg: #ffffff;
+      --code-bg: #656c7633;
+      --btn-primary: #238636;
+      --btn-primary-hover: #29903b;
+      --btn-bg: #212830;
+      --btn-bg-hover: #262c36;
+      --btn-border: #3d444d;
+      --btn-shadow: none;
     }
   }
 
@@ -66,18 +82,26 @@
   }
   .button {
     display: inline-block;
-    padding: 0.4rem 0.9rem;
+    padding: 0.3125rem 1rem;
     border-radius: 6px;
-    background: var(--accent);
-    color: var(--accent-fg);
+    background: var(--btn-primary);
+    color: #ffffff;
+    border: 1px solid rgba(31, 35, 40, 0.15);
+    box-shadow: var(--btn-shadow);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.42857;
     text-decoration: none;
-    font-weight: 600;
     white-space: nowrap;
   }
-  .button:hover { filter: brightness(1.08); }
+  .button:hover { background: var(--btn-primary-hover); text-decoration: none; }
 
   h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
   h1 { font-size: 2rem; margin: 0 0 0.5rem; }
+  main > h1, main > h2 {
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--rule);
+  }
   h2 {
     font-size: 1.35rem;
     margin-top: 2.5rem;
@@ -86,21 +110,9 @@
   }
   h3 { font-size: 1.1rem; margin-top: 1.75rem; }
 
-  a { color: var(--link); }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
 
-  /* Callout card: used on the landing page to surface a sibling project. */
-  .callout {
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent);
-    border-radius: 6px;
-    background: var(--code-bg);
-    padding: 0.9rem 1.1rem;
-    margin: 1.5rem 0;
-  }
-  .callout strong { font-size: 1.02em; }
-  .callout a { font-weight: 700; }
-
-  /* Site footer, shared by every page. */
   .sitefooter { border-top: 1px solid var(--rule); margin-top: 3rem; }
   .sitefooter .band-inner {
     max-width: 62rem;
@@ -122,9 +134,9 @@
                  "Liberation Mono", monospace;
     font-size: 0.875em;
   }
-  code { background: var(--code-bg); padding: 0.15em 0.35em; border-radius: 4px; }
+  code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 6px; font-size: 85%; }
   pre {
-    background: var(--code-bg);
+    background: var(--bg-muted);
     padding: 0.9rem 1rem;
     border-radius: 6px;
     overflow-x: auto;      /* wide code scrolls, the page never does */
@@ -134,7 +146,7 @@
   /* Wide tables scroll inside their own box rather than widening the page. */
   table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
   th, td { border: 1px solid var(--rule); padding: 0.45rem 0.7rem; text-align: left; }
-  th { background: var(--code-bg); }
+  th { background: var(--bg-muted); font-weight: 600; }
 
   blockquote {
     margin: 1rem 0;

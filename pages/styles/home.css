@@ -2,7 +2,7 @@
   /* Sections are separated by space and by the tinted band, not by rules.
      A hairline under every one of them stacked up down the page. */
   .band-inner { max-width: 62rem; margin: 0 auto; padding: 4rem 1.25rem; }
-  .band.tint { background: var(--code-bg); }
+  .band.tint { background: var(--bg-muted); }
 
   .hero { text-align: center; }
   .hero .band-inner { padding: 4.5rem 1.25rem 3.75rem; }
@@ -20,26 +20,30 @@
   }
   .hero .byline { color: var(--muted); font-size: 0.92rem; margin: 1.75rem 0 0; }
   .cta { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  /* GitHub's default (secondary) button. */
   .cta .button.ghost {
-    background: transparent;
-    color: var(--link);
-    border: 1px solid var(--rule);
+    background: var(--btn-bg);
+    color: var(--fg);
+    border: 1px solid var(--btn-border);
   }
+  .cta .button.ghost:hover { background: var(--btn-bg-hover); }
 
   .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
     gap: 1.15rem;
   }
+  /* Primer's Box: 6px corners, one hairline, no shadow. */
   .card {
     border: 1px solid var(--rule);
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 1.35rem;
     background: var(--bg);
     display: flex;
     flex-direction: column;
   }
-  .card h3 { margin: 0 0 0.45rem; font-size: 1.06rem; }
+  .band.tint .card { background: var(--bg); }
+  .card h3 { margin: 0 0 0.45rem; font-size: 1rem; font-weight: 600; }
   .card p { margin: 0 0 1rem; color: var(--muted); font-size: 0.95rem; flex: 1; }
   .card .more { font-weight: 600; text-decoration: none; }
   .card .more:hover { text-decoration: underline; }
