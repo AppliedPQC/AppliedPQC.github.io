@@ -1,6 +1,7 @@
 {% extends "page.html" %}
 {% block content %}
 <section class="band hero"><div class="band-inner">
+<div>
 <h1>Applied Post-Quantum Cryptography</h1>
 <p class="lede">A book that builds post-quantum cryptography from the ground up —
 from lattices and Learning With Errors to complete, byte-exact implementations
@@ -9,63 +10,73 @@ of all four NIST standards.</p>
 <a class="button" href="apqc.pdf">Read the book (PDF)</a>
 <a class="button ghost" href="playground.html">Run the code</a>
 </div>
-<p class="byline">{% if pages %}{{ pages }} pages · {% endif %}by Stephen Duan and Wei Li · free and open source</p>
-</div></section>
-
-<section class="band"><div class="band-inner">
-<h2>Start here</h2>
-<p class="sub">Three ways in, depending on what you need.</p>
-<div class="cards">
-  <div class="card">
-    <h3>The book</h3>
-    <p>The full arc, from finite fields and lattices through ML-KEM, ML-DSA,
-    SLH-DSA and FN-DSA, to side channels and deployment.</p>
-    <a class="more" href="apqc.pdf">Download the PDF →</a>
-  </div>
-  <div class="card">
-    <h3>Runnable code</h3>
-    <p>All {{ n_listings }} code listings and the four reference implementations
-    run in your browser, with nothing to install.</p>
-    <a class="more" href="playground.html">Open the playground →</a>
-  </div>
-  <div class="card">
-    <h3>awesome-pqc</h3>
-    <p>A curated, link-verified list of post-quantum resources for people who
-    have to build and ship it — standards, test vectors, libraries, deployment.</p>
-    <a class="more" href="{{ gh }}/awesome-pqc">Browse the list →</a>
-  </div>
+</div>
+<div class="hero-art" aria-hidden="true">
+{{ art('lattice', 0) }}{{ art('merkle', 4) }}{{ art('ntt', 2) }}
 </div>
 </div></section>
 
-<section class="band tint"><div class="band-inner">
-<h2>The four standards, implemented</h2>
-<p class="sub">Every numbered algorithm of each standard, as its own function,
-checked against NIST's test vectors.</p>
-<div class="cards">
+<section class="band"><div class="band-inner">
+<h2>Everything in the project</h2>
+<p class="sub">The book, the runnable implementations, the standards and the
+research — filter by what you need.</p>
+<div class="pills" data-pills="all">
+  <button class="pill" type="button" data-cat="all" aria-pressed="true">All</button>
+  <button class="pill" type="button" data-cat="start" aria-pressed="false">Start here</button>
+  <button class="pill" type="button" data-cat="standard" aria-pressed="false">Standards</button>
+  <button class="pill" type="button" data-cat="writing" aria-pressed="false">Writing</button>
+</div>
+<ul class="grid" data-filter="all">
+  <li class="card" data-cat="start" data-text="the book pdf lattices ml-kem ml-dsa slh-dsa fn-dsa side channels deployment">
+    {{ art('book', 0) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="apqc.pdf">The book</a></h3>
+      <p>The full arc, from finite fields and lattices through ML-KEM, ML-DSA,
+      SLH-DSA and FN-DSA, to side channels and deployment.</p>
+      <p class="meta"><span class="tag">PDF</span>{% if pages %}<span>{{ pages }} pages</span>{% endif %}</p>
+    </div>
+  </li>
+  <li class="card" data-cat="start" data-text="runnable code playground sagemath listings browser">
+    {{ art('code', 1) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="playground.html">Runnable code</a></h3>
+      <p>All {{ n_listings }} code listings and the four reference implementations
+      run in your browser, with nothing to install.</p>
+      <p class="meta"><span class="tag">Playground</span><span>{{ n_listings }} listings</span></p>
+    </div>
+  </li>
+  <li class="card" data-cat="start" data-text="awesome-pqc curated list resources standards test vectors libraries deployment migration">
+    {{ art('list', 2) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="{{ gh }}/awesome-pqc">awesome-pqc</a></h3>
+      <p>A curated, link-verified list of post-quantum resources for people who
+      have to build and ship it — standards, test vectors, libraries, deployment.</p>
+      <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
+    </div>
+  </li>
 {%- for s in standards %}
-  <div class="card"><h3>{{ s.name }} · {{ s.fips }}</h3><p>{{ s.blurb }}</p></div>
+  <li class="card" data-cat="standard" data-text="{{ s.name|lower }} {{ s.fips|lower }} {{ s.blurb|lower }}">
+    {{ art(s.art, loop.index0 + 3) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="{{ gh }}/AppliedPQC/tree/main/sage">{{ s.name }}</a></h3>
+      <p>{{ s.blurb }}</p>
+      <p class="meta"><span class="tag">{{ s.fips }}</span></p>
+    </div>
+  </li>
 {%- endfor %}
-</div>
-<p class="after"><a href="{{ gh }}/AppliedPQC/tree/main/sage">The implementations
-on GitHub →</a> · 462 checks, 0 failures against ACVP.</p>
-</div></section>
-
-<section class="band"><div class="band-inner">
-<h2>From the blog</h2>
-{%- if posts %}
-<p class="sub">Notes and research from the project.</p>
-<ul class="posts">
 {%- for p in posts[:4] %}
-  <li>
-    <span class="date">{{ p.date }}</span><br />
-    <a href="blog-{{ p.slug }}.html">{{ p.title }}</a>
-    {%- if p.summary %}<p>{{ p.summary }}</p>{% endif %}
+  <li class="card" data-cat="writing" data-text="{{ p.title|lower }} {{ (p.summary or '')|lower }} blog research">
+    {{ art('post', loop.index0 + 7) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="blog-{{ p.slug }}.html">{{ p.title }}</a></h3>
+      {%- if p.summary %}<p>{{ p.summary }}</p>{% endif %}
+      <p class="meta"><span class="tag">Blog</span><span>{{ p.date }}</span></p>
+    </div>
   </li>
 {%- endfor %}
 </ul>
-<p class="after"><a href="blog.html">All posts →</a></p>
-{%- else %}
-<p class="sub">No posts yet.</p>
-{%- endif %}
+<p class="empty" hidden>Nothing matches that.</p>
+<p class="after"><a href="{{ gh }}/AppliedPQC/tree/main/sage">The implementations
+on GitHub →</a> · 462 checks, 0 failures against ACVP · <a href="blog.html">all posts →</a></p>
 </div></section>
 {% endblock %}

@@ -58,14 +58,22 @@ def main():
           "landing page lost its title")
     check('href="apqc.pdf"' in index, "landing page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
-    check(len(re.findall(r'<section class="band', index)) >= 4,
-          "landing page has fewer than four section bands")
-    check(len(re.findall(r'<div class="card">', index)) >= 6,
-          "landing page has fewer than six cards")
+    check(len(re.findall(r'<section class="band', index)) >= 2,
+          "landing page has fewer than two section bands")
+    # The grid is the landing page. Every entry must carry cover art and a
+    # stretched link, or the card is a dead tile.
+    cards = re.findall(r'<li class="card"', index)
+    check(len(cards) >= 6, "landing page has fewer than six cards")
+    check(index.count('class="art"') >= len(cards),
+          "a landing-page card is missing its cover art")
+    check(index.count('class="stretch"') >= len(cards),
+          "a landing-page card is missing its link")
+    check('data-filter=' in index and 'data-pills=' in index,
+          "landing page lost the card filter")
     check("AppliedPQC/awesome-pqc" in index, "landing page does not surface awesome-pqc")
     # The page count is read from the build, never typed in; if the source it
-    # comes from moves, the hero loses it silently.
-    check(re.search(r"[0-9]+ pages · by", index) is not None,
+    # comes from moves, the book card loses it silently.
+    check(re.search(r"<span>[0-9]+ pages</span>", index) is not None,
           "landing page lost the page count")
     check(index.count('name="viewport"') == 1, "landing page has a duplicate viewport tag")
 
