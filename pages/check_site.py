@@ -196,6 +196,19 @@ def main():
     check(re.search(r"<title>[^<]{25,90}</title>", index) is not None,
           "landing page title is missing or a bad length for search results")
 
+    # The Run button takes its colours from --btn-primary, which is near-black
+    # in light mode and near-white in dark. A literal label colour therefore
+    # reads white-on-white in one scheme and the button disappears -- which is
+    # exactly what happened. Assert the pair that flips together instead.
+    play = read(p("playground.html"))
+    btn = re.search(r"\.sagecell_evalButton\s*\{[^}]*\}", play)
+    check(btn is not None, "playground lost the Run button styling")
+    if btn:
+        check("var(--accent-fg)" in btn.group(0),
+              "Run button label is not theme-aware; it will vanish in one scheme")
+        check(not re.search(r"color:\s*#", btn.group(0)),
+              "Run button label uses a literal colour instead of a token")
+
     check(os.path.exists(p("robots.txt")), "no robots.txt")
     check(os.path.exists(p("sitemap.xml")), "no sitemap.xml")
     if os.path.exists(p("sitemap.xml")):
