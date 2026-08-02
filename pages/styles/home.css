@@ -30,7 +30,6 @@
     border: 1px solid var(--btn-border);
   }
   .cta .button.ghost:hover { background: var(--btn-bg-hover); }
-  .hero .byline { color: var(--muted); font-size: 0.9rem; margin: 1.6rem 0 0; }
 
   /* Three tiles fanned out. Purely decorative, so it is hidden from assistive
      technology and dropped entirely when there is no room for it. */

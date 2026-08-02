@@ -72,8 +72,8 @@ def main():
           "landing page lost the card filter")
     check("AppliedPQC/awesome-pqc" in index, "landing page does not surface awesome-pqc")
     # The page count is read from the build, never typed in; if the source it
-    # comes from moves, the hero loses it silently.
-    check(re.search(r"[0-9]+ pages · by", index) is not None,
+    # comes from moves, the book card loses it silently.
+    check(re.search(r"<span>[0-9]+ pages</span>", index) is not None,
           "landing page lost the page count")
     check(index.count('name="viewport"') == 1, "landing page has a duplicate viewport tag")
 
