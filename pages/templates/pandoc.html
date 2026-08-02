@@ -9,6 +9,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>$pagetitle$</title>
 {% with description="$description$", page="$page$", og_type="$ogtype$", og_title="$pagetitle$", jsonld=None %}{% include "_meta.html" %}{% endwith %}
+{#- Per-page structured data arrives through --include-in-header, because a
+    pandoc --variable would HTML-escape the JSON into nonsense. -#}
+$for(header-includes)$
+$header-includes$
+$endfor$
 <style>
 {{ css }}
 </style>

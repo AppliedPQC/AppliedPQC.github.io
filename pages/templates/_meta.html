@@ -1,12 +1,24 @@
 <meta name="description" content="{{ description }}" />
 <meta name="color-scheme" content="light dark" />
+{#- The bar is tinted to the icon's navy in both schemes, so the browser chrome
+    matches the brand rather than the page background. -#}
+<meta name="theme-color" content="#0e1c28" />
 <link rel="canonical" href="{{ site }}/{{ page }}" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="manifest" href="site.webmanifest" />
 <meta property="og:type" content="{{ og_type }}" />
-<meta property="og:site_name" content="Applied Post-Quantum Cryptography" />
+<meta property="og:site_name" content="Applied PQC" />
 <meta property="og:title" content="{{ og_title }}" />
 <meta property="og:description" content="{{ description }}" />
 <meta property="og:url" content="{{ site }}/{{ page }}" />
-<meta name="twitter:card" content="summary" />
+{#- One share card for the whole site. It is the wordmark on its own field, so
+    it is correct for every page and never goes stale against the content. -#}
+<meta property="og:image" content="{{ site }}/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Applied PQC — post-quantum cryptography, from lattices to byte-exact FIPS code" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:site" content="@AppliedPQC" />
 {%- if jsonld %}
 <script type="application/ld+json">{{ jsonld }}</script>
