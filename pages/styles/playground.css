@@ -2,21 +2,37 @@
   div.sage { margin: 1.25rem 0; }
   div.sage .CodeMirror {
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: 14px;
     height: auto;
   }
+  /* The label has to be var(--accent-fg), not a hardcoded white: --btn-primary
+     is near-black in light mode but near-white in dark, so a fixed white label
+     rendered white-on-white at 1.09:1 and the button vanished. --accent-fg is
+     the token that flips with it, and it is what .button already uses. */
   .sagecell_evalButton {
     background: var(--btn-primary) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(27, 31, 36, 0.15) !important;
-    border-radius: 6px !important;
-    padding: 0.4rem 1rem !important;
+    color: var(--accent-fg) !important;
+    border: 1px solid transparent !important;
+    border-radius: 999px !important;
+    padding: 0.45rem 1.25rem !important;
     font-weight: 600 !important;
     cursor: pointer;
   }
+  .sagecell_evalButton:hover { background: var(--btn-primary-hover) !important; }
+  /* SageCell disables the button while a cell runs. jQuery UI dims it to about
+     a third, which on either scheme leaves the label unreadable, so the
+     disabled state is given its own legible pair instead. */
+  .sagecell_evalButton[disabled],
+  .sagecell_evalButton.ui-state-disabled {
+    background: var(--bg-muted) !important;
+    color: var(--muted) !important;
+    border-color: var(--rule) !important;
+    opacity: 1 !important;
+    cursor: default;
+  }
   .sagecell_output_elements pre, .sagecell_sessionOutput {
     background: var(--bg-muted);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     overflow-x: auto;
   }
