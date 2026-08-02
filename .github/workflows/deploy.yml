@@ -1,13 +1,16 @@
 name: Build and deploy the site
 
-# The page templates, stylesheets and build scripts live in pages/ here. The
-# book they render -- the LaTeX, the Sage implementations, the generated listing
-# data and the blog content -- lives in AppliedPQC/AppliedPQC, which is public
-# and so is checked out without a token; nothing here needs a secret.
+# The page templates, stylesheets and build scripts live in pages/ here, as does
+# the blog. The book they render -- the LaTeX, the Sage implementations and the
+# generated listing data -- lives in AppliedPQC/AppliedPQC, which is public and
+# so is checked out without a token; nothing here needs a secret. Blog posts
+# listed in blog/sources.json come from other AppliedPQC repositories and are
+# fetched at build time rather than copied in.
 #
-# GitHub cannot notify this repository when the source changes, so a schedule
-# polls it. The poll is cheap: it compares the source commit against the one
-# recorded in the live site and stops before installing anything if they match.
+# GitHub cannot notify this repository when any of that changes, so a schedule
+# polls. The poll is cheap: it compares a key covering every repository the
+# build reads against the one recorded in the live site, and stops before
+# installing anything if they match.
 
 on:
   push:
@@ -48,17 +51,26 @@ jobs:
 
       - name: Decide whether a rebuild is needed
         id: decide
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           sha="$(git -C source rev-parse HEAD)"
           echo "source_sha=$sha" >> "$GITHUB_OUTPUT"
+          # The book is not the only thing the site renders: posts listed in
+          # blog/sources.json are pulled from other AppliedPQC repositories at
+          # build time. Keying this check on the book alone left edits to those
+          # posts permanently unpublished, so the key covers every repository
+          # the build reads.
+          key="$(python3 pages/content_key.py "$sha" blog/sources.json)"
+          echo "content_key=$key" >> "$GITHUB_OUTPUT"
           live="$(curl -sf --max-time 20 https://appliedpqc.io/build-info.json \
-                  | python3 -c 'import json,sys; print(json.load(sys.stdin).get("source_sha",""))' \
+                  | python3 -c 'import json,sys; print(json.load(sys.stdin).get("content_key",""))' \
                   2>/dev/null || true)"
-          echo "live is ${live:-<none>}, source is $sha"
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$sha" = "$live" ]; then
+          echo "live key is ${live:-<none>}, computed key is $key (book $sha)"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$key" = "$live" ]; then
             echo "build=false" >> "$GITHUB_OUTPUT"
-            echo "Source unchanged; skipping before any install."
+            echo "Nothing the site reads has changed; skipping before any install."
           else
             echo "build=true" >> "$GITHUB_OUTPUT"
           fi
@@ -103,8 +115,9 @@ jobs:
         if: steps.decide.outputs.build == 'true'
         run: |
           set -euo pipefail
-          printf '{\n "source_repo": "%s",\n "source_sha": "%s",\n "built_by": "%s",\n "run": "%s"\n}\n' \
+          printf '{\n "source_repo": "%s",\n "source_sha": "%s",\n "content_key": "%s",\n "built_by": "%s",\n "run": "%s"\n}\n' \
             "$SOURCE_REPO" "${{ steps.decide.outputs.source_sha }}" \
+            "${{ steps.decide.outputs.content_key }}" \
             "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > site/build-info.json
           cat site/build-info.json
 
