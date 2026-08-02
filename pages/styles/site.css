@@ -1,43 +1,58 @@
-  /* GitHub's Primer tokens, read from github.com's own light and dark
-     stylesheets rather than eyeballed. */
+  /* A gallery, not a document. Cards carry generated cover art, the grid is the
+     primary layout, and the chrome stays out of the way: near-black on white,
+     one ink accent, and colour supplied by the art rather than the interface. */
   :root {
     --bg: #ffffff;
-    --bg-muted: #f6f8fa;
-    --fg: #1f2328;
-    --muted: #59636e;
-    --rule: #d1d9e0;
-    --link: #0969da;
-    --accent: #0969da;
+    --bg-muted: #f5f5f7;
+    --surface: #ffffff;
+    --fg: #0f1115;
+    --muted: #6b7280;
+    --rule: #e6e7eb;
+    --link: #4b3bd6;
+    --accent: #4b3bd6;
     --accent-fg: #ffffff;
-    --code-bg: #818b981f;         /* bgColor-neutral-muted */
-    --btn-primary: #1f883d;       /* bgColor-success-emphasis */
-    --btn-primary-hover: #1c8139;
-    --btn-bg: #f6f8fa;            /* control-bgColor-rest */
-    --btn-bg-hover: #eff2f5;
-    --btn-border: #d1d9e0;
-    --btn-shadow: 0 1px 0 rgba(31, 35, 40, 0.04);
+    --code-bg: #f2f3f6;
+    --btn-primary: #0f1115;
+    --btn-primary-hover: #24272f;
+    --btn-bg: #ffffff;
+    --btn-bg-hover: #f5f5f7;
+    --btn-border: #d9dbe1;
+    --btn-shadow: none;
+    --shadow-1: 0 1px 2px rgba(15, 17, 21, .05), 0 8px 24px rgba(15, 17, 21, .06);
+    --shadow-2: 0 2px 6px rgba(15, 17, 21, .07), 0 18px 40px rgba(15, 17, 21, .13);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --nav-bg: rgba(255, 255, 255, .78);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0d1117;
-      --bg-muted: #151b23;
-      --fg: #f0f6fc;
-      --muted: #9198a1;
-      --rule: #3d444d;
-      --link: #4493f8;
-      --accent: #4493f8;
-      --accent-fg: #ffffff;
-      --code-bg: #656c7633;
-      --btn-primary: #238636;
-      --btn-primary-hover: #29903b;
-      --btn-bg: #212830;
-      --btn-bg-hover: #262c36;
-      --btn-border: #3d444d;
+      --bg: #0b0c0f;
+      --bg-muted: #121419;
+      --surface: #15171d;
+      --fg: #f4f5f7;
+      --muted: #9ba1ad;
+      --rule: #262a33;
+      --link: #a99cff;
+      --accent: #a99cff;
+      --accent-fg: #0b0c0f;
+      --code-bg: #1a1d24;
+      --btn-primary: #f4f5f7;
+      --btn-primary-hover: #ffffff;
+      --btn-bg: #1a1d24;
+      --btn-bg-hover: #22262f;
+      --btn-border: #2d323c;
       --btn-shadow: none;
+      --shadow-1: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .45);
+      --shadow-2: 0 2px 6px rgba(0, 0, 0, .55), 0 18px 40px rgba(0, 0, 0, .6);
+      --nav-bg: rgba(11, 12, 15, .74);
     }
   }
-
   * { box-sizing: border-box; }
+
+  /* [hidden] is only a UA-stylesheet display:none, so any author display rule
+     beats it -- and the cards and the search box both set one. Without this the
+     filter sets the attribute and nothing disappears. */
+  [hidden] { display: none !important; }
 
   body {
     margin: 0;
@@ -50,72 +65,236 @@
   }
 
   main {
-    max-width: 46rem;
+    max-width: 48rem;
     margin: 0 auto;
-    padding: 2rem 1.25rem 5rem;
+    padding: 3rem 1.5rem 5rem;
   }
+  /* Gallery pages run edge to edge and set their own inner width. */
+  main.wide { max-width: 78rem; }
 
-  /* Site chrome above the README content. */
+  /* Sticky chrome: it stays because the grid below it is long, and blurs so
+     cards scrolling under it stay legible. */
   .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     border-bottom: 1px solid var(--rule);
-    background: var(--bg);
+    background: var(--nav-bg);
+    backdrop-filter: saturate(160%) blur(12px);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
   }
   .topbar-inner {
-    max-width: 62rem;
+    max-width: 78rem;
     margin: 0 auto;
-    padding: 0.9rem 1.25rem;
+    padding: 0.7rem 1.5rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.75rem 1.25rem;
     align-items: center;
-    justify-content: space-between;
   }
   .topbar-title {
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-  .topbar-links {
-    display: flex;
-    gap: 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-  }
-  .button {
-    display: inline-block;
-    padding: 0.3125rem 1rem;
-    border-radius: 6px;
-    background: var(--btn-primary);
-    color: #ffffff;
-    border: 1px solid rgba(31, 35, 40, 0.15);
-    box-shadow: var(--btn-shadow);
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.42857;
+    gap: 0.55rem;
+    color: var(--fg);
     text-decoration: none;
     white-space: nowrap;
   }
-  .button:hover { background: var(--btn-primary-hover); text-decoration: none; }
+  .topbar-title:hover { text-decoration: none; }
+  .mark {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, hsl(262 72% 58%), hsl(300 68% 46%));
+    display: inline-block;
+    flex: none;
+  }
+  .topbar-links {
+    display: flex;
+    gap: 1.15rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: auto;
+    font-size: 0.925rem;
+  }
+  .topbar-links a { color: var(--muted); font-weight: 500; }
+  .topbar-links a:hover { color: var(--fg); text-decoration: none; }
+  .topbar-links a.here { color: var(--fg); font-weight: 600; }
 
-  h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
-  h1 { font-size: 2rem; margin: 0 0 0.5rem; }
-  main > h1, main > h2 {
-    padding-bottom: 0.3em;
+  /* Search filters the grid on this page; it is not a site-wide index, so it
+     says so rather than implying results from elsewhere. */
+  .search {
+    flex: 1 1 13rem;
+    max-width: 22rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search input {
+    width: 100%;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--fg);
+    background: var(--bg-muted);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem 0.45rem 2.1rem;
+    outline: none;
+  }
+  .search input:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+  .search svg {
+    position: absolute;
+    left: 0.72rem;
+    width: 1rem;
+    height: 1rem;
+    stroke: var(--muted);
+    fill: none;
+    stroke-width: 2;
+    pointer-events: none;
+  }
+
+  .button {
+    display: inline-block;
+    padding: 0.6rem 1.35rem;
+    border-radius: 999px;
+    background: var(--btn-primary);
+    color: var(--accent-fg);
+    border: 1px solid transparent;
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform .14s ease, background .14s ease, box-shadow .14s ease;
+  }
+  .button:hover {
+    background: var(--btn-primary-hover);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-1);
+  }
+
+  /* Shared card and grid primitives: the landing page, the blog index and the
+     playground all draw from these rather than each defining a grid. */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+    gap: 1.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-2);
+    border-color: transparent;
+  }
+  .card .art {
+    display: block;
+    width: 100%;
+    aspect-ratio: 400 / 260;
+    background: var(--bg-muted);
+  }
+  .card-body { padding: 1.05rem 1.15rem 1.25rem; display: flex; flex-direction: column; flex: 1; }
+  .card h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.02rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .card h3 a { color: var(--fg); }
+  .card h3 a:hover { text-decoration: none; }
+  /* Clamped, so one long summary cannot stretch its whole row and leave the
+     cards beside it mostly empty. The full text is on the page it links to. */
+  .card-body > p:not(.meta) {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card .meta {
+    margin-top: 0.85rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-block;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    background: var(--bg-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  /* One stretched link per card, so the whole card is the target without
+     nesting anchors or trapping a keyboard user in a dead region. */
+  .card .stretch::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .empty { color: var(--muted); }
+
+  /* A prose page carrying a grid -- the blog index, the playground's chapter
+     list -- needs the gallery measure, not the reading measure. */
+  main:has(.grid) { max-width: 78rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, .button { transition: none; }
+    .card:hover, .button:hover { transform: none; }
+  }
+
+  /* On a phone the bar wraps to three rows, and pinning that costs a sixth of
+     the screen for the whole scroll. Let it go by instead. */
+  @media (max-width: 48rem) {
+    .topbar { position: static; }
+    .topbar-inner { padding: 0.6rem 1.1rem; }
+    .search { order: 3; max-width: none; }
+  }
+
+  h1, h2, h3 { line-height: 1.2; letter-spacing: -0.025em; font-weight: 700; }
+  h1 { font-size: 2.35rem; margin: 0 0 0.6rem; }
+  /* Prose keeps a hairline under its top-level headings for scanning; the
+     gallery pages do not, because the cards already do the dividing. */
+  main:not(.home) > h1, main:not(.home) > h2,
+  .layout-toc article > h2 {
+    padding-bottom: 0.35em;
     border-bottom: 1px solid var(--rule);
   }
-  h2 {
-    font-size: 1.35rem;
-    margin-top: 2.5rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--rule);
-  }
-  h3 { font-size: 1.1rem; margin-top: 1.75rem; }
+  h2 { font-size: 1.5rem; margin-top: 2.75rem; }
+  h3 { font-size: 1.12rem; margin-top: 1.85rem; }
 
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
-  .sitefooter { border-top: 1px solid var(--rule); margin-top: 3rem; }
+  .sitefooter { border-top: 1px solid var(--rule); margin-top: 4rem; }
   .sitefooter .band-inner {
-    max-width: 62rem;
+    max-width: 78rem;
     margin: 0 auto;
     padding: 2.25rem 1.25rem;
     display: flex;
@@ -132,7 +311,7 @@
   /* Contents for long posts: a sticky side column beside the text on wide
      screens, folding above it when there is no room. Generated by pandoc from
      the headings, so it cannot drift from a document sourced elsewhere. */
-  main.has-toc { max-width: 68rem; }
+  main.has-toc { max-width: 72rem; }
   .layout-toc {
     display: grid;
     grid-template-columns: 15rem minmax(0, 1fr);
@@ -174,7 +353,7 @@
       overflow: visible;
       border-left: 0;
       border: 1px solid var(--rule);
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       background: var(--bg-muted);
       padding: 0.85rem 1.1rem;
       margin-bottom: 2rem;
@@ -186,11 +365,11 @@
                  "Liberation Mono", monospace;
     font-size: 0.875em;
   }
-  code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: 6px; font-size: 85%; }
+  code { background: var(--code-bg); padding: 0.2em 0.4em; border-radius: var(--radius-sm); font-size: 85%; }
   pre {
     background: var(--bg-muted);
-    padding: 0.9rem 1rem;
-    border-radius: 6px;
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius-sm);
     overflow-x: auto;      /* wide code scrolls, the page never does */
   }
   pre code { background: none; padding: 0; }

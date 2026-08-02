@@ -1,60 +1,81 @@
   main.home { max-width: none; margin: 0; padding: 0; }
-  /* Sections are separated by space and by the tinted band, not by rules.
-     A hairline under every one of them stacked up down the page. */
-  .band-inner { max-width: 62rem; margin: 0 auto; padding: 4rem 1.25rem; }
+  .band-inner { max-width: 78rem; margin: 0 auto; padding: 3.5rem 1.5rem; }
   .band.tint { background: var(--bg-muted); }
 
-  .hero { text-align: center; }
-  .hero .band-inner { padding: 4.5rem 1.25rem 3.75rem; }
+  /* Hero: text on the left, a strip of the generated art on the right, so the
+     first screen already shows what the cards below are made of. */
+  .hero .band-inner {
+    padding: 4.5rem 1.5rem 3.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 3.5rem;
+    align-items: center;
+  }
   .hero h1 {
-    font-size: clamp(2rem, 5.5vw, 3.1rem);
-    line-height: 1.15;
-    margin: 0 0 0.85rem;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.4rem, 5.2vw, 4rem);
+    line-height: 1.04;
+    margin: 0 0 1rem;
+    letter-spacing: -0.035em;
   }
   .hero p.lede {
-    font-size: clamp(1.02rem, 2.1vw, 1.2rem);
+    font-size: clamp(1.05rem, 1.5vw, 1.22rem);
     color: var(--muted);
-    max-width: 40rem;
-    margin: 0 auto 1.9rem;
+    max-width: 34rem;
+    margin: 0 0 2rem;
   }
-  .hero .byline { color: var(--muted); font-size: 0.92rem; margin: 1.75rem 0 0; }
-  .cta { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-  /* GitHub's default (secondary) button. */
+  .cta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
   .cta .button.ghost {
     background: var(--btn-bg);
     color: var(--fg);
     border: 1px solid var(--btn-border);
   }
   .cta .button.ghost:hover { background: var(--btn-bg-hover); }
+  .hero .byline { color: var(--muted); font-size: 0.9rem; margin: 1.6rem 0 0; }
 
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
-    gap: 1.15rem;
+  /* Three tiles fanned out. Purely decorative, so it is hidden from assistive
+     technology and dropped entirely when there is no room for it. */
+  .hero-art { position: relative; min-height: 20rem; }
+  .hero-art .art {
+    position: absolute;
+    width: 62%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-2);
+    aspect-ratio: 400 / 260;
   }
-  /* Primer's Box: 6px corners, one hairline, no shadow. */
-  .card {
-    border: 1px solid var(--rule);
-    border-radius: 6px;
-    padding: 1.35rem;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
+  .hero-art .art:nth-child(1) { top: 0; left: 2%; transform: rotate(-7deg); }
+  .hero-art .art:nth-child(2) { top: 22%; left: 34%; transform: rotate(4deg); z-index: 2; }
+  .hero-art .art:nth-child(3) { top: 52%; left: 8%; transform: rotate(-2deg); }
+
+  .band h2 { margin: 0 0 0.4rem; font-size: 1.75rem; }
+  .band .sub { color: var(--muted); margin: 0 0 2.1rem; max-width: 42rem; }
+  .band .after { margin: 1.9rem 0 0; color: var(--muted); font-size: 0.94rem; }
+
+  /* Category pills. They filter the grid below rather than navigating, so they
+     are buttons; with JS off the script removes them instead of leaving dead
+     controls on the page. */
+  .pills { display: flex; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 1.9rem; }
+  .pill {
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--bg-muted);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 0.42rem 1rem;
+    cursor: pointer;
+    transition: background .14s ease, color .14s ease;
   }
-  .band.tint .card { background: var(--bg); }
-  .card h3 { margin: 0 0 0.45rem; font-size: 1rem; font-weight: 600; }
-  .card p { margin: 0 0 1rem; color: var(--muted); font-size: 0.95rem; flex: 1; }
-  .card .more { font-weight: 600; text-decoration: none; }
-  .card .more:hover { text-decoration: underline; }
+  .band.tint .pill { background: var(--surface); }
+  .pill:hover { color: var(--fg); }
+  .pill[aria-pressed="true"] {
+    background: var(--btn-primary);
+    color: var(--accent-fg);
+  }
 
-  .band h2 { margin: 0 0 0.5rem; font-size: 1.5rem; }
-  .band .sub { color: var(--muted); margin: 0 0 1.9rem; }
+  .empty { color: var(--muted); margin: 0; }
 
-  .posts { list-style: none; padding: 0; margin: 0; }
-  /* Rules only between posts, so a single post draws none at all. */
-  .posts li { padding: 0.95rem 0; border-top: 1px solid var(--rule); }
-  .posts li:first-child { border-top: 0; padding-top: 0; }
-  .posts .date { color: var(--muted); font-size: 0.86rem; }
-  .posts a { font-weight: 600; }
-  .posts p { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.95rem; }
+  @media (max-width: 60rem) {
+    .hero .band-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    .hero-art { display: none; }
+  }

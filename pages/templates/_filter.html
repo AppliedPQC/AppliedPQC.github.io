@@ -1,0 +1,50 @@
+{#- Card filtering for the grid pages. Everything here is progressive: the grid
+    is complete in the HTML, and this only hides cards. With the script blocked,
+    the search box stays hidden and the pills remove themselves, so no dead
+    control is ever shown. -#}
+<script>
+(function () {
+  var grid = document.querySelector('[data-filter]');
+  var pills = document.querySelector('[data-pills]');
+  var search = document.querySelector('[data-search]');
+  var empty = document.querySelector('.empty');
+  if (!grid) { if (pills) pills.remove(); return; }
+
+  var cards = Array.prototype.slice.call(grid.children);
+  var cat = 'all';
+  var term = '';
+
+  function apply() {
+    var shown = 0;
+    cards.forEach(function (card) {
+      var okCat = cat === 'all' || card.getAttribute('data-cat') === cat;
+      var hay = (card.getAttribute('data-text') || '') + ' ' + card.textContent.toLowerCase();
+      var okTerm = !term || hay.indexOf(term) !== -1;
+      var show = okCat && okTerm;
+      card.hidden = !show;
+      if (show) shown++;
+    });
+    if (empty) empty.hidden = shown !== 0;
+  }
+
+  if (search) {
+    search.hidden = false;
+    search.querySelector('input').addEventListener('input', function (e) {
+      term = e.target.value.trim().toLowerCase();
+      apply();
+    });
+  }
+
+  if (pills) {
+    pills.addEventListener('click', function (e) {
+      var btn = e.target.closest('.pill');
+      if (!btn) return;
+      cat = btn.getAttribute('data-cat');
+      pills.querySelectorAll('.pill').forEach(function (p) {
+        p.setAttribute('aria-pressed', String(p === btn));
+      });
+      apply();
+    });
+  }
+})();
+</script>

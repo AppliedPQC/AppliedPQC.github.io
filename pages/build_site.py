@@ -37,6 +37,8 @@ import subprocess
 import sys
 import urllib.request
 
+import art
+
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -69,13 +71,13 @@ BOOT = ('import urllib.request\n'
         'exec(urllib.request.urlopen("%s").read())' % RAW)
 
 STANDARDS = [
-    dict(name="ML-KEM", fips="FIPS 203",
+    dict(name="ML-KEM", fips="FIPS 203", art="lattice",
          blurb="21 of 21 algorithms. Key encapsulation at 512, 768 and 1024."),
-    dict(name="ML-DSA", fips="FIPS 204",
+    dict(name="ML-DSA", fips="FIPS 204", art="ntt",
          blurb="49 of 49 algorithms. Signatures at 44, 65 and 87."),
-    dict(name="SLH-DSA", fips="FIPS 205",
+    dict(name="SLH-DSA", fips="FIPS 205", art="merkle",
          blurb="25 of 25 algorithms, all twelve approved parameter sets."),
-    dict(name="FN-DSA", fips="FIPS 206",
+    dict(name="FN-DSA", fips="FIPS 206", art="gaussian",
          blurb="18 of 18 Falcon algorithms. Still in development at NIST, so "
                "validated against Falcon's own tests."),
 ]
@@ -83,6 +85,30 @@ STANDARDS = [
 env = Environment(loader=FileSystemLoader(TEMPLATES),
                   undefined=StrictUndefined,   # a typo'd variable fails the build
                   keep_trailing_newline=True)
+# Cards draw their own cover art rather than loading images; see pages/art.py.
+env.globals["art"] = art.tile
+
+
+# Chapters get the drawing of whatever they are about, matched on the stem and
+# falling back to the book tile so a new chapter never breaks the build.
+CHAPTER_ART = (
+    ("lattice", "lattice"), ("lll", "lattice"), ("svp", "lattice"),
+    ("lwe", "lattice"), ("module", "lattice"), ("kyber", "lattice"),
+    ("ntt", "ntt"), ("polynomial", "ntt"), ("circulant", "ntt"),
+    ("convolution", "ntt"), ("dilithium", "ntt"),
+    ("hash", "merkle"), ("sphincs", "merkle"), ("merkle", "merkle"),
+    ("winternitz", "merkle"), ("slh", "merkle"),
+    ("falcon", "gaussian"), ("gaussian", "gaussian"), ("sampl", "gaussian"),
+    ("linear", "code"), ("basics", "code"), ("sage", "code"),
+)
+
+
+def chapter_art(stem):
+    low = stem.lower()
+    for key, kind in CHAPTER_ART:
+        if key in low:
+            return kind
+    return "book"
 
 
 def css(*names):
@@ -218,6 +244,8 @@ def main():
 
     data = json.load(open(LISTINGS))
     chapters = data["chapters"]
+    for c in chapters:
+        c["art"] = chapter_art(c["stem"])
     n_listings = sum(len(c["listings"]) for c in chapters)
     posts = read_posts() + fetch_sourced(build)
     posts.sort(key=lambda p: p["date"], reverse=True)

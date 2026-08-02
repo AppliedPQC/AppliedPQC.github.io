@@ -1,14 +1,19 @@
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="topbar-title">Applied Post-Quantum Cryptography</span>
+    <a class="topbar-title" href="index.html">
+      <span class="mark" aria-hidden="true"></span>Applied PQC</a>
+    {#- The box filters the cards on this page. The script unhides it only where
+        there is a grid to filter, so it never offers a search it cannot run. -#}
+    <div class="search" data-search hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" placeholder="Filter this page…" aria-label="Filter this page" />
+    </div>
     <span class="topbar-links">
       <a href="{{ gh }}/AppliedPQC">GitHub</a>
-      {%- if here == 'home' %}
-      <a href="playground.html">Playground</a>
-      {%- else %}
+      {%- if here != 'home' %}
       <a href="index.html">Home</a>
-      <a href="playground.html"{% if here == 'playground' %} class="here"{% endif %}>Playground</a>
       {%- endif %}
+      <a href="playground.html"{% if here == 'playground' %} class="here"{% endif %}>Playground</a>
       <a href="blog.html"{% if here == 'blog' %} class="here"{% endif %}>Blog</a>
       <a href="https://x.com/AppliedPQC" rel="me">@AppliedPQC</a>
     </span>
