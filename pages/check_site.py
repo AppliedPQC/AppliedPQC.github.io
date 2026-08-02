@@ -54,8 +54,7 @@ def main():
 
     # --- landing page -----------------------------------------------------
     index = read(p("index.html"))
-    check("<title>Applied Post-Quantum Cryptography</title>" in index,
-          "landing page lost its title")
+    check("<title>Applied PQC —" in index, "landing page lost its title")
     check('href="apqc.pdf"' in index, "landing page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
     check(len(re.findall(r'<section class="band', index)) >= 2,
@@ -182,6 +181,20 @@ def main():
     for url, where in canons.items():
         check(len(where) == 1,
               "%d pages claim the same canonical URL %s" % (len(where), url))
+
+    # --- brand assets and SEO --------------------------------------------
+    for asset in ("favicon.svg", "icon-180.png", "icon-512.png", "og.png",
+                  "site.webmanifest"):
+        check(os.path.exists(p(asset)), "missing %s" % asset)
+    # A share card that 404s is worse than none: the crawler caches the miss.
+    if os.path.exists(p("og.png")):
+        check(os.path.getsize(p("og.png")) > 10_000, "og.png is truncated")
+    check('property="og:image"' in index, "landing page has no og:image")
+    check('content="summary_large_image"' in index,
+          "landing page is not using the large share card")
+    check('rel="icon"' in index, "landing page links no icon")
+    check(re.search(r"<title>[^<]{25,90}</title>", index) is not None,
+          "landing page title is missing or a bad length for search results")
 
     check(os.path.exists(p("robots.txt")), "no robots.txt")
     check(os.path.exists(p("sitemap.xml")), "no sitemap.xml")

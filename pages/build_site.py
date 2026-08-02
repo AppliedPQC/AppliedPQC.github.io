@@ -63,6 +63,14 @@ def set_source(root):
 GH = "https://github.com/AppliedPQC"
 SITE = "https://appliedpqc.io"
 
+BRAND = "Applied PQC"
+# Search results truncate around sixty characters, so the suffix is the short
+# brand rather than the full book title, and the home page leads with what the
+# site is instead of repeating the name twice.
+HOME_TITLE = ("Applied PQC — post-quantum cryptography, from lattices to "
+              "byte-exact FIPS code")
+STATIC = os.path.join(HERE, "static")
+
 BOOK_DESC = ("A book that builds post-quantum cryptography from the ground up, from "
              "lattices and Learning With Errors to byte-exact implementations of "
              "ML-KEM, ML-DSA, SLH-DSA and FN-DSA.")
@@ -213,7 +221,7 @@ TOC_MIN_SECTIONS = 6
 
 
 def pandoc(src, out, template, title, toc=False, description="", page="",
-           ogtype="article"):
+           ogtype="article", header=None):
     cmd = ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
            "--standalone", "--template=" + template,
            "--variable=pagetitle=" + title, "--variable=lang=en",
@@ -222,6 +230,9 @@ def pandoc(src, out, template, title, toc=False, description="", page="",
            "--output=" + out]
     if toc:
         cmd += ["--toc", "--toc-depth=2"]
+    # Raw, because --variable would escape the JSON-LD into nonsense.
+    if header:
+        cmd += ["--include-in-header=" + header]
     subprocess.run(cmd, check=True)
 
 
@@ -250,6 +261,11 @@ def main():
     posts = read_posts() + fetch_sourced(build)
     posts.sort(key=lambda p: p["date"], reverse=True)
 
+    # Icon, share image and their raster fallbacks. Committed rather than
+    # generated here; see pages/make_brand_assets.py.
+    for name in sorted(os.listdir(STATIC)):
+        shutil.copyfile(os.path.join(STATIC, name), os.path.join(dest, name))
+
     # The book, and the alias some published links still use.
     for name in ("apqc.pdf", "main.pdf"):
         shutil.copyfile(os.path.join(ROOT, "apqc.pdf"), os.path.join(dest, name))
@@ -258,8 +274,19 @@ def main():
     base = dict(gh=GH, site=SITE, css=css("site.css"))
 
     # --- landing page -----------------------------------------------------
-    book_ld = json.dumps({
-        "@context": "https://schema.org", "@type": "Book",
+    book_ld = json.dumps({"@context": "https://schema.org", "@graph": [{
+        "@type": "WebSite", "@id": SITE + "/#website",
+        "name": BRAND, "alternateName": "Applied Post-Quantum Cryptography",
+        "url": SITE + "/", "description": BOOK_DESC, "inLanguage": "en",
+        "publisher": {"@id": SITE + "/#org"},
+    }, {
+        "@type": "Organization", "@id": SITE + "/#org",
+        "name": BRAND, "url": SITE + "/",
+        "logo": {"@type": "ImageObject", "url": SITE + "/icon-512.png",
+                 "width": 512, "height": 512},
+        "sameAs": ["https://x.com/AppliedPQC", GH],
+    }, {
+        "@type": "Book",
         "name": "Applied Post-Quantum Cryptography",
         "author": [{"@type": "Person", "name": "Stephen Duan"},
                    {"@type": "Person", "name": "Wei Li"}],
@@ -269,14 +296,15 @@ def main():
         "workExample": {"@type": "Book", "bookFormat": "https://schema.org/EBook",
                         "encodingFormat": "application/pdf",
                         "url": SITE + "/apqc.pdf"},
-    }, separators=(",", ":"))
+        "publisher": {"@id": SITE + "/#org"},
+    }]}, separators=(",", ":"))
     open(os.path.join(dest, "index.html"), "w").write(
         env.get_template("home.html").render(
-            base, title="Applied Post-Quantum Cryptography",
+            base, title=HOME_TITLE,
             css=css("site.css", "home.css"), main_class="home", here="home",
             n_listings=n_listings, pages=pages, posts=posts,
             standards=STANDARDS, description=BOOK_DESC, page="",
-            og_type="website", og_title="Applied Post-Quantum Cryptography",
+            og_type="website", og_title=HOME_TITLE,
             jsonld=book_ld))
 
     # --- chapter pages ----------------------------------------------------
@@ -285,7 +313,7 @@ def main():
         n_run = sum(1 for l in c["listings"] if l["runnable"])
         page = "playground-%s.html" % c["stem"]
         open(os.path.join(dest, page), "w").write(
-            tpl.render(base, title="%s — Applied Post-Quantum Cryptography" % c["title"],
+            tpl.render(base, title="%s — %s" % (c["title"], BRAND),
                        css=css("site.css", "playground.css"), main_class="",
                        here="playground", chapter=c, boot=BOOT, n_runnable=n_run,
                        description="Every code listing from %s, runnable in your "
@@ -320,22 +348,39 @@ def main():
     merged = os.path.join(build, "playground.md")
     open(merged, "w").write(open(os.path.join(HERE, "playground.md")).read() + table)
     pandoc(merged, os.path.join(dest, "playground.html"), play_tpl,
-           "Playground — Applied Post-Quantum Cryptography",
+           "Playground — %s" % BRAND,
            description="Run all %d code listings from the book and the four NIST "
                        "reference implementations in your browser. Nothing to "
                        "install." % n_listings,
            page="playground.html", ogtype="website")
 
     for p in posts:
+        page_url = "%s/blog-%s.html" % (SITE, p["slug"])
+        post_ld = json.dumps({
+            "@context": "https://schema.org", "@type": "BlogPosting",
+            "headline": p["title"], "datePublished": p["date"],
+            "dateModified": p["date"], "inLanguage": "en",
+            "description": p.get("summary") or BOOK_DESC,
+            "url": page_url, "image": SITE + "/og.png",
+            "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
+            "author": [{"@type": "Person", "name": "Stephen Duan"},
+                       {"@type": "Person", "name": "Wei Li"}],
+            "publisher": {"@id": SITE + "/#org"},
+            "isAccessibleForFree": True,
+        }, separators=(",", ":"))
+        ld_file = os.path.join(build, "ld-%s.html" % p["slug"])
+        open(ld_file, "w").write(
+            '<script type="application/ld+json">%s</script>\n' % post_ld)
         pandoc(p["path"], os.path.join(dest, "blog-%s.html" % p["slug"]), blog_tpl,
-               "%s — Applied Post-Quantum Cryptography" % p["title"],
+               "%s — %s" % (p["title"], BRAND),
                toc=wants_toc(p["path"]),
                description=p.get("summary") or BOOK_DESC,
-               page="blog-%s.html" % p["slug"], ogtype="article")
+               page="blog-%s.html" % p["slug"], ogtype="article",
+               header=ld_file)
     index_md = os.path.join(build, "blog.md")
     open(index_md, "w").write(env.get_template("blog_index.md").render(posts=posts))
     pandoc(index_md, os.path.join(dest, "blog.html"), blog_tpl,
-           "Blog — Applied Post-Quantum Cryptography",
+           "Blog — %s" % BRAND,
            description="Notes and research from the Applied PQC project on "
                        "post-quantum migration.",
            page="blog.html", ogtype="website")
@@ -344,17 +389,37 @@ def main():
     # hand-kept list, so a new page cannot be left undiscoverable.
     urls = sorted(f for f in os.listdir(dest)
                   if f.endswith(".html") and f != "book-code.html")
+    # lastmod only where a real date exists. Stamping every page with today's
+    # date is the classic way to teach a crawler to ignore the field.
+    post_dates = {"blog-%s.html" % q["slug"]: q["date"] for q in posts}
     entries = []
     for f in urls:
         loc = SITE + "/" + ("" if f == "index.html" else f)
         prio = "1.0" if f == "index.html" else (
             "0.8" if f in ("playground.html", "blog.html") or f.startswith("blog-")
             else "0.6")
-        entries.append("  <url><loc>%s</loc><priority>%s</priority></url>" % (loc, prio))
+        mod = ("<lastmod>%s</lastmod>" % post_dates[f]) if f in post_dates else ""
+        entries.append("  <url><loc>%s</loc>%s<priority>%s</priority></url>"
+                       % (loc, mod, prio))
     open(os.path.join(dest, "sitemap.xml"), "w").write(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "\n".join(entries) + "\n</urlset>\n")
+    open(os.path.join(dest, "site.webmanifest"), "w").write(json.dumps({
+        "name": "Applied PQC",
+        "short_name": "Applied PQC",
+        "description": BOOK_DESC,
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#0e1c28",
+        "theme_color": "#0e1c28",
+        "icons": [
+            {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"},
+            {"src": "/icon-180.png", "sizes": "180x180", "type": "image/png"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"},
+        ],
+    }, indent=1) + "\n")
+
     open(os.path.join(dest, "robots.txt"), "w").write(
         "User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n" % SITE)
 
