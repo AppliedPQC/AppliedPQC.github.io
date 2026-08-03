@@ -24,6 +24,7 @@ research — filter by what you need.</p>
   <button class="pill" type="button" data-cat="all" aria-pressed="true">All</button>
   <button class="pill" type="button" data-cat="start" aria-pressed="false">Start here</button>
   <button class="pill" type="button" data-cat="standard" aria-pressed="false">Standards</button>
+  <button class="pill" type="button" data-cat="code" aria-pressed="false">Code</button>
   <button class="pill" type="button" data-cat="writing" aria-pressed="false">Writing</button>
 </div>
 <ul class="grid" data-filter="all">
@@ -52,6 +53,16 @@ research — filter by what you need.</p>
       <p>A curated, link-verified list of post-quantum resources for people who
       have to build and ship it — standards, test vectors, libraries, deployment.</p>
       <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
+    </div>
+  </li>
+  <li class="card" data-cat="code" data-text="bitcoin stark verifier poseidon2 koalabear whir op_cat merkle script rust plonky3 bitvm">
+    {{ art('merkle', 3) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier">bitcoin-stark-verifier</a></h3>
+      <p>A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2
+      over KoalaBear, and WHIR on top of it, checked end to end against Plonky3's
+      real prover.</p>
+      <p class="meta"><span class="tag">Rust</span><span>no soft fork</span></p>
     </div>
   </li>
 {%- for s in standards %}
