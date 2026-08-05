@@ -296,6 +296,10 @@
   h2 { font-size: 1.5rem; margin-top: 2.75rem; }
   h3 { font-size: 1.12rem; margin-top: 1.85rem; }
 
+  /* The browser default of 1em between paragraphs reads as a blank line at
+     this line-height; keep prose closer together. */
+  p { margin: 0.7em 0; }
+
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
