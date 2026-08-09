@@ -60,9 +60,19 @@ research — filter by what you need.</p>
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier">bitcoin-stark-verifier</a></h3>
       <p>A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2
-      over KoalaBear, and WHIR on top of it, checked end to end against Plonky3's
-      real prover.</p>
+      over KoalaBear, and WHIR on top of it. Fiat–Shamir challenges are squeezed
+      inside the script, and a real Plonky3 proof is accepted by one execution.</p>
       <p class="meta"><span class="tag">Rust</span><span>no soft fork</span></p>
+    </div>
+  </li>
+  <li class="card" data-cat="writing" data-text="whir stir proximity test review soundness completeness reed-solomon sumcheck bitcoin script formal">
+    {{ art('book', 11) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">WHIR on Bitcoin Script</a></h3>
+      <p>A formal account of the STIR and WHIR proximity tests, and a review of
+      the verifier against them — what the implementation checks, what it does
+      not, and what each query costs.</p>
+      <p class="meta"><span class="tag">PDF</span><span>11 pages</span></p>
     </div>
   </li>
 {%- for s in standards %}

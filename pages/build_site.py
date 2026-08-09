@@ -148,6 +148,27 @@ def pdf_pages(pdf):
     return None
 
 
+AUTHOR = re.compile(r"\\author\{(.*?)\}", re.S)
+
+
+def authors():
+    """The book's authors, read from its title page.
+
+    Typed here, this list goes stale the moment the book gains an author -- and
+    silently, because structured data has no visible rendering. It is the one
+    piece of the landing page that was not derived from the source, and it was
+    wrong: the book had three authors and the site named two.
+    """
+    m = AUTHOR.search(open(os.path.join(ROOT, "apqc.tex"), errors="replace").read())
+    if not m:
+        raise SystemExit("apqc.tex has no \\author{...}; the site takes the "
+                         "author list from the book's title page")
+    names = [n.strip() for n in re.split(r"\\and", m.group(1)) if n.strip()]
+    if not names:
+        raise SystemExit("apqc.tex has an empty \\author{...}")
+    return [{"@type": "Person", "name": n} for n in names]
+
+
 FRONT = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 RAW_REPO = "https://raw.githubusercontent.com/AppliedPQC/%s/main/%s"
 
@@ -271,6 +292,7 @@ def main():
         shutil.copyfile(os.path.join(ROOT, "apqc.pdf"), os.path.join(dest, name))
     pages = pdf_pages(os.path.join(dest, "apqc.pdf"))
 
+    who = authors()
     base = dict(gh=GH, site=SITE, css=css("site.css"))
 
     # --- landing page -----------------------------------------------------
@@ -288,8 +310,7 @@ def main():
     }, {
         "@type": "Book",
         "name": "Applied Post-Quantum Cryptography",
-        "author": [{"@type": "Person", "name": "Stephen Duan"},
-                   {"@type": "Person", "name": "Wei Li"}],
+        "author": who,
         "description": BOOK_DESC, "inLanguage": "en",
         "url": SITE + "/", "isAccessibleForFree": True,
         "numberOfPages": pages,
@@ -363,8 +384,7 @@ def main():
             "description": p.get("summary") or BOOK_DESC,
             "url": page_url, "image": SITE + "/og.png",
             "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
-            "author": [{"@type": "Person", "name": "Stephen Duan"},
-                       {"@type": "Person", "name": "Wei Li"}],
+            "author": who,
             "publisher": {"@id": SITE + "/#org"},
             "isAccessibleForFree": True,
         }, separators=(",", ":"))
