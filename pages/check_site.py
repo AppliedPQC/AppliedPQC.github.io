@@ -52,6 +52,19 @@ def main():
     # --- the book itself --------------------------------------------------
     check(os.path.getsize(p("apqc.pdf")) > 100_000, "apqc.pdf missing or truncated")
 
+    # The author list is structured data, so it has no visible rendering and a
+    # wrong one is invisible until it reaches a search result. It was wrong.
+    book_tex = os.path.join(root, "apqc.tex")
+    if os.path.exists(book_tex):
+        m = re.search(r"\\author\{(.*?)\}", read(book_tex), re.S)
+        if m:
+            expected = [n.strip() for n in re.split(r"\\and", m.group(1)) if n.strip()]
+            rendered = read(p("index.html"))
+            for name in expected:
+                check(name in rendered,
+                      "landing page structured data omits the author %s" % name)
+            notes.append("authors: %s" % ", ".join(expected))
+
     # --- landing page -----------------------------------------------------
     index = read(p("index.html"))
     check("<title>Applied PQC —" in index, "landing page lost its title")
@@ -62,7 +75,7 @@ def main():
     # The grid is the landing page. Every entry must carry cover art and a
     # stretched link, or the card is a dead tile.
     cards = re.findall(r'<li class="card"', index)
-    check(len(cards) >= 6, "landing page has fewer than six cards")
+    check(len(cards) >= 7, "landing page has fewer than seven cards")
     check(index.count('class="art"') >= len(cards),
           "a landing-page card is missing its cover art")
     check(index.count('class="stretch"') >= len(cards),
@@ -70,6 +83,8 @@ def main():
     check('data-filter=' in index and 'data-pills=' in index,
           "landing page lost the card filter")
     check("AppliedPQC/awesome-pqc" in index, "landing page does not surface awesome-pqc")
+    check("bitcoin-stark-verifier" in index,
+          "landing page does not surface bitcoin-stark-verifier")
     # The page count is read from the build, never typed in; if the source it
     # comes from moves, the book card loses it silently.
     check(re.search(r"<span>[0-9]+ pages</span>", index) is not None,
