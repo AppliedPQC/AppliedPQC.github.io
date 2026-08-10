@@ -75,7 +75,7 @@ def main():
     # The grid is the landing page. Every entry must carry cover art and a
     # stretched link, or the card is a dead tile.
     cards = re.findall(r'<li class="card"', index)
-    check(len(cards) >= 7, "landing page has fewer than seven cards")
+    check(len(cards) >= 8, "landing page has fewer than eight cards")
     check(index.count('class="art"') >= len(cards),
           "a landing-page card is missing its cover art")
     check(index.count('class="stretch"') >= len(cards),
