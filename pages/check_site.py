@@ -75,7 +75,7 @@ def main():
     # The grid is the landing page. Every entry must carry cover art and a
     # stretched link, or the card is a dead tile.
     cards = re.findall(r'<li class="card"', index)
-    check(len(cards) >= 7, "landing page has fewer than seven cards")
+    check(len(cards) >= 8, "landing page has fewer than eight cards")
     check(index.count('class="art"') >= len(cards),
           "a landing-page card is missing its cover art")
     check(index.count('class="stretch"') >= len(cards),
@@ -156,6 +156,19 @@ def main():
                       "%s has a contents sidebar but no two-column wrapper"
                       % os.path.basename(page))
                 notes.append("%s: contents sidebar, %d entries" % (e["slug"], entries))
+            # Sourced documents are Markdown from another repository, and
+            # nothing stops one arriving with TeX in it. The pandoc call has no
+            # math engine, so a dollar-delimited span renders as literal
+            # backslashes -- which looks like a typo rather than a failure, and
+            # in the one document sourced here the affected section was the one
+            # whose argument turns on reading a formula.
+            leaked = re.findall(r"\\(?:mathsf|mathrm|mathbb|cdot|oplus|leq|gets|pi_|alpha|beta|gamma|delta)",
+                                html)
+            check(not leaked,
+                  "%s renders raw TeX (%s); the pandoc call has no math engine, "
+                  "so the source should not use dollar-delimited math"
+                  % (os.path.basename(page), ", ".join(sorted(set(leaked))[:3])))
+
             # Diagrams come from the sourced document as fenced mermaid blocks.
             # If the fence stops being recognised they degrade to plain code
             # blocks, which looks fine and conveys nothing.

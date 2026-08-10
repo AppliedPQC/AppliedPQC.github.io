@@ -55,14 +55,26 @@ research — filter by what you need.</p>
       <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
     </div>
   </li>
-  <li class="card" data-cat="code" data-text="bitcoin stark verifier poseidon2 koalabear whir op_cat merkle script rust plonky3 bitvm">
+  <li class="card" data-cat="code" data-text="bitcoin stark verifier poseidon2 koalabear whir op_cat merkle script rust plonky3 bitvm winternitz disprove chunks">
     {{ art('merkle', 3) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier">bitcoin-stark-verifier</a></h3>
       <p>A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2
-      over KoalaBear, and WHIR on top of it. Fiat–Shamir challenges are squeezed
-      inside the script, and a real Plonky3 proof is accepted by one execution.</p>
+      over KoalaBear, and WHIR on top of it. Every challenge is squeezed inside
+      the script and every constraint derived from the transcript, so the
+      verifier ends on its own identity rather than on a hint.</p>
       <p class="meta"><span class="tag">Rust</span><span>no soft fork</span></p>
+    </div>
+  </li>
+  <li class="card" data-cat="code" data-text="bitvm disprove chunks winternitz one-time signature commitment bitcoin transaction weight taproot">
+    {{ art('code', 12) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier#chunks">Disproving one step</a></h3>
+      <p>The verifier is three hundred blocks and is never run on chain. What is
+      run is one chunk of it, bound by Winternitz signatures — 22 Poseidon2
+      rounds in a standard transaction, about two thousand chunks for the whole
+      verifier.</p>
+      <p class="meta"><span class="tag">BitVM</span><span>~2,000 chunks</span></p>
     </div>
   </li>
   <li class="card" data-cat="writing" data-text="whir stir proximity test review soundness completeness reed-solomon sumcheck bitcoin script formal">
@@ -70,9 +82,10 @@ research — filter by what you need.</p>
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">WHIR on Bitcoin Script</a></h3>
       <p>A formal account of the STIR and WHIR proximity tests, and a review of
-      the verifier against them — what the implementation checks, what it does
-      not, and what each query costs.</p>
-      <p class="meta"><span class="tag">PDF</span><span>11 pages</span></p>
+      the verifier against them — the algorithm stated formally, the
+      implementation reviewed against it, and completeness and soundness
+      separated into what the protocol proves and what the script checks.</p>
+      <p class="meta"><span class="tag">PDF</span><span>17 pages</span></p>
     </div>
   </li>
 {%- for s in standards %}
