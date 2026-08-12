@@ -3,11 +3,13 @@
 <section class="band hero"><div class="band-inner">
 <div>
 <h1>Applied Post-Quantum Cryptography</h1>
-<p class="lede">A book that builds post-quantum cryptography from the ground up —
-from lattices and Learning With Errors to complete, byte-exact implementations
-of all four NIST standards.</p>
+<p class="lede">NIST has finished; the internet has not. Where post-quantum
+cryptography actually stands — what has shipped, what is still a draft, and what
+breaks when you deploy it — with byte-exact implementations of all four
+standards and the book that derives them.</p>
 <div class="cta">
-<a class="button" href="apqc.pdf">Read the book (PDF)</a>
+<a class="button" href="{{ gh }}/awesome-pqc">What has shipped</a>
+<a class="button ghost" href="apqc.pdf">Read the book (PDF)</a>
 <a class="button ghost" href="playground.html">Run the code</a>
 </div>
 </div>
@@ -18,41 +20,45 @@ of all four NIST standards.</p>
 
 <section class="band"><div class="band-inner">
 <h2>Everything in the project</h2>
-<p class="sub">The book, the runnable implementations, the standards and the
-research — filter by what you need.</p>
+<p class="sub">What to deploy and what it costs, the standards themselves, the
+code that implements them, and the research behind it — filter by what you
+need.</p>
 <div class="pills" data-pills="all">
   <button class="pill" type="button" data-cat="all" aria-pressed="true">All</button>
-  <button class="pill" type="button" data-cat="start" aria-pressed="false">Start here</button>
+  <button class="pill" type="button" data-cat="deploy" aria-pressed="false">Deploy</button>
   <button class="pill" type="button" data-cat="standard" aria-pressed="false">Standards</button>
   <button class="pill" type="button" data-cat="code" aria-pressed="false">Code</button>
-  <button class="pill" type="button" data-cat="writing" aria-pressed="false">Writing</button>
+  <button class="pill" type="button" data-cat="research" aria-pressed="false">Research</button>
 </div>
 <ul class="grid" data-filter="all">
-  <li class="card" data-cat="start" data-text="the book pdf lattices ml-kem ml-dsa slh-dsa fn-dsa side channels deployment">
+  <li class="card" data-cat="deploy" data-text="awesome-pqc curated list resources standards test vectors libraries deployment migration shipped tls browsers">
+    {{ art('list', 2) }}
+    <div class="card-body">
+      <h3><a class="stretch" href="{{ gh }}/awesome-pqc">What has shipped</a></h3>
+      <p>A curated, link-verified list of what is actually available to build
+      against — the standards, the test vectors, the libraries that implement
+      them, and the deployment and migration guidance.</p>
+      <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
+    </div>
+  </li>
+  <li class="card" data-cat="deploy" data-text="the book pdf lattices ml-kem ml-dsa slh-dsa fn-dsa side channels deployment tls hybrid blockchain migration bitcoin">
     {{ art('book', 0) }}
     <div class="card-body">
       <h3><a class="stretch" href="apqc.pdf">The book</a></h3>
-      <p>The full arc, from finite fields and lattices through ML-KEM, ML-DSA,
-      SLH-DSA and FN-DSA, to side channels and deployment.</p>
+      <p>The full arc, from finite fields and lattices through all four
+      standards — and then the part that decides whether any of it lands: hybrid
+      TLS, side channels, blockchain exposure, and what migration costs in
+      blockspace.</p>
       <p class="meta"><span class="tag">PDF</span>{% if pages %}<span>{{ pages }} pages</span>{% endif %}</p>
     </div>
   </li>
-  <li class="card" data-cat="start" data-text="runnable code playground sagemath listings browser">
+  <li class="card" data-cat="code" data-text="runnable code playground sagemath listings browser">
     {{ art('code', 1) }}
     <div class="card-body">
       <h3><a class="stretch" href="playground.html">Runnable code</a></h3>
       <p>All {{ n_listings }} code listings and the four reference implementations
       run in your browser, with nothing to install.</p>
       <p class="meta"><span class="tag">Playground</span><span>{{ n_listings }} listings</span></p>
-    </div>
-  </li>
-  <li class="card" data-cat="start" data-text="awesome-pqc curated list resources standards test vectors libraries deployment migration">
-    {{ art('list', 2) }}
-    <div class="card-body">
-      <h3><a class="stretch" href="{{ gh }}/awesome-pqc">awesome-pqc</a></h3>
-      <p>A curated, link-verified list of post-quantum resources for people who
-      have to build and ship it — standards, test vectors, libraries, deployment.</p>
-      <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
     </div>
   </li>
   <li class="card" data-cat="code" data-text="bitcoin stark verifier poseidon2 koalabear whir op_cat merkle script rust plonky3 bitvm winternitz disprove chunks">
@@ -77,7 +83,7 @@ research — filter by what you need.</p>
       <p class="meta"><span class="tag">BitVM</span><span>~2,000 chunks</span></p>
     </div>
   </li>
-  <li class="card" data-cat="writing" data-text="whir stir proximity test review soundness completeness reed-solomon sumcheck bitcoin script formal">
+  <li class="card" data-cat="research" data-text="whir stir proximity test review soundness completeness reed-solomon sumcheck bitcoin script formal">
     {{ art('book', 11) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">WHIR on Bitcoin Script</a></h3>
@@ -99,12 +105,12 @@ research — filter by what you need.</p>
   </li>
 {%- endfor %}
 {%- for p in posts[:4] %}
-  <li class="card" data-cat="writing" data-text="{{ p.title|lower }} {{ (p.summary or '')|lower }} blog research">
+  <li class="card" data-cat="{{ p.cat }}" data-text="{{ p.title|lower }} {{ (p.summary or '')|lower }} blog research">
     {{ art('post', loop.index0 + 7) }}
     <div class="card-body">
       <h3><a class="stretch" href="blog-{{ p.slug }}.html">{{ p.title }}</a></h3>
       {%- if p.summary %}<p>{{ p.summary }}</p>{% endif %}
-      <p class="meta"><span class="tag">Blog</span><span>{{ p.date }}</span></p>
+      <p class="meta"><span class="tag">Writing</span><span>{{ p.date }}</span></p>
     </div>
   </li>
 {%- endfor %}

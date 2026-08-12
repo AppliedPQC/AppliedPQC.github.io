@@ -67,13 +67,20 @@ BRAND = "Applied PQC"
 # Search results truncate around sixty characters, so the suffix is the short
 # brand rather than the full book title, and the home page leads with what the
 # site is instead of repeating the name twice.
-HOME_TITLE = ("Applied PQC — post-quantum cryptography, from lattices to "
-              "byte-exact FIPS code")
+HOME_TITLE = "Applied PQC — where post-quantum cryptography actually stands"
 STATIC = os.path.join(HERE, "static")
+
+# The site is about getting post-quantum cryptography deployed; the book is one
+# of the things it publishes towards that. SITE_DESC is what the home page and
+# the search engines get, BOOK_DESC only describes the book itself.
+SITE_DESC = ("NIST has finished; the internet has not. Where post-quantum "
+             "cryptography actually stands — what has shipped, what is still a "
+             "draft, and what breaks when you deploy it — with byte-exact "
+             "implementations of all four standards.")
 
 BOOK_DESC = ("A book that builds post-quantum cryptography from the ground up, from "
              "lattices and Learning With Errors to byte-exact implementations of "
-             "ML-KEM, ML-DSA, SLH-DSA and FN-DSA.")
+             "ML-KEM, ML-DSA, SLH-DSA and FN-DSA, and on to deployment.")
 RAW = "https://raw.githubusercontent.com/AppliedPQC/AppliedPQC/main/sage/playground.py"
 BOOT = ('import urllib.request\n'
         'exec(urllib.request.urlopen("%s").read())' % RAW)
@@ -205,7 +212,8 @@ def fetch_sourced(build):
         path = os.path.join(build, "sourced-%s.md" % e["slug"])
         open(path, "w").write(body)
         out.append(dict(title=title, date=e["date"], summary=e.get("summary", ""),
-                        slug=e["slug"], path=path, source=home))
+                        slug=e["slug"], path=path, source=home,
+                        cat=e.get("cat", "research")))
     return out
 
 
@@ -299,7 +307,7 @@ def main():
     book_ld = json.dumps({"@context": "https://schema.org", "@graph": [{
         "@type": "WebSite", "@id": SITE + "/#website",
         "name": BRAND, "alternateName": "Applied Post-Quantum Cryptography",
-        "url": SITE + "/", "description": BOOK_DESC, "inLanguage": "en",
+        "url": SITE + "/", "description": SITE_DESC, "inLanguage": "en",
         "publisher": {"@id": SITE + "/#org"},
     }, {
         "@type": "Organization", "@id": SITE + "/#org",
@@ -324,7 +332,7 @@ def main():
             base, title=HOME_TITLE,
             css=css("site.css", "home.css"), main_class="home", here="home",
             n_listings=n_listings, pages=pages, posts=posts,
-            standards=STANDARDS, description=BOOK_DESC, page="",
+            standards=STANDARDS, description=SITE_DESC, page="",
             og_type="website", og_title=HOME_TITLE,
             jsonld=book_ld))
 
@@ -381,7 +389,7 @@ def main():
             "@context": "https://schema.org", "@type": "BlogPosting",
             "headline": p["title"], "datePublished": p["date"],
             "dateModified": p["date"], "inLanguage": "en",
-            "description": p.get("summary") or BOOK_DESC,
+            "description": p.get("summary") or SITE_DESC,
             "url": page_url, "image": SITE + "/og.png",
             "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
             "author": who,
@@ -394,7 +402,7 @@ def main():
         pandoc(p["path"], os.path.join(dest, "blog-%s.html" % p["slug"]), blog_tpl,
                "%s — %s" % (p["title"], BRAND),
                toc=wants_toc(p["path"]),
-               description=p.get("summary") or BOOK_DESC,
+               description=p.get("summary") or SITE_DESC,
                page="blog-%s.html" % p["slug"], ogtype="article",
                header=ld_file)
     index_md = os.path.join(build, "blog.md")
@@ -428,7 +436,7 @@ def main():
     open(os.path.join(dest, "site.webmanifest"), "w").write(json.dumps({
         "name": "Applied PQC",
         "short_name": "Applied PQC",
-        "description": BOOK_DESC,
+        "description": SITE_DESC,
         "start_url": "/",
         "display": "standalone",
         "background_color": "#0e1c28",
