@@ -73,7 +73,7 @@ STATIC = os.path.join(HERE, "static")
 # The site is about getting post-quantum cryptography deployed; the book is one
 # of the things it publishes towards that. SITE_DESC is what the home page and
 # the search engines get, BOOK_DESC only describes the book itself.
-SITE_DESC = ("NIST has finished; the internet has not. Where post-quantum "
+SITE_DESC = ("Standardising the algorithms was the easy part. Where post-quantum "
              "cryptography actually stands — what has shipped, what is still a "
              "draft, and what breaks when you deploy it — with byte-exact "
              "implementations of all four standards.")
