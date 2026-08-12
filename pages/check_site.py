@@ -83,6 +83,18 @@ def main():
     check('data-filter=' in index and 'data-pills=' in index,
           "landing page lost the card filter")
     check("AppliedPQC/awesome-pqc" in index, "landing page does not surface awesome-pqc")
+    # The site is about getting post-quantum cryptography deployed, and the book
+    # is one of the things it publishes towards that. Both of these have been
+    # the book's own blurb before now, and the drift is silent: the page still
+    # builds and still looks right, it just says the site is a book again.
+    # The Book node in the JSON-LD is *supposed* to carry the book's blurb, so
+    # this looks at the two places that describe the site itself.
+    check('name="description" content="A book that builds' not in index,
+          "landing page's meta description is the book's, not the site's")
+    check(re.search(r'<p class="lede">\s*A book\b', index) is None,
+          "landing page opens by calling itself a book rather than the site")
+    check('data-cat="deploy"' in index,
+          "landing page lost the deploy shelf")
     check("bitcoin-stark-verifier" in index,
           "landing page does not surface bitcoin-stark-verifier")
     # The page count is read from the build, never typed in; if the source it
