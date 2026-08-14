@@ -67,7 +67,7 @@ def main():
 
     # --- landing page -----------------------------------------------------
     index = read(p("index.html"))
-    check("<title>Applied PQC —" in index, "landing page lost its title")
+    check("<title>Applied PQC:" in index, "landing page lost its title")
     check('href="apqc.pdf"' in index, "landing page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
     check(len(re.findall(r'<section class="band', index)) >= 2,

@@ -3,10 +3,9 @@
 <section class="band hero"><div class="band-inner">
 <div>
 <h1>Applied Post-Quantum Cryptography</h1>
-<p class="lede">Standardising the algorithms was the easy part. Where
-post-quantum cryptography actually stands — what has shipped, what is still a draft, and what
-breaks when you deploy it — with byte-exact implementations of all four
-standards and the book that derives them.</p>
+<p class="lede">Where post-quantum cryptography actually stands: what has
+shipped, what is still a draft, and what breaks when you deploy it. Byte-exact
+implementations of all four standards, and the book that derives them.</p>
 <div class="cta">
 <a class="button" href="{{ gh }}/awesome-pqc">What has shipped</a>
 <a class="button ghost" href="apqc.pdf">Read the book (PDF)</a>
@@ -21,7 +20,7 @@ standards and the book that derives them.</p>
 <section class="band"><div class="band-inner">
 <h2>Everything in the project</h2>
 <p class="sub">What to deploy and what it costs, the standards themselves, the
-code that implements them, and the research behind it — filter by what you
+code that implements them, and the research behind it. Filter by what you
 need.</p>
 <div class="pills" data-pills="all">
   <button class="pill" type="button" data-cat="all" aria-pressed="true">All</button>
@@ -36,7 +35,7 @@ need.</p>
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/awesome-pqc">What has shipped</a></h3>
       <p>A curated, link-verified list of what is actually available to build
-      against — the standards, the test vectors, the libraries that implement
+      against: the standards, the test vectors, the libraries that implement
       them, and the deployment and migration guidance.</p>
       <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
     </div>
@@ -46,9 +45,8 @@ need.</p>
     <div class="card-body">
       <h3><a class="stretch" href="apqc.pdf">The book</a></h3>
       <p>The full arc, from finite fields and lattices through all four
-      standards — and then the part that decides whether any of it lands: hybrid
-      TLS, side channels, blockchain exposure, and what migration costs in
-      blockspace.</p>
+      standards, then the deployment questions: hybrid TLS, side channels,
+      blockchain exposure, and what migration costs in blockspace.</p>
       <p class="meta"><span class="tag">PDF</span>{% if pages %}<span>{{ pages }} pages</span>{% endif %}</p>
     </div>
   </li>
@@ -77,7 +75,7 @@ need.</p>
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier#chunks">Disproving one step</a></h3>
       <p>The verifier is three hundred blocks and is never run on chain. What is
-      run is one chunk of it, bound by Winternitz signatures — 22 Poseidon2
+      run is one chunk of it, bound by Winternitz signatures: 22 Poseidon2
       rounds in a standard transaction, about two thousand chunks for the whole
       verifier.</p>
       <p class="meta"><span class="tag">BitVM</span><span>~2,000 chunks</span></p>
@@ -88,7 +86,7 @@ need.</p>
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">WHIR on Bitcoin Script</a></h3>
       <p>A formal account of the STIR and WHIR proximity tests, and a review of
-      the verifier against them — the algorithm stated formally, the
+      the verifier against them: the algorithm stated formally, the
       implementation reviewed against it, and completeness and soundness
       separated into what the protocol proves and what the script checks.</p>
       <p class="meta"><span class="tag">PDF</span><span>17 pages</span></p>

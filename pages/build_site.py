@@ -67,16 +67,15 @@ BRAND = "Applied PQC"
 # Search results truncate around sixty characters, so the suffix is the short
 # brand rather than the full book title, and the home page leads with what the
 # site is instead of repeating the name twice.
-HOME_TITLE = "Applied PQC — where post-quantum cryptography actually stands"
+HOME_TITLE = "Applied PQC: where post-quantum cryptography actually stands"
 STATIC = os.path.join(HERE, "static")
 
 # The site is about getting post-quantum cryptography deployed; the book is one
 # of the things it publishes towards that. SITE_DESC is what the home page and
 # the search engines get, BOOK_DESC only describes the book itself.
-SITE_DESC = ("Standardising the algorithms was the easy part. Where post-quantum "
-             "cryptography actually stands — what has shipped, what is still a "
-             "draft, and what breaks when you deploy it — with byte-exact "
-             "implementations of all four standards.")
+SITE_DESC = ("Where post-quantum cryptography actually stands: what has shipped, "
+             "what is still a draft, and what breaks when you deploy it. "
+             "Byte-exact implementations of all four standards.")
 
 BOOK_DESC = ("A book that builds post-quantum cryptography from the ground up, from "
              "lattices and Learning With Errors to byte-exact implementations of "

@@ -1,7 +1,7 @@
 # Playground
 
 Every algorithm in *Applied Post-Quantum Cryptography* has a SageMath
-implementation, and the cells below run them **in your browser** — no install,
+implementation, and the cells below run them in your browser, with no install and
 nothing to download. Edit any cell and press **Run**.
 
 The code is not copied into this page. Each cell fetches the `.sage` sources
@@ -9,10 +9,10 @@ straight from [the repository](https://github.com/AppliedPQC/AppliedPQC/tree/mai
 so what runs here is exactly the code the book documents.
 
 Execution happens on the free [SageMath Cell](https://sagecell.sagemath.org/)
-service, which allows **30 seconds per run**. Nearly everything fits; the few
+service, which allows 30 seconds per run. Nearly everything fits; the few
 operations that do not are noted below, with the command to run them locally.
 
-The four standards are below. Every other listing in the book — the lattice, LWE, NTT and toy-Kyber experiments the chapters build up from — is runnable too, chapter by chapter, at the end of this page.
+The four standards are below. Every other listing in the book (the lattice, LWE, NTT and toy-Kyber experiments the chapters build up from) is runnable too, chapter by chapter, at the end of this page.
 
 ## ML-KEM (FIPS 203)
 
@@ -34,7 +34,7 @@ for ps in ['ML-KEM-512', 'ML-KEM-768', 'ML-KEM-1024']:
 
 The number-theoretic transform is a *ring isomorphism*, not merely a fast
 multiplication trick. This check confirms all three parts of that claim using
-Sage's own arithmetic as the oracle — it is the check discussed in the ML-KEM
+Sage's own arithmetic as the oracle; it is the check discussed in the ML-KEM
 chapter.
 
 <div class="sage"><script type="text/x-sage">import urllib.request
@@ -45,7 +45,7 @@ print("NTT is a ring isomorphism:", verify_ntt_is_a_ring_isomorphism())
 
 ## ML-DSA (FIPS 204)
 
-Signing uses Fiat–Shamir with aborts, so the number of rejection-loop
+Signing uses Fiat-Shamir with aborts, so the number of rejection-loop
 iterations varies from run to run. Public key and signature sizes match
 FIPS 204 Table 2.
 
@@ -75,8 +75,8 @@ print("signature: %d bytes" % len(sig))
 </script></div>
 
 The `s` ("small") sets trade signing time for signature size, and signing them
-takes far longer than 30 seconds. Verification, though, is the fast direction —
-well under a second — so `apqc_demo_sig` supplies a signature from NIST's ACVP
+takes far longer than 30 seconds. Verification, though, is the fast direction,
+well under a second, so `apqc_demo_sig` supplies a signature from NIST's ACVP
 vectors and the verifier does the rest. Note how much smaller these are than
 the `f` signature above.
 
