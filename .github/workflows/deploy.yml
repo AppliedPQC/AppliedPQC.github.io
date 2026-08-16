@@ -79,7 +79,7 @@ jobs:
         if: steps.decide.outputs.build == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-pictures texlive-science
+          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-pictures texlive-science texlive-bibtex-extra biber
 
       - name: Install pandoc
         if: steps.decide.outputs.build == 'true'
