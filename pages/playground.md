@@ -118,6 +118,31 @@ print("NTRU equation f*G - g*F = q holds:",
       verify_ntru_equation(sk['f'], sk['g'], sk['F'], sk['G']))
 </script></div>
 
+A Falcon-512 signature is 666 bytes: one header byte, a 40-byte salt, and
+625 bytes of compressed `s2`. The book derives that figure from the sampler's
+Gaussian width and the sign, low-seven-bits, unary code; this cell checks the
+derivation on a real signature. The public key has no smallness to exploit and
+costs the full 14 bits per coefficient.
+
+<div class="sage"><script type="text/x-sage">import urllib.request
+exec(urllib.request.urlopen("https://raw.githubusercontent.com/AppliedPQC/AppliedPQC/main/sage/playground.py").read())
+apqc_load('fips206')
+sk, h = apqc_demo_key('FN-DSA-512')
+fn = FNDSA('FN-DSA-512')
+r, s = fn.Sign(b"where the bytes go", sk)
+print("header 1 + salt", len(r), "+ compressed s2", len(s),
+      "=", 1 + len(r) + len(s), "bytes; the parameter set says", fn.sbytelen)
+print("public key:", len(fn.encode_public_key(h)), "bytes = 1 + 14 *", fn.n, "/ 8")
+s2 = Decompress(s, fn.slen, fn.n)
+used = sum(1 + 7 + (abs(int(c)) >> 7) + 1 for c in s2)
+print("bits the code actually used: %d of %d, %.2f per coefficient"
+      % (used, fn.slen, used / fn.n))
+print("entropy of a Gaussian at sigma = %.1f: %.2f bits per coefficient"
+      % (fn.sigma, float(log(fn.sigma * sqrt(2 * pi * e), 2))))
+print("share of coefficients with |c| < 128: %.2f"
+      % (sum(1 for c in s2 if abs(int(c)) < 128) / fn.n))
+</script></div>
+
 ## What does not fit in a browser
 
 Three things exceed the 30-second budget. `apqc_require` names them and says
