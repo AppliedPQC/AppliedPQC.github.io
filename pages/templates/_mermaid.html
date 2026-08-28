@@ -3,14 +3,24 @@
      with no second copy to keep in step. -->
 <script type="module">
   import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  // pandoc emits <pre class="mermaid"><code>...</code></pre>, and mermaid reads
+  // innerHTML rather than textContent, so the inner <code> tag arrives as part
+  // of the diagram source and every graph fails to parse. Lift the text out of
+  // the wrapper first. Without it every diagram renders as the error graphic.
+  for (const code of document.querySelectorAll("pre.mermaid > code")) {
+    code.parentElement.textContent = code.textContent;
+  }
   const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   mermaid.initialize({
-    startOnLoad: true,
+    // Run explicitly: this module is fetched from a CDN and can execute after
+    // the load event that startOnLoad waits for.
+    startOnLoad: false,
     theme: dark ? "dark" : "neutral",
     securityLevel: "strict",
     flowchart: { curve: "basis" },
     themeVariables: { fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }
   });
+  await mermaid.run();
 </script>
 <style>
   pre.mermaid {
