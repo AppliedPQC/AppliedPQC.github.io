@@ -6,10 +6,10 @@
     font-size: 14px;
     height: auto;
   }
-  /* The label has to be var(--accent-fg), not a hardcoded white: --btn-primary
-     is near-black in light mode but near-white in dark, so a fixed white label
-     rendered white-on-white at 1.09:1 and the button vanished. --accent-fg is
-     the token that flips with it, and it is what .button already uses. */
+  /* The label is var(--accent-fg) rather than a hardcoded white. The pair is
+     defined to contrast, so the label follows any change to --btn-primary
+     instead of going white-on-white the way a literal colour once did. It is
+     also what .button already uses. */
   .sagecell_evalButton {
     background: var(--btn-primary) !important;
     color: var(--accent-fg) !important;
