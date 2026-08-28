@@ -17,7 +17,11 @@
     startOnLoad: false,
     theme: dark ? "dark" : "neutral",
     securityLevel: "strict",
-    flowchart: { curve: "basis" },
+    // useMaxWidth would set the svg to width:100% with the natural size as
+    // a max, so a diagram wider than the column is scaled down to fit and
+    // its labels shrink with it. Draw at natural size instead and let the
+    // pre scroll, which is what overflow-x above is for.
+    flowchart: { curve: "basis", useMaxWidth: false },
     themeVariables: { fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }
   });
   await mermaid.run();
