@@ -364,10 +364,12 @@ def main():
         return p
 
     play_tpl = pandoc_template("t-playground.html", True, ("playground.css",), "playground")
-    # Mermaid is only loaded if a post actually contains a diagram, so the blog
-    # does not pull a large module for nothing.
-    any_diagram = any("```mermaid" in open(p["path"]).read() for p in posts)
-    blog_tpl = pandoc_template("t-blog.html", False, (), "blog", mermaid=any_diagram)
+    # Mermaid and Sage Cell are each loaded only if a post actually uses them,
+    # so the blog does not pull a large module for nothing.
+    bodies = [open(p["path"]).read() for p in posts]
+    any_diagram = any("```mermaid" in b for b in bodies)
+    any_sage = any('<div class="sage">' in b for b in bodies)
+    blog_tpl = pandoc_template("t-blog.html", any_sage, (), "blog", mermaid=any_diagram)
 
     # The playground is the single entry point for running code, so the
     # generated chapter table is appended to its prose.
