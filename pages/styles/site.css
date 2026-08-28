@@ -2,6 +2,7 @@
      primary layout, and the chrome stays out of the way: near-black on white,
      one ink accent, and colour supplied by the art rather than the interface. */
   :root {
+    color-scheme: light;
     --bg: #ffffff;
     --bg-muted: #f5f5f7;
     --surface: #ffffff;
@@ -24,35 +25,10 @@
     --radius-sm: 10px;
     --nav-bg: rgba(255, 255, 255, .78);
     /* Brand. The logo's teal is #3fdbd3, which is a 1.7:1 smear on white, so
-       light mode uses a darkened tone of the same hue and the bright value is
-       kept for dark backgrounds -- and for the icon and share image, which
-       carry their own navy field. */
+       the page uses a darkened tone of the same hue. The bright value is kept
+       for the icon and share image, which carry their own navy field. */
     --brand: #0b7d74;
     --brand-ink: #0e1c28;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b0c0f;
-      --bg-muted: #121419;
-      --surface: #15171d;
-      --fg: #f4f5f7;
-      --muted: #9ba1ad;
-      --rule: #262a33;
-      --link: #a99cff;
-      --accent: #a99cff;
-      --accent-fg: #0b0c0f;
-      --code-bg: #1a1d24;
-      --btn-primary: #f4f5f7;
-      --btn-primary-hover: #ffffff;
-      --btn-bg: #1a1d24;
-      --btn-bg-hover: #22262f;
-      --btn-border: #2d323c;
-      --btn-shadow: none;
-      --shadow-1: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .45);
-      --shadow-2: 0 2px 6px rgba(0, 0, 0, .55), 0 18px 40px rgba(0, 0, 0, .6);
-      --nav-bg: rgba(11, 12, 15, .74);
-      --brand: #3fdbd3;
-    }
   }
   * { box-sizing: border-box; }
 

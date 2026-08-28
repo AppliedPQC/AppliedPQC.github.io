@@ -10,12 +10,11 @@
   for (const code of document.querySelectorAll("pre.mermaid > code")) {
     code.parentElement.textContent = code.textContent;
   }
-  const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   mermaid.initialize({
     // Run explicitly: this module is fetched from a CDN and can execute after
     // the load event that startOnLoad waits for.
     startOnLoad: false,
-    theme: dark ? "dark" : "neutral",
+    theme: "neutral",
     securityLevel: "strict",
     // useMaxWidth would set the svg to width:100% with the natural size as
     // a max, so a diagram wider than the column is scaled down to fit and

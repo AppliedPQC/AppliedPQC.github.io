@@ -236,10 +236,9 @@ def main():
     check(re.search(r"<title>[^<]{25,90}</title>", index) is not None,
           "landing page title is missing or a bad length for search results")
 
-    # The Run button takes its colours from --btn-primary, which is near-black
-    # in light mode and near-white in dark. A literal label colour therefore
-    # reads white-on-white in one scheme and the button disappears -- which is
-    # exactly what happened. Assert the pair that flips together instead.
+    # The Run button takes its colours from --btn-primary. A literal label
+    # colour once went white-on-white against it and the button disappeared,
+    # so assert the token pair that is defined to contrast instead.
     play = read(p("playground.html"))
     btn = re.search(r"\.sagecell_evalButton\s*\{[^}]*\}", play)
     check(btn is not None, "playground lost the Run button styling")
