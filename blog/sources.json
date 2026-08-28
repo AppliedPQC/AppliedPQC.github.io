@@ -6,5 +6,13 @@
     "path": "bitcoin-l2-pq-migration.md",
     "summary": "A Bitcoin layer 2 settles to a base layer it cannot change, borrows consensus from a third ecosystem, and runs a bridge whose trust root is cryptography of its own choosing. Where the post-quantum exposure actually sits, and who can fix each part.",
     "cat": "deploy"
+  },
+  {
+    "slug": "shrincs-construction",
+    "date": "2026-08-28",
+    "repo": "pqc-research",
+    "path": "shrincs-construction.md",
+    "summary": "SHRINCS demotes SLH-DSA to a fallback path and puts a 548-byte stateful signature on the primary one. What the draft reuses from FIPS 205, what it only reparameterises, what it constructs anew, and what it gives up.",
+    "cat": "research"
   }
 ]
