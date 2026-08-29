@@ -176,8 +176,38 @@ def authors():
 
 
 FRONT = re.compile(r"\A---\n(.*?)\n---\n", re.S)
+def esc(t):
+    """XML-escape prose going into the feed."""
+    return (t.replace("&", "&amp;").replace("<", "&lt;")
+             .replace(">", "&gt;"))
+
+
 RAW_REPO = "https://raw.githubusercontent.com/AppliedPQC/%s/main/%s"
 
+
+# Figures in a sourced document are written as absolute raw.githubusercontent
+# URLs, because the document has to render on GitHub as well as here. Serving
+# them from there on this site would hand a third party the images: they could
+# not be attributed to this domain, GitHub asks that raw content not be
+# hotlinked, and every reader pays a second DNS lookup and TLS handshake for
+# them. So they are fetched once at build time and rewritten to local paths.
+# A figure may appear twice in one line, once as the image and once as the
+# link a reader follows for the full-size copy, so every occurrence of the URL
+# is rewritten rather than only the image syntax.
+FIGURE = re.compile(r"https://raw\.githubusercontent\.com/[^)\s\"']+\.(?:png|jpg|jpeg|gif|svg|webp)")
+
+
+def localise_images(body, build, slug):
+    """Copy a post's figures into the build and point the markdown at them."""
+    for url in dict.fromkeys(FIGURE.findall(body)):     # de-duplicated, order kept
+        name = "fig-%s-%s" % (slug, url.rsplit("/", 1)[-1])
+        try:
+            data = urllib.request.urlopen(url, timeout=30).read()
+        except Exception as exc:                        # noqa: BLE001 - reported as-is
+            raise SystemExit("could not fetch the figure %s\n%s" % (url, exc))
+        open(os.path.join(build, name), "wb").write(data)
+        body = body.replace(url, name)
+    return body
 
 def fetch_sourced(build):
     """Posts whose text lives in another repository.
@@ -208,6 +238,7 @@ def fetch_sourced(build):
                 % (e["repo"], home, e["path"]))
         # Keep the heading first so the page leads with the title, then the note.
         body = body.replace(m.group(0), m.group(0) + "\n\n" + note, 1)
+        body = localise_images(body, build, e["slug"])
         path = os.path.join(build, "sourced-%s.md" % e["slug"])
         open(path, "w").write(body)
         out.append(dict(title=title, date=e["date"], summary=e.get("summary", ""),
@@ -434,6 +465,32 @@ def main():
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "\n".join(entries) + "\n</urlset>\n")
+    # Atom, because this audience subscribes rather than returns. Entries carry
+    # the summary rather than the body: the post is the canonical copy and the
+    # feed exists to say that one appeared, not to replace reading it.
+    updated = max([q["date"] for q in posts], default="1970-01-01") + "T00:00:00Z"
+    items = []
+    for q in sorted(posts, key=lambda x: x["date"], reverse=True):
+        url = "%s/blog-%s.html" % (SITE, q["slug"])
+        items.append(
+            "  <entry>\n"
+            "    <title>%s</title>\n"
+            '    <link href="%s"/>\n'
+            "    <id>%s</id>\n"
+            "    <updated>%sT00:00:00Z</updated>\n"
+            "    <summary>%s</summary>\n"
+            "  </entry>" % (esc(q["title"]), url, url, q["date"], esc(q.get("summary", ""))))
+    open(os.path.join(dest, "feed.xml"), "w").write(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<feed xmlns="http://www.w3.org/2005/Atom">\n'
+        "  <title>%s</title>\n"
+        '  <link href="%s/"/>\n'
+        '  <link rel="self" href="%s/feed.xml"/>\n'
+        "  <id>%s/</id>\n"
+        "  <updated>%s</updated>\n"
+        "  <subtitle>%s</subtitle>\n%s\n</feed>\n"
+        % (esc(BRAND), SITE, SITE, SITE, updated, esc(SITE_DESC), "\n".join(items)))
+
     open(os.path.join(dest, "site.webmanifest"), "w").write(json.dumps({
         "name": "Applied PQC",
         "short_name": "Applied PQC",
