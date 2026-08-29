@@ -197,19 +197,23 @@ RAW_REPO = "https://raw.githubusercontent.com/AppliedPQC/%s/main/%s"
 FIGURE = re.compile(r"https://raw\.githubusercontent\.com/[^)\s\"']+\.(?:png|jpg|jpeg|gif|svg|webp)")
 
 
-def localise_images(body, build, slug):
-    """Copy a post's figures into the build and point the markdown at them."""
+def localise_images(body, dest, slug):
+    """Copy a post's figures into the site and point the markdown at them.
+
+    They go to `dest`, not the scratch build directory, which is removed at the
+    end of a run: a figure written there is a figure the reader never sees.
+    """
     for url in dict.fromkeys(FIGURE.findall(body)):     # de-duplicated, order kept
         name = "fig-%s-%s" % (slug, url.rsplit("/", 1)[-1])
         try:
             data = urllib.request.urlopen(url, timeout=30).read()
         except Exception as exc:                        # noqa: BLE001 - reported as-is
             raise SystemExit("could not fetch the figure %s\n%s" % (url, exc))
-        open(os.path.join(build, name), "wb").write(data)
+        open(os.path.join(dest, name), "wb").write(data)
         body = body.replace(url, name)
     return body
 
-def fetch_sourced(build):
+def fetch_sourced(build, dest):
     """Posts whose text lives in another repository.
 
     The document is fetched at build time rather than copied here, so the
@@ -238,7 +242,7 @@ def fetch_sourced(build):
                 % (e["repo"], home, e["path"]))
         # Keep the heading first so the page leads with the title, then the note.
         body = body.replace(m.group(0), m.group(0) + "\n\n" + note, 1)
-        body = localise_images(body, build, e["slug"])
+        body = localise_images(body, dest, e["slug"])
         path = os.path.join(build, "sourced-%s.md" % e["slug"])
         open(path, "w").write(body)
         out.append(dict(title=title, date=e["date"], summary=e.get("summary", ""),
@@ -317,7 +321,7 @@ def main():
     for c in chapters:
         c["art"] = chapter_art(c["stem"])
     n_listings = sum(len(c["listings"]) for c in chapters)
-    posts = read_posts() + fetch_sourced(build)
+    posts = read_posts() + fetch_sourced(build, dest)
     posts.sort(key=lambda p: p["date"], reverse=True)
 
     # Icon, share image and their raster fallbacks. Committed rather than
