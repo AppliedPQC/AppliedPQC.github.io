@@ -260,11 +260,20 @@ def main():
     check('type="application/atom+xml"' in index, "landing page does not advertise the feed")
 
     # Figures must be served from this domain: a sourced document writes them
-    # as absolute raw.githubusercontent URLs and the build rewrites them.
+    # as absolute raw.githubusercontent URLs and the build rewrites them. Both
+    # halves are checked, because the rewrite can succeed and still leave every
+    # image broken: the URL is local and the file is not there. That happened.
     for name in os.listdir(site):
-        if name.startswith("blog-") and name.endswith(".html"):
-            check("raw.githubusercontent.com" not in read(p(name)),
-                  "%s still links a figure off-site" % name)
+        if not (name.startswith("blog-") and name.endswith(".html")):
+            continue
+        html = read(p(name))
+        check("raw.githubusercontent.com" not in html,
+              "%s still links a figure off-site" % name)
+        for src in re.findall(r'<img[^>]+src="([^"]+)"', html):
+            if src.startswith(("http://", "https://", "data:")):
+                continue
+            check(os.path.exists(p(src)), "%s references %s, which was not published"
+                  % (name, src))
 
     check(os.path.exists(p("robots.txt")), "no robots.txt")
     check(os.path.exists(p("sitemap.xml")), "no sitemap.xml")
