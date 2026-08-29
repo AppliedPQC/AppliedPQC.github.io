@@ -248,6 +248,24 @@ def main():
         check(not re.search(r"color:\s*#", btn.group(0)),
               "Run button label uses a literal colour instead of a token")
 
+    # The feed is how this audience subscribes, and a page that does not
+    # advertise it is a feed nobody finds.
+    check(os.path.exists(p("feed.xml")), "no feed.xml")
+    if os.path.exists(p("feed.xml")):
+        import xml.etree.ElementTree as FT
+        try:
+            FT.parse(p("feed.xml"))
+        except Exception as exc:                       # noqa: BLE001
+            check(False, "feed.xml is not well-formed: %s" % exc)
+    check('type="application/atom+xml"' in index, "landing page does not advertise the feed")
+
+    # Figures must be served from this domain: a sourced document writes them
+    # as absolute raw.githubusercontent URLs and the build rewrites them.
+    for name in os.listdir(site):
+        if name.startswith("blog-") and name.endswith(".html"):
+            check("raw.githubusercontent.com" not in read(p(name)),
+                  "%s still links a figure off-site" % name)
+
     check(os.path.exists(p("robots.txt")), "no robots.txt")
     check(os.path.exists(p("sitemap.xml")), "no sitemap.xml")
     if os.path.exists(p("sitemap.xml")):
