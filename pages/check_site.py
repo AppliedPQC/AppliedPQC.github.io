@@ -129,6 +129,34 @@ def main():
         check(re.search(r"<p>[a-z_]+ = ", read(f)) is None,
               "%s: a listing was mangled out of its cell" % os.path.basename(f))
 
+    contents = read(p("book.html"))
+    online = re.findall(r'<li class="toc-chapter"><a href="(book-[^"]+\.html)"', contents)
+    inputs = re.findall(r"^\\input\{chapters/(?!00_style)", read(book_tex), re.M) \
+        if os.path.exists(book_tex) else online
+    check(len(online) == len(inputs),
+          "the online book has %d chapters, apqc.tex inputs %d" % (len(online), len(inputs)))
+    figures = 0
+    for name in online:
+        html = read(p(name)) if os.path.exists(p(name)) else ""
+        check(html, "%s is listed in the book's contents but was not built" % name)
+        if not html:
+            continue
+        body = html.split('<article class="book-body">', 1)[-1]
+        check(re.search(r"<h1[ >]", body) is not None, "%s has no chapter title" % name)
+        check("??" not in body, "%s has an unresolved cross-reference" % name)
+        check(re.search(r"\\(begin|end)\{(?!aligned|bmatrix|pmatrix|smallmatrix|cases|array)",
+                        re.sub(r"<pre.*?</pre>", "", body, flags=re.S)) is None,
+              "%s has LaTeX environments left in its text" % name)
+        check("BADGE" not in body, "%s has a status badge left unrendered" % name)
+        check("utteranc.es/client.js" in html, "%s lost its comments" % name)
+        for src in re.findall(r'<img[^>]+src="(book-figures/[^"]+)"', body):
+            figures += 1
+            check(os.path.exists(p(src)), "%s references %s, which was not published"
+                  % (name, src))
+    check(figures >= 50, "the online book shows only %d drawn figures" % figures)
+    check(os.path.getsize(p("book-search.json")) > 100_000,
+          "the online book's search index is missing or truncated")
+
     # --- blog -------------------------------------------------------------
     blog = read(p("blog.html"))
     local = [f for f in glob.glob(os.path.join(POSTS, "*.md"))
@@ -305,6 +333,7 @@ def main():
                  % (len(index), os.path.getsize(p("apqc.pdf"))))
     notes.append("playground %d cells; book %d chapters, %d cells"
                  % (cells, len(chapter_pages), book_cells))
+    notes.append("book online: %d chapters, %d drawn figures" % (len(online), figures))
     notes.append("blog %d post(s); chrome checked on %d pages" % (len(built), len(pages)))
 
     for n in notes:

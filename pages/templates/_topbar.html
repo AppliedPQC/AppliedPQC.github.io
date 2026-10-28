@@ -13,6 +13,7 @@
       {%- if here != 'home' %}
       <a href="index.html">Home</a>
       {%- endif %}
+      <a href="book.html"{% if here == 'book' %} class="here"{% endif %}>Book</a>
       <a href="playground.html"{% if here == 'playground' %} class="here"{% endif %}>Playground</a>
       <a href="blog.html"{% if here == 'blog' %} class="here"{% endif %}>Blog</a>
       <a href="https://x.com/AppliedPQC" rel="me">@AppliedPQC</a>
