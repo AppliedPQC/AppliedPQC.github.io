@@ -1,7 +1,7 @@
 {#- Base for pages this script generates outright.  Prose pages get the same
     chrome through pandoc.html, so the partials below are the single source. -#}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ lang|default("en") }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

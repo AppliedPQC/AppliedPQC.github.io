@@ -23,6 +23,43 @@ MATHJAX_FILES = ("tex-chtml.js", "input/tex/extensions/", "output/chtml/", "ui/"
 COMMENTS_REPO = "AppliedPQC/AppliedPQC"
 COMMENTS_LABEL = "book-comment"
 
+EDITIONS = {
+    "en": dict(code="en", lang="en", prefix="", name="English",
+               title="Applied Post-Quantum Cryptography",
+               figure="Figure", table="Table", algorithm="Algorithm", caption="%s %s.",
+               chapter="Chapter %s", appendix="Appendix %s", part="Part %s", colon=": ",
+               input="Input:", output="Output:", references="References",
+               anchor="Link to this section", theorems={}, playground=None,
+               contents="Contents", search="Search the book…", nothing="Nothing found.",
+               pdf="PDF", run="Run this chapter's code", source="LaTeX source",
+               comments="Comments", start="Start reading", download="Download the PDF",
+               previous="Previous", next="Next",
+               page_title="%s — Applied PQC", home_title="Read the book online — Applied PQC",
+               description="%s, from Applied Post-Quantum Cryptography, free to read "
+                           "online. %s.",
+               home_description="Applied Post-Quantum Cryptography, free to read online: "
+                                "every chapter, figure and algorithm of the book."),
+    "zh": dict(code="zh", lang="zh-Hans", prefix="zh-", name="中文",
+               title="应用后量子密码学",
+               figure="图", table="表", algorithm="算法", caption="%s %s",
+               chapter="第 %s 章", appendix="附录 %s", part="第 %s 部分", colon="：",
+               input="输入：", output="输出：", references="参考文献",
+               anchor="链接到本节",
+               theorems={"Definition": "定义", "Example": "例", "Theorem": "定理",
+                         "Proposition": "命题", "Lemma": "引理", "Remark": "注"},
+               playground="\\newcommand{\\playground}[1]{\\smallskip\\noindent\\emph{在浏览器中运行：}"
+                          "#1。参见 \\href{\\playgroundurl}{appliedpqc.io/playground.html}，无需安装。}",
+               contents="目录", search="搜索全书…", nothing="没有找到结果。",
+               pdf="PDF（英文）", run="运行本章代码", source="LaTeX 源文件",
+               comments="评论", start="开始阅读", download="下载 PDF（英文）",
+               previous="上一章", next="下一章",
+               stale="本章英文原文在翻译之后有过修改，最新内容请以英文版为准。",
+               page_title="%s — Applied PQC", home_title="在线阅读《应用后量子密码学》— Applied PQC",
+               description="%s，选自《应用后量子密码学》，可免费在线阅读。%s。",
+               home_description="《应用后量子密码学》中文版，免费在线阅读：全书的每一章、"
+                                "每一幅图和每一个算法。"),
+}
+
 
 def strip_comments(tex):
     out, verb = [], None
@@ -198,16 +235,19 @@ def render_drawn(root, work, chapters, sources):
 PREAMBLE_MACROS = ("sagerepo", "sagefile", "playgroundurl", "playground")
 
 
-def preamble(root):
+def preamble(root, ed):
     style = open(os.path.join(root, "chapters", "00_style.tex")).read()
     out = [l for l in style.split("\n")
            if re.match(r"\\(newtheorem|theoremstyle)", l)]
+    for en, name in ed["theorems"].items():
+        out = [l.replace("{%s}" % en, "{%s}" % name) for l in out]
     for name in PREAMBLE_MACROS:
         m = re.search(r"^\\newcommand\{\\%s\}.*?(?=^\\|^%%|^$|\Z)" % name,
                       style, re.M | re.S)
         if not m:
             raise SystemExit("chapters/00_style.tex no longer defines \\%s" % name)
-        out.append(m.group(0).strip())
+        out.append(ed["playground"] if name == "playground" and ed["playground"]
+                   else m.group(0).strip())
     return "\n".join(out) + "\n"
 
 
@@ -229,7 +269,7 @@ def take_badges(tex):
 CAPTIONED = re.compile(r"\\(begin|end)\{(figure|table|algorithm|subfigure)\}|\\caption\{")
 
 
-def number_captions(tex, floats, used):
+def number_captions(tex, floats, used, ed):
     out, at, stack = [], 0, []
     for m in CAPTIONED.finditer(tex):
         if m.group(1) == "begin":
@@ -243,7 +283,7 @@ def number_captions(tex, floats, used):
             num = floats[kind][used[kind]]
             used[kind] += 1
             out.append(tex[at:m.end()])
-            out.append("\\textbf{%s %s.} " % (kind.capitalize(), num))
+            out.append("\\textbf{%s} " % (ed["caption"] % (ed[kind], num)))
             at = m.end()
     out.append(tex[at:])
     return "".join(out)
@@ -287,7 +327,7 @@ def top_level(pattern, s):
     return out
 
 
-def algorithmic(body, numbered):
+def algorithmic(body, numbered, ed):
     body = re.sub(r"\\Return(?![A-Za-z])", r"\\textbf{return}", body)
     marks = top_level(ALG_STATEMENT, body)
     lines, indent, n = [], 0, 0
@@ -309,9 +349,9 @@ def algorithmic(body, numbered):
         elif kind in ALG_WORD:
             text = "\\textbf{%s} %s" % (ALG_WORD[kind], rest)
         elif kind == "Require":
-            text = "\\textbf{Input:} " + rest
+            text = "\\textbf{%s} %s" % (ed["input"], rest)
         elif kind == "Ensure":
-            text = "\\textbf{Output:} " + rest
+            text = "\\textbf{%s} %s" % (ed["output"], rest)
         else:
             text = rest
         num = 0
@@ -325,9 +365,9 @@ def algorithmic(body, numbered):
     return "\n\nXALGBEGINX\n\n" + "\n\n".join(lines) + "\n\nXALGENDX\n\n"
 
 
-def algorithmic_blocks(tex):
+def algorithmic_blocks(tex, ed):
     def one(m):
-        return algorithmic(m.group(2), m.group(1) is not None and m.group(1) != "[0]")
+        return algorithmic(m.group(2), m.group(1) is not None and m.group(1) != "[0]", ed)
     return re.sub(r"\\begin\{algorithmic\}(\[\d+\])?(.*?)\\end\{algorithmic\}", one, tex,
                   flags=re.S)
 
@@ -382,13 +422,13 @@ def math_aware(tex):
     return "".join(out)
 
 
-def prepare(tex, stem, drawn, labels, floats, used, missing):
+def prepare(tex, stem, drawn, labels, floats, used, missing, ed):
     tex, badges = take_badges(tex)
-    tex = algorithmic_blocks(tex)
+    tex = algorithmic_blocks(tex, ed)
     tex = splice(tex, drawn_spans(tex),
                  lambda i, s: "\\includegraphics{%s}" % drawn[i])
     tex = math_aware(tex)
-    tex = number_captions(tex, floats, used)
+    tex = number_captions(tex, floats, used, ed)
     tex = re.sub(r"\\(begin|end)\{algorithm\}", r"\\\1{figure}", tex)
     tex = re.sub(r"\\chaptermark\{[^{}]*\}", "", tex)
     tex = re.sub(r"\\printbibliography(\[[^\]]*\])?", "", tex)
@@ -414,12 +454,12 @@ def highlight_css(build):
     return "\n".join(rules)
 
 
-def run_pandoc(root, src, out):
+def run_pandoc(root, src, out, ed):
     cmd = ["pandoc", src, "--from=latex", "--to=html5", "--wrap=none",
            "--mathjax",
            "--citeproc", "--bibliography=" + os.path.join(root, "references.bib"),
            "--csl=" + CSL, "--metadata=link-citations:true",
-           "--metadata=reference-section-title:References",
+           "--metadata=reference-section-title:" + ed["references"],
            "--output=" + out]
     run = subprocess.run(cmd, capture_output=True, text=True)
     if run.returncode != 0:
@@ -446,7 +486,7 @@ def svg_size(path):
 PX_PER_PT = 768 / 468
 
 
-def finish(html, chapter, where, badges, figdir_url, sizes):
+def finish(html, chapter, where, badges, figdir_url, sizes, ed):
     secs = iter(chapter["sections"])
     subs = iter(chapter["subsections"])
     sections, counted = [], {"2": 0, "3": 0}
@@ -458,12 +498,11 @@ def finish(html, chapter, where, badges, figdir_url, sizes):
         cls = re.search(r' class="[^"]*"', attrs)
         cls = cls.group(0) if cls else ""
         if level == "1":
-            if strip_tags(inner).strip() == "References":
-                sections.append(dict(id=hid, title="References", num="", level=2))
+            if strip_tags(inner).strip() == ed["references"]:
+                sections.append(dict(id=hid, title=ed["references"], num="", level=2))
                 return '<h2 id="%s" class="unnumbered">%s</h2>' % (hid, inner)
-            return ('<h1 id="%s"><span class="secnum">%s %s</span>%s</h1>'
-                    % (hid, "Appendix" if chapter["num"].isalpha() else "Chapter",
-                       chapter["num"], inner))
+            return ('<h1 id="%s"><span class="secnum">%s</span>%s</h1>'
+                    % (hid, numbered(chapter, ed), inner))
         num = ""
         if level in counted and "unnumbered" not in cls:
             try:
@@ -479,7 +518,7 @@ def finish(html, chapter, where, badges, figdir_url, sizes):
             sections.append(dict(id=hid, title=strip_tags(inner).strip(), num=num,
                                  level=3))
         lead = '<span class="secnum">%s</span>' % num if num else ""
-        anchor = '<a class="anchor" href="#%s" aria-label="Link to this section">#</a>' % hid
+        anchor = '<a class="anchor" href="#%s" aria-label="%s">#</a>' % (hid, ed["anchor"])
         return '<h%s id="%s"%s>%s%s%s</h%s>' % (level, hid, cls, lead, inner, anchor, level)
 
     html = HEADING.sub(heading, html)
@@ -500,7 +539,9 @@ def finish(html, chapter, where, badges, figdir_url, sizes):
     html = re.sub(r'href="#([^"]+)"', link, html)
 
     html = algorithm_html(html)
-    html = re.sub(r"<strong>(Definition|Example|Theorem|Proposition|Lemma) 1\.(\d+)</strong>",
+    names = list(ed["theorems"].values()) or ["Definition", "Example", "Theorem",
+                                              "Proposition", "Lemma"]
+    html = re.sub(r"<strong>(%s) 1\.(\d+)</strong>" % "|".join(names),
                   lambda m: "<strong>%s %s.%s</strong>" % (m.group(1), chapter["num"], m.group(2)),
                   html)
     for name, (text, colour) in badges.items():
@@ -576,15 +617,65 @@ def vendor_mathjax(dest):
     return n
 
 
+def numbered(chapter, ed):
+    return (ed["appendix"] if chapter["num"].isalpha() else ed["chapter"]) % chapter["num"]
+
+
+def blob_sha(data):
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def translation(root, items, chapters, sources):
+    zdir = os.path.join(root, "chapters", "zh")
+    if not os.path.isdir(zdir):
+        return None
+    absent = [c["stem"] for c in chapters
+              if not os.path.exists(os.path.join(zdir, c["stem"] + ".tex"))]
+    if absent:
+        raise SystemExit("chapters/zh has no translation of %s" % ", ".join(absent))
+    parts = re.findall(r"^\\(part|subpart)\*?\{(.*)\}\s*$",
+                       strip_comments(open(os.path.join(zdir, "parts.tex")).read()), re.M)
+    if [k for k, _ in parts] != [it["kind"] for it in items if it["kind"] != "chapter"]:
+        raise SystemExit("chapters/zh/parts.tex does not list apqc.tex's parts and "
+                         "subparts in order")
+    zsources, zchapters = {}, {}
+    for c in chapters:
+        raw = open(os.path.join(zdir, c["stem"] + ".tex"), "rb").read()
+        tex = strip_comments(raw.decode())
+        if [tex[a:b] for a, b in drawn_spans(tex)] != \
+                [sources[c["stem"]][a:b] for a, b in drawn_spans(sources[c["stem"]])]:
+            raise SystemExit("chapters/zh/%s.tex does not carry the English drawings "
+                             "unchanged" % c["stem"])
+        label = re.compile(r"\\label\{([^{}]+)\}")
+        if label.findall(tex) != label.findall(sources[c["stem"]]):
+            raise SystemExit("chapters/zh/%s.tex does not carry the English labels in "
+                             "order" % c["stem"])
+        m = re.search(r"\\chapter\*?(\[[^\]]*\])?", tex)
+        if not m:
+            raise SystemExit("chapters/zh/%s.tex has no \\chapter" % c["stem"])
+        title, _ = brace_arg(tex, m.end())
+        stamp = re.search(rb"^% source: ([0-9a-f]{40})", raw, re.M)
+        english = open(os.path.join(root, "chapters", c["stem"] + ".tex"), "rb").read()
+        zsources[c["stem"]] = tex
+        zchapters[c["stem"]] = dict(
+            c, title=tex_text(title), page="zh-" + c["page"],
+            stale=not stamp or stamp.group(1).decode() != blob_sha(english))
+    heads = iter(parts)
+    zitems = [zchapters[it["stem"]] if it["kind"] == "chapter"
+              else dict(it, title=tex_text(next(heads)[1])) for it in items]
+    return zitems, [zchapters[c["stem"]] for c in chapters], zsources
+
+
 def build(root, dest, build, env, base, css, listings):
     stems = book_order(root)
     items, chapters = parse_toc(root, stems)
     labels, floats = parse_aux(root)
     for c in chapters:
         c["page"] = slug(c["stem"]) + ".html"
+        c["title_en"] = c["title"]
+        c["stale"] = False
     sources = {s: strip_comments(open(os.path.join(root, "chapters", s + ".tex")).read())
                for s in stems}
-    where = label_pages(sources, chapters)
 
     work = os.path.join(build, "book")
     os.makedirs(work, exist_ok=True)
@@ -597,73 +688,91 @@ def build(root, dest, build, env, base, css, listings):
             shutil.copyfile(os.path.join(figdir, name), os.path.join(figout, name))
             sizes[name] = svg_size(os.path.join(figdir, name))
 
-    pre = preamble(root)
-    used = {k: 0 for k in floats}
-    missing = []
-    prepared = {}
-    for c in chapters:
-        tex, badges = prepare(sources[c["stem"]], c["stem"], drawn[c["stem"]],
-                              labels, floats, used, missing)
-        src = os.path.join(work, c["stem"] + ".tex")
-        open(src, "w").write(pre + tex)
-        prepared[c["stem"]] = (src, badges)
-    for kind in floats:
-        if used[kind] != len(floats[kind]):
-            raise SystemExit("%d %s captions in the chapters, %d in apqc.aux"
-                             % (used[kind], kind, len(floats[kind])))
-    if missing:
-        raise SystemExit("unresolved references:\n  " + "\n  ".join(missing))
-
-    def convert(c):
-        src, _ = prepared[c["stem"]]
-        out = src[:-4] + ".html"
-        return c["stem"], out, run_pandoc(root, src, out)
-
-    with ThreadPoolExecutor(max_workers=os.cpu_count() or 2) as pool:
-        converted = list(pool.map(convert, chapters))
-    warnings = {}
-    for stem, out, err in converted:
-        if err.strip():
-            warnings[stem] = err.strip()
-
     playground = {c["stem"] for c in listings}
     hl = highlight_css(work)
     tpl = env.get_template("book.html")
-    index = []
-    for c in chapters:
-        out = os.path.join(work, c["stem"] + ".html")
-        html, c["toc"] = finish(open(out).read(), c, where, prepared[c["stem"]][1],
-                                "book-figures", sizes)
-        c["html"] = html
-        index.extend(search_index(html, c))
+    editions = [(EDITIONS["en"], items, chapters, sources)]
+    zh = translation(root, items, chapters, sources)
+    if zh:
+        editions.append((EDITIONS["zh"],) + zh)
+    other = {}
+    for ed, _, eds_chapters, _ in editions:
+        for c in eds_chapters:
+            other.setdefault(c["stem"], []).append(dict(page=c["page"], lang=ed["lang"],
+                                                        name=ed["name"]))
+    homes = [dict(page=ed["prefix"] + "book.html", lang=ed["lang"], name=ed["name"])
+             for ed, _, _, _ in editions]
+    warnings = {}
 
-    for i, c in enumerate(chapters):
-        prev = chapters[i - 1] if i else None
-        nxt = chapters[i + 1] if i + 1 < len(chapters) else None
-        open(os.path.join(dest, c["page"]), "w").write(tpl.render(
-            base, title="%s %s — Applied PQC" % (c["num"], c["title"]),
-            css=css + "\n" + hl, main_class="book", here="book",
-            items=items, chapter=c, prev=prev, next=nxt,
-            playground=("playground-%s.html" % c["stem"]) if c["stem"] in playground else None,
-            source="%s/AppliedPQC/blob/main/chapters/%s.tex" % (base["gh"], c["stem"]),
-            comments_repo=COMMENTS_REPO, comments_label=COMMENTS_LABEL,
-            description="%s %s, from Applied Post-Quantum Cryptography, free to "
-                        "read online." % ("Appendix" if c["num"].isalpha() else
-                                          "Chapter", c["num"]) + " " + c["title"] + ".",
-            page=c["page"], og_type="article", og_title=c["title"], jsonld=None))
+    def publish(ed, items, chapters, sources):
+        where = {k: ed["prefix"] + v for k, v in label_pages(sources, chapters).items()}
+        pre = preamble(root, ed)
+        used = {k: 0 for k in floats}
+        missing = []
+        prepared = {}
+        for c in chapters:
+            tex, badges = prepare(sources[c["stem"]], c["stem"], drawn[c["stem"]],
+                                  labels, floats, used, missing, ed)
+            src = os.path.join(work, ed["prefix"] + c["stem"] + ".tex")
+            open(src, "w").write(pre + tex)
+            prepared[c["stem"]] = (src, badges)
+        for kind in floats:
+            if used[kind] != len(floats[kind]):
+                raise SystemExit("%s: %d %s captions in the chapters, %d in apqc.aux"
+                                 % (ed["name"], used[kind], kind, len(floats[kind])))
+        if missing:
+            raise SystemExit("unresolved references:\n  " + "\n  ".join(missing))
 
-    open(os.path.join(dest, "book.html"), "w").write(tpl.render(
-        base, title="Read the book online — Applied PQC",
-        css=css + "\n" + hl, main_class="book", here="book",
-        items=items, chapter=None, prev=None, next=chapters[0],
-        playground=None, source=None,
-        comments_repo=COMMENTS_REPO, comments_label=COMMENTS_LABEL,
-        description="Applied Post-Quantum Cryptography, free to read online: "
-                    "every chapter, figure and algorithm of the book.",
-        page="book.html", og_type="book", og_title="Applied Post-Quantum Cryptography",
-        jsonld=None))
+        def convert(c):
+            src, _ = prepared[c["stem"]]
+            out = src[:-4] + ".html"
+            return ed["prefix"] + c["stem"], out, run_pandoc(root, src, out, ed)
 
+        with ThreadPoolExecutor(max_workers=os.cpu_count() or 2) as pool:
+            converted = list(pool.map(convert, chapters))
+        for stem, out, err in converted:
+            if err.strip():
+                warnings[stem] = err.strip()
+
+        index = []
+        for c, (_, out, _) in zip(chapters, converted):
+            html, c["toc"] = finish(open(out).read(), c, where, prepared[c["stem"]][1],
+                                    "book-figures", sizes, ed)
+            c["html"] = html
+            index.extend(search_index(html, c))
+
+        common = dict(css=css + "\n" + hl, main_class="book", here="book", items=items,
+                      ed=ed, lang=ed["lang"], home=ed["prefix"] + "book.html",
+                      search_index=ed["prefix"] + "book-search.json",
+                      comments_repo=COMMENTS_REPO, comments_label=COMMENTS_LABEL)
+        for i, c in enumerate(chapters):
+            prev = chapters[i - 1] if i else None
+            nxt = chapters[i + 1] if i + 1 < len(chapters) else None
+            source = "chapters/%s%s.tex" % ("zh/" if ed["prefix"] else "", c["stem"])
+            open(os.path.join(dest, c["page"]), "w").write(tpl.render(
+                base, **common,
+                title=ed["page_title"] % ("%s %s" % (c["num"], c["title"])),
+                chapter=c, prev=prev, next=nxt,
+                playground=("playground-%s.html" % c["stem"]) if c["stem"] in playground
+                else None,
+                source="%s/AppliedPQC/blob/main/%s" % (base["gh"], source),
+                english=[o for o in other[c["stem"]] if o["lang"] == "en"][0]["page"],
+                alternates=other[c["stem"]] if len(other[c["stem"]]) > 1 else [],
+                description=ed["description"] % (numbered(c, ed), c["title"]),
+                page=c["page"], og_type="article", og_title=c["title"], jsonld=None))
+
+        open(os.path.join(dest, ed["prefix"] + "book.html"), "w").write(tpl.render(
+            base, **common,
+            title=ed["home_title"], chapter=None, prev=None, next=chapters[0],
+            playground=None, source=None, english="book.html",
+            alternates=homes if len(homes) > 1 else [],
+            description=ed["home_description"],
+            page=ed["prefix"] + "book.html", og_type="book", og_title=ed["title"],
+            jsonld=None))
+        open(os.path.join(dest, ed["prefix"] + "book-search.json"), "w").write(
+            json.dumps(index, ensure_ascii=False, separators=(",", ":")))
+
+    for ed, eds_items, eds_chapters, eds_sources in editions:
+        publish(ed, eds_items, eds_chapters, eds_sources)
     vendor_mathjax(dest)
-    open(os.path.join(dest, "book-search.json"), "w").write(
-        json.dumps(index, ensure_ascii=False, separators=(",", ":")))
     return chapters, warnings
