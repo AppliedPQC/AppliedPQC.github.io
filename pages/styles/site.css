@@ -139,6 +139,13 @@
   .topbar-links a { color: var(--muted); font-weight: 500; }
   .topbar-links a:hover { color: var(--fg); text-decoration: none; }
   .topbar-links a.here { color: var(--fg); font-weight: 600; }
+  .topbar-links a.lang-switch {
+    display: inline-flex; align-items: center; gap: 0.35rem; height: 2rem; padding: 0 0.7rem;
+    border: 1px solid var(--rule); border-radius: 999px; font-size: 0.85rem;
+  }
+  .topbar-links a.lang-switch:hover { color: var(--fg); border-color: var(--btn-border); }
+  .lang-switch svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-width: 1.8; }
+  :lang(zh-Hans) em { font-style: normal; font-weight: 600; }
 
   /* Search filters the grid on this page; it is not a site-wide index, so it
      says so rather than implying results from elsewhere. */

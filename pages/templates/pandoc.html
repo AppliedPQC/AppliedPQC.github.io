@@ -8,7 +8,11 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>$pagetitle$</title>
-{% with description="$description$", page="$page$", og_type="$ogtype$", og_title="$pagetitle$", jsonld=None %}{% include "_meta.html" %}{% endwith %}
+{% with description="$description$", page="$page$", og_type="$ogtype$", og_title="$pagetitle$", jsonld=None, alternates=[] %}{% include "_meta.html" %}{% endwith %}
+$if(zhpage)$
+<link rel="alternate" hreflang="en" href="{{ site }}/$enpage$" />
+<link rel="alternate" hreflang="zh-Hans" href="{{ site }}/$zhpage$" />
+$endif$
 {#- Per-page structured data arrives through --include-in-header, because a
     pandoc --variable would HTML-escape the JSON into nonsense. -#}
 $for(header-includes)$
@@ -25,12 +29,12 @@ $endfor$
 {%- endif %}
 </head>
 <body>
-{% include "_topbar.html" %}
+{% with alt="$altpage$" %}{% include "_topbar.html" %}{% endwith %}
 <main$if(table-of-contents)$ class="has-toc"$endif$>
 $if(table-of-contents)$
 <div class="layout-toc">
-<aside class="toc" aria-label="Contents">
-<p class="toc-heading">Contents</p>
+<aside class="toc" aria-label="{{ _('Contents') }}">
+<p class="toc-heading">{{ _("Contents") }}</p>
 $table-of-contents$
 </aside>
 <article>

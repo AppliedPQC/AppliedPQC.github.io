@@ -4,23 +4,23 @@
 {%- endblock %}
 {% block content %}
 <h1>{{ chapter.title }}</h1>
-<p>Every code listing from this chapter of <em>Applied Post-Quantum
-Cryptography</em>: {{ chapter.listings|length }} in total, {{ n_runnable }}
-runnable here. Edit any cell and press <strong>Run</strong>.</p>
-<p>The book's snippets build on each other down the chapter, but a Sage Cell
+<p>{{ _("Every code listing from this chapter of <em>Applied Post-Quantum
+Cryptography</em>: %d in total, %d runnable here. Edit any cell and press
+<strong>Run</strong>.")|format(chapter.listings|length, n_runnable) }}</p>
+<p>{{ _("The book's snippets build on each other down the chapter, but a Sage Cell
 kernel runs one cell and keeps no state afterwards, so each cell replays the
 earlier listings with <code>apqc_book</code>. That call is the only thing added
-to the book's own code.</p>
-<p><a href="playground.html">← the playground</a></p>
+to the book's own code.") }}</p>
+<p><a href="{{ p }}playground.html">{{ _("← the playground") }}</a></p>
 {%- for l in chapter.listings %}
-<h2 id="listing-{{ l.n }}">Listing {{ l.n }}{% if l.title %}: {{ l.title | e }}{% endif %}</h2>
+<h2 id="listing-{{ l.n }}">{{ _("Listing %s")|format(l.n) }}{% if l.title %}{{ _(": ") }}{{ l.title | e }}{% endif %}</h2>
 {#- The book's own prose for this listing, carried over by extract_listings.py
     so a cell says what it demonstrates rather than just its number. #}
 {%- for p in l.intro %}
 <p>{{ p | e }}</p>
 {%- endfor %}
 {%- if not l.runnable %}
-<p>Not runnable on its own: {{ l.note }}.</p>
+<p>{{ _("Not runnable on its own: %s.")|format(l.note) }}</p>
 <pre><code>{{ l.code | e }}</code></pre>
 {%- else %}
 <div class="sage"><script type="text/x-sage">{{ boot }}

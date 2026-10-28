@@ -666,7 +666,7 @@ def translation(root, items, chapters, sources):
     return zitems, [zchapters[c["stem"]] for c in chapters], zsources
 
 
-def build(root, dest, build, env, base, css, listings):
+def build(root, dest, build, env, base, css, listings, chrome):
     stems = book_order(root)
     items, chapters = parse_toc(root, stems)
     labels, floats = parse_aux(root)
@@ -695,13 +695,7 @@ def build(root, dest, build, env, base, css, listings):
     zh = translation(root, items, chapters, sources)
     if zh:
         editions.append((EDITIONS["zh"],) + zh)
-    other = {}
-    for ed, _, eds_chapters, _ in editions:
-        for c in eds_chapters:
-            other.setdefault(c["stem"], []).append(dict(page=c["page"], lang=ed["lang"],
-                                                        name=ed["name"]))
-    homes = [dict(page=ed["prefix"] + "book.html", lang=ed["lang"], name=ed["name"])
-             for ed, _, _, _ in editions]
+    translated = len(editions) > 1
     warnings = {}
 
     def publish(ed, items, chapters, sources):
@@ -742,7 +736,7 @@ def build(root, dest, build, env, base, css, listings):
             index.extend(search_index(html, c))
 
         common = dict(css=css + "\n" + hl, main_class="book", here="book", items=items,
-                      ed=ed, lang=ed["lang"], home=ed["prefix"] + "book.html",
+                      ed=ed, home=ed["prefix"] + "book.html",
                       search_index=ed["prefix"] + "book-search.json",
                       comments_repo=COMMENTS_REPO, comments_label=COMMENTS_LABEL)
         for i, c in enumerate(chapters):
@@ -750,24 +744,22 @@ def build(root, dest, build, env, base, css, listings):
             nxt = chapters[i + 1] if i + 1 < len(chapters) else None
             source = "chapters/%s%s.tex" % ("zh/" if ed["prefix"] else "", c["stem"])
             open(os.path.join(dest, c["page"]), "w").write(tpl.render(
-                base, **common,
+                base, **common, **chrome(ed["code"], slug(c["stem"]) + ".html", translated),
                 title=ed["page_title"] % ("%s %s" % (c["num"], c["title"])),
                 chapter=c, prev=prev, next=nxt,
-                playground=("playground-%s.html" % c["stem"]) if c["stem"] in playground
-                else None,
+                playground=(ed["prefix"] + "playground-%s.html" % c["stem"])
+                if c["stem"] in playground else None,
                 source="%s/AppliedPQC/blob/main/%s" % (base["gh"], source),
-                english=[o for o in other[c["stem"]] if o["lang"] == "en"][0]["page"],
-                alternates=other[c["stem"]] if len(other[c["stem"]]) > 1 else [],
+                english=slug(c["stem"]) + ".html",
                 description=ed["description"] % (numbered(c, ed), c["title"]),
-                page=c["page"], og_type="article", og_title=c["title"], jsonld=None))
+                og_type="article", og_title=c["title"], jsonld=None))
 
         open(os.path.join(dest, ed["prefix"] + "book.html"), "w").write(tpl.render(
-            base, **common,
+            base, **common, **chrome(ed["code"], "book.html", translated),
             title=ed["home_title"], chapter=None, prev=None, next=chapters[0],
             playground=None, source=None, english="book.html",
-            alternates=homes if len(homes) > 1 else [],
             description=ed["home_description"],
-            page=ed["prefix"] + "book.html", og_type="book", og_title=ed["title"],
+            og_type="book", og_title=ed["title"],
             jsonld=None))
         open(os.path.join(dest, ed["prefix"] + "book-search.json"), "w").write(
             json.dumps(index, ensure_ascii=False, separators=(",", ":")))

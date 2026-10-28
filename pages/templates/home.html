@@ -2,14 +2,14 @@
 {% block content %}
 <section class="band hero"><div class="band-inner">
 <div>
-<h1>Applied Post-Quantum Cryptography</h1>
-<p class="lede">Where post-quantum cryptography actually stands: what has
+<h1>{{ _("Applied Post-Quantum Cryptography") }}</h1>
+<p class="lede">{{ _("Where post-quantum cryptography actually stands: what has
 shipped, what is still a draft, and what breaks when you deploy it. Byte-exact
-implementations of all four standards, and the book that derives them.</p>
+implementations of all four standards, and the book that derives them.") }}</p>
 <div class="cta">
-<a class="button" href="{{ gh }}/awesome-pqc">What has shipped</a>
-<a class="button ghost" href="book.html">Read the book</a>
-<a class="button ghost" href="playground.html">Run the code</a>
+<a class="button" href="{{ gh }}/awesome-pqc">{{ _("What has shipped") }}</a>
+<a class="button ghost" href="{{ p }}book.html">{{ _("Read the book") }}</a>
+<a class="button ghost" href="{{ p }}playground.html">{{ _("Run the code") }}</a>
 </div>
 </div>
 <div class="hero-art" aria-hidden="true">
@@ -18,78 +18,78 @@ implementations of all four standards, and the book that derives them.</p>
 </div></section>
 
 <section class="band"><div class="band-inner">
-<h2>Everything in the project</h2>
-<p class="sub">What to deploy and what it costs, the standards themselves, the
+<h2>{{ _("Everything in the project") }}</h2>
+<p class="sub">{{ _("What to deploy and what it costs, the standards themselves, the
 code that implements them, and the research behind it. Filter by what you
-need.</p>
+need.") }}</p>
 <div class="pills" data-pills="all">
-  <button class="pill" type="button" data-cat="all" aria-pressed="true">All</button>
-  <button class="pill" type="button" data-cat="deploy" aria-pressed="false">Deploy</button>
-  <button class="pill" type="button" data-cat="standard" aria-pressed="false">Standards</button>
-  <button class="pill" type="button" data-cat="code" aria-pressed="false">Code</button>
-  <button class="pill" type="button" data-cat="research" aria-pressed="false">Research</button>
+  <button class="pill" type="button" data-cat="all" aria-pressed="true">{{ _("All") }}</button>
+  <button class="pill" type="button" data-cat="deploy" aria-pressed="false">{{ _("Deploy") }}</button>
+  <button class="pill" type="button" data-cat="standard" aria-pressed="false">{{ _("Standards") }}</button>
+  <button class="pill" type="button" data-cat="code" aria-pressed="false">{{ _("Code") }}</button>
+  <button class="pill" type="button" data-cat="research" aria-pressed="false">{{ _("Research") }}</button>
 </div>
 <ul class="grid" data-filter="all">
   <li class="card" data-cat="deploy" data-text="awesome-pqc curated list resources standards test vectors libraries deployment migration shipped tls browsers">
     {{ art('list', 2) }}
     <div class="card-body">
-      <h3><a class="stretch" href="{{ gh }}/awesome-pqc">What has shipped</a></h3>
-      <p>A curated, link-verified list of what is actually available to build
+      <h3><a class="stretch" href="{{ gh }}/awesome-pqc">{{ _("What has shipped") }}</a></h3>
+      <p>{{ _("A curated, link-verified list of what is actually available to build
       against: the standards, the test vectors, the libraries that implement
-      them, and the deployment and migration guidance.</p>
-      <p class="meta"><span class="tag">List</span><span>link-verified</span></p>
+      them, and the deployment and migration guidance.") }}</p>
+      <p class="meta"><span class="tag">{{ _("List") }}</span><span>{{ _("link-verified") }}</span></p>
     </div>
   </li>
   <li class="card" data-cat="deploy" data-text="the book pdf lattices ml-kem ml-dsa slh-dsa fn-dsa side channels deployment tls hybrid blockchain migration bitcoin">
     {{ art('book', 0) }}
     <div class="card-body">
-      <h3><a class="stretch" href="book.html">The book</a></h3>
-      <p>The full arc, from finite fields and lattices through all four
+      <h3><a class="stretch" href="{{ p }}book.html">{{ _("The book") }}</a></h3>
+      <p>{{ _("The full arc, from finite fields and lattices through all four
       standards, then the deployment questions: hybrid TLS, side channels,
-      blockchain exposure, and what migration costs in blockspace.</p>
-      <p class="meta"><span class="tag">Online &amp; PDF</span>{% if pages %}<span>{{ pages }} pages</span>{% endif %}</p>
+      blockchain exposure, and what migration costs in blockspace.") }}</p>
+      <p class="meta"><span class="tag">{{ _("Online &amp; PDF") }}</span>{% if pages %}<span>{{ _("%d pages")|format(pages) }}</span>{% endif %}</p>
     </div>
   </li>
   <li class="card" data-cat="code" data-text="runnable code playground sagemath listings browser">
     {{ art('code', 1) }}
     <div class="card-body">
-      <h3><a class="stretch" href="playground.html">Runnable code</a></h3>
-      <p>All {{ n_listings }} code listings and the four reference implementations
-      run in your browser, with nothing to install.</p>
-      <p class="meta"><span class="tag">Playground</span><span>{{ n_listings }} listings</span></p>
+      <h3><a class="stretch" href="{{ p }}playground.html">{{ _("Runnable code") }}</a></h3>
+      <p>{{ _("All %d code listings and the four reference implementations
+      run in your browser, with nothing to install.")|format(n_listings) }}</p>
+      <p class="meta"><span class="tag">{{ _("Playground") }}</span><span>{{ _("%d listings")|format(n_listings) }}</span></p>
     </div>
   </li>
   <li class="card" data-cat="code" data-text="bitcoin stark verifier poseidon2 koalabear whir op_cat merkle script rust plonky3 bitvm winternitz disprove chunks">
     {{ art('merkle', 3) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier">bitcoin-stark-verifier</a></h3>
-      <p>A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2
+      <p>{{ _("A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2
       over KoalaBear, and WHIR on top of it. Every challenge is squeezed inside
       the script and every constraint derived from the transcript, so the
-      verifier ends on its own identity rather than on a hint.</p>
-      <p class="meta"><span class="tag">Rust</span><span>no soft fork</span></p>
+      verifier ends on its own identity rather than on a hint.") }}</p>
+      <p class="meta"><span class="tag">Rust</span><span>{{ _("no soft fork") }}</span></p>
     </div>
   </li>
   <li class="card" data-cat="code" data-text="bitvm disprove chunks winternitz one-time signature commitment bitcoin transaction weight taproot">
     {{ art('code', 12) }}
     <div class="card-body">
-      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier#chunks">Disproving one step</a></h3>
-      <p>The verifier is three hundred blocks and is never run on chain. What is
+      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier#chunks">{{ _("Disproving one step") }}</a></h3>
+      <p>{{ _("The verifier is three hundred blocks and is never run on chain. What is
       run is one chunk of it, bound by Winternitz signatures: 22 Poseidon2
       rounds in a standard transaction, about two thousand chunks for the whole
-      verifier.</p>
-      <p class="meta"><span class="tag">BitVM</span><span>~2,000 chunks</span></p>
+      verifier.") }}</p>
+      <p class="meta"><span class="tag">BitVM</span><span>{{ _("~2,000 chunks") }}</span></p>
     </div>
   </li>
   <li class="card" data-cat="research" data-text="whir stir proximity test review soundness completeness reed-solomon sumcheck bitcoin script formal">
     {{ art('book', 11) }}
     <div class="card-body">
-      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">WHIR on Bitcoin Script</a></h3>
-      <p>A formal account of the STIR and WHIR proximity tests, and a review of
+      <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">{{ _("WHIR on Bitcoin Script") }}</a></h3>
+      <p>{{ _("A formal account of the STIR and WHIR proximity tests, and a review of
       the verifier against them: the algorithm stated formally, the
       implementation reviewed against it, and completeness and soundness
-      separated into what the protocol proves and what the script checks.</p>
-      <p class="meta"><span class="tag">PDF</span><span>17 pages</span></p>
+      separated into what the protocol proves and what the script checks.") }}</p>
+      <p class="meta"><span class="tag">PDF</span><span>{{ _("%d pages")|format(17) }}</span></p>
     </div>
   </li>
 {%- for s in standards %}
@@ -97,24 +97,24 @@ need.</p>
     {{ art(s.art, loop.index0 + 3) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/AppliedPQC/tree/main/sage">{{ s.name }}</a></h3>
-      <p>{{ s.blurb }}</p>
+      <p>{{ _(s.blurb) }}</p>
       <p class="meta"><span class="tag">{{ s.fips }}</span></p>
     </div>
   </li>
 {%- endfor %}
-{%- for p in posts[:4] %}
-  <li class="card" data-cat="{{ p.cat }}" data-text="{{ p.title|lower }} {{ (p.summary or '')|lower }} blog research">
+{%- for post in posts[:4] %}
+  <li class="card" data-cat="{{ post.cat }}" data-text="{{ post.title|lower }} {{ (post.summary or '')|lower }} blog research">
     {{ art('post', loop.index0 + 7) }}
     <div class="card-body">
-      <h3><a class="stretch" href="blog-{{ p.slug }}.html">{{ p.title }}</a></h3>
-      {%- if p.summary %}<p>{{ p.summary }}</p>{% endif %}
-      <p class="meta"><span class="tag">Writing</span><span>{{ p.date }}</span></p>
+      <h3><a class="stretch" href="blog-{{ post.slug }}.html">{{ post.title }}</a></h3>
+      {%- if post.summary %}<p>{{ post.summary }}</p>{% endif %}
+      <p class="meta"><span class="tag">{{ _("Writing") }}</span><span>{{ post.date }}</span></p>
     </div>
   </li>
 {%- endfor %}
 </ul>
-<p class="empty" hidden>Nothing matches that.</p>
-<p class="after"><a href="{{ gh }}/AppliedPQC/tree/main/sage">The implementations
-on GitHub →</a> · 462 checks, 0 failures against ACVP · <a href="blog.html">all posts →</a></p>
+<p class="empty" hidden>{{ _("Nothing matches that.") }}</p>
+<p class="after"><a href="{{ gh }}/AppliedPQC/tree/main/sage">{{ _("The implementations
+on GitHub →") }}</a> · {{ _("462 checks, 0 failures against ACVP") }} · <a href="blog.html">{{ _("all posts →") }}</a></p>
 </div></section>
 {% endblock %}

@@ -256,6 +256,22 @@ def main():
               "%s cannot switch between light and dark" % name)
         check('class="button" href="apqc.pdf">Download the PDF' not in h,
               "%s: the PDF button is back in the topbar" % name)
+        # Every page but the blog exists in both languages, and the switch in
+        # the topbar goes to the same page in the other one. The blog is
+        # English only, so its switch goes to the Chinese home page.
+        twin = name[3:] if name.startswith("zh-") else "zh-" + name
+        lang = "zh-Hans" if name.startswith("zh-") else "en"
+        if name == "blog.html" or name.startswith("blog-"):
+            twin = "zh-index.html"
+            check('hreflang="zh-Hans"' not in h.split('class="lang-switch"')[0],
+                  "%s claims a Chinese counterpart" % name)
+        check(not name.startswith("zh-blog"), "%s: the blog is English only" % name)
+        check(os.path.exists(p(twin)), "%s has no %s counterpart" % (name, twin))
+        check('<a class="lang-switch" href="%s"' % twin in h,
+              "%s: the language switch does not go to %s" % (name, twin))
+        check('<html lang="%s">' % lang in h, "%s is not marked as %s" % (name, lang))
+        check(lang == "en" or not re.search(r'>(Home|Playground|Blog|Book)</a>', h),
+              "%s shows the English topbar" % name)
 
     # --- SEO: metadata must be per-page, and everything discoverable --------
     import json as _json
