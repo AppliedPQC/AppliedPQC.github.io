@@ -62,7 +62,6 @@
 
   .book-tools { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.85rem; margin: 0 0 1.5rem; }
   .book-tools a { color: var(--muted); }
-  .book-lede { font-size: 1.08rem; color: var(--muted); }
   .button.ghost { background: var(--btn-bg); color: var(--fg); border-color: var(--btn-border); }
   .button.ghost:hover { background: var(--btn-bg-hover); }
   .book-body h1 { font-size: 2.2rem; margin-bottom: 1.5rem; }
@@ -119,7 +118,6 @@
   .book-pager span { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); }
   .book-pager .next { text-align: right; }
   .book-comments { margin-top: 3rem; }
-  .book-comments > p { color: var(--muted); font-size: 0.92rem; }
 
   .book-contents { list-style: none; padding: 0; margin: 2rem 0 0; }
   .book-contents .toc-part { font-size: 0.8rem; margin-top: 1.8rem; }
@@ -137,4 +135,18 @@
     .book-nav.shown { display: block; border-bottom: 1px solid var(--rule); }
     .book-body { padding-top: 1.5rem; }
     .book-body figure > figure { max-width: 100%; display: block; margin: 1rem 0; }
+  }
+
+  .book-body .algorithmic {
+    text-align: left; margin: 0 auto; max-width: 44rem;
+    padding: 0.7rem 0.9rem; border-top: 2px solid var(--fg); border-bottom: 1px solid var(--fg);
+    font-size: 0.95rem; line-height: 1.55;
+  }
+  .alg-line { display: flex; gap: 0.6rem; padding-left: calc(var(--i) * 1.5em); }
+  .alg-no { flex: none; width: 1.9em; margin-left: calc(var(--i) * -1.5em); padding-right: calc(var(--i) * 1.5em); box-sizing: content-box; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .alg-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .alg-comment { flex: none; max-width: 45%; color: var(--muted); text-align: right; }
+  @media (max-width: 40rem) {
+    .alg-line { flex-wrap: wrap; }
+    .alg-comment { max-width: none; flex-basis: 100%; padding-left: 2.5em; text-align: left; }
   }

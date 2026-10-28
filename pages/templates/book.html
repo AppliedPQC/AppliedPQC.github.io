@@ -3,11 +3,10 @@
 <script>
 window.MathJax = {
   tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
-  chtml: { scale: 0.97 },
-  options: { ignoreHtmlClass: 'book-nav' }
+  chtml: { scale: 0.97 }
 };
 </script>
-<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+<script defer src="mathjax/tex-chtml.js"></script>
 {%- endblock %}
 {% block content %}
 <div class="book-layout">
@@ -27,11 +26,11 @@ window.MathJax = {
     <li class="toc-subpart">{{ it.title }}</li>
     {%- else %}
     <li class="toc-chapter{% if chapter and it.stem == chapter.stem %} open{% endif %}">
-      <a href="{{ it.page }}"{% if chapter and it.stem == chapter.stem %} aria-current="page"{% endif %}><span class="toc-num">{{ it.num }}</span>{{ it.title }}</a>
+      <a href="{{ it.page }}"{% if chapter and it.stem == chapter.stem %} aria-current="page"{% endif %}><span class="toc-num">{{ it.num }}</span><span>{{ it.title }}</span></a>
       {%- if chapter and it.stem == chapter.stem %}
       <ol>
         {%- for s in chapter.toc if s.level == 2 %}
-        <li><a href="#{{ s.id }}" data-section="{{ s.id }}">{% if s.num %}<span class="toc-num">{{ s.num }}</span>{% endif %}{{ s.title }}</a></li>
+        <li><a href="#{{ s.id }}" data-section="{{ s.id }}">{% if s.num %}<span class="toc-num">{{ s.num }}</span>{% endif %}<span>{{ s.title }}</span></a></li>
         {%- endfor %}
       </ol>
       {%- endif %}
@@ -53,12 +52,6 @@ window.MathJax = {
 {{ chapter.html }}
 {%- else %}
 <h1>Applied Post-Quantum Cryptography</h1>
-<p class="book-lede">The whole book, free to read here, one chapter to a page.
-It is rendered from the same LaTeX as <a href="apqc.pdf">the PDF</a>, and every
-figure, algorithm and reference number matches it. Each chapter's code runs in
-<a href="playground.html">the playground</a>, and each chapter takes comments,
-which are filed as issues on <a href="{{ gh }}/AppliedPQC/issues?q=label%3A{{ comments_label }}">the book's repository</a>
-so that every one is followed up.</p>
 <p><a class="button" href="{{ next.page }}">Start reading</a>
 <a class="button ghost" href="apqc.pdf">Download the PDF</a></p>
 <ol class="book-contents">
@@ -68,7 +61,7 @@ so that every one is followed up.</p>
   {%- elif it.kind == 'subpart' %}
   <li class="toc-subpart">{{ it.title }}</li>
   {%- else %}
-  <li class="toc-chapter"><a href="{{ it.page }}"><span class="toc-num">{{ it.num }}</span>{{ it.title }}</a></li>
+  <li class="toc-chapter"><a href="{{ it.page }}"><span class="toc-num">{{ it.num }}</span><span>{{ it.title }}</span></a></li>
   {%- endif %}
   {%- endfor %}
 </ol>
@@ -86,11 +79,6 @@ so that every one is followed up.</p>
 </nav>
 <section class="book-comments" id="comments" aria-label="Comments">
 <h2 class="unnumbered">Comments</h2>
-<p>Found a mistake, or something unclear? Comment below with a GitHub account.
-Each chapter's comments are kept as one issue on
-<a href="{{ gh }}/AppliedPQC/issues?q=label%3A{{ comments_label }}">the book's repository</a>,
-labelled <code>{{ comments_label }}</code>, so every one is tracked until it is
-answered or fixed.</p>
 <script src="https://utteranc.es/client.js"
         repo="{{ comments_repo }}"
         issue-term="Book: {{ chapter.title }}"
