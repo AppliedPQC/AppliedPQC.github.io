@@ -79,13 +79,27 @@ window.MathJax = {
 </nav>
 <section class="book-comments" id="comments" aria-label="Comments">
 <h2 class="unnumbered">Comments</h2>
-<script src="https://utteranc.es/client.js"
-        repo="{{ comments_repo }}"
-        issue-term="Book: {{ chapter.title }}"
-        label="{{ comments_label }}"
-        theme="github-light"
-        crossorigin="anonymous"
-        async></script>
+<div class="book-comments-box" data-utterances
+     data-repo="{{ comments_repo }}" data-term="Book: {{ chapter.title }}" data-label="{{ comments_label }}"></div>
+<script>
+(function () {
+  var box = document.querySelector('[data-utterances]');
+  function theme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'github-dark' : 'github-light'; }
+  var s = document.createElement('script');
+  s.src = 'https://utteranc.es/client.js';
+  s.async = true;
+  s.setAttribute('crossorigin', 'anonymous');
+  s.setAttribute('repo', box.getAttribute('data-repo'));
+  s.setAttribute('issue-term', box.getAttribute('data-term'));
+  s.setAttribute('label', box.getAttribute('data-label'));
+  s.setAttribute('theme', theme());
+  box.appendChild(s);
+  document.addEventListener('themechange', function () {
+    var frame = box.querySelector('iframe.utterances-frame');
+    if (frame) frame.contentWindow.postMessage({ type: 'set-theme', theme: theme() }, 'https://utteranc.es');
+  });
+})();
+</script>
 </section>
 {%- endif %}
 </article>

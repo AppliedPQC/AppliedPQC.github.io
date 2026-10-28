@@ -151,7 +151,8 @@ def main():
         check(re.search(r'class="math[^"]*">[^<]*\\textsc', body) is None,
               "%s has \\textsc in math, which MathJax cannot render" % name)
         check("XALG" not in body, "%s has an algorithm line left unrendered" % name)
-        check("utteranc.es/client.js" in html, "%s lost its comments" % name)
+        check("utteranc.es/client.js" in html and 'data-utterances' in html,
+              "%s lost its comments" % name)
         check('src="mathjax/tex-chtml.js"' in html, "%s does not load the site\'s own MathJax" % name)
         for src in re.findall(r'<img[^>]+src="(book-figures/[^"]+)"', body):
             figures += 1
@@ -235,6 +236,9 @@ def main():
         name = os.path.basename(f)
         check("x.com/AppliedPQC" in h, "%s has no X link" % name)
         check('class="sitefooter"' in h, "%s has no footer" % name)
+        check("data-theme-toggle" in h and ':root[data-theme="dark"]' in h
+              and 'localStorage.getItem("theme")' in h,
+              "%s cannot switch between light and dark" % name)
         check('class="button" href="apqc.pdf">Download the PDF' not in h,
               "%s: the PDF button is back in the topbar" % name)
 

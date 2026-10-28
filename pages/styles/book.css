@@ -150,3 +150,27 @@
     .alg-line { flex-wrap: wrap; }
     .alg-comment { max-width: none; flex-basis: 100%; padding-left: 2.5em; text-align: left; }
   }
+
+  :root[data-theme="dark"] .book-body figure img { background: #fff; border-radius: 6px; padding: 0.5rem; box-sizing: content-box; }
+  :root[data-theme="dark"] .badge-teal { background: #12332e; color: #7fd6c7; }
+  :root[data-theme="dark"] .badge-orange { background: #3a2414; color: #f0a46b; }
+  :root[data-theme="dark"] .badge-blue { background: #15263a; color: #8fb8e6; }
+  :root[data-theme="dark"] .badge-gray { background: #23262d; color: #b8bcc4; }
+  :root[data-theme="dark"] .book-results mark { background: #5a4a00; }
+  :root[data-theme="dark"] code span.kw, :root[data-theme="dark"] code span.cf,
+  :root[data-theme="dark"] code span.im, :root[data-theme="dark"] code span.pp { color: #ff7b72; }
+  :root[data-theme="dark"] code span.dt, :root[data-theme="dark"] code span.dv,
+  :root[data-theme="dark"] code span.bn, :root[data-theme="dark"] code span.fl,
+  :root[data-theme="dark"] code span.cn, :root[data-theme="dark"] code span.at { color: #79c0ff; }
+  :root[data-theme="dark"] code span.st, :root[data-theme="dark"] code span.ss,
+  :root[data-theme="dark"] code span.ch, :root[data-theme="dark"] code span.sc,
+  :root[data-theme="dark"] code span.vs { color: #a5d6ff; }
+  :root[data-theme="dark"] code span.co, :root[data-theme="dark"] code span.an,
+  :root[data-theme="dark"] code span.cv, :root[data-theme="dark"] code span.do,
+  :root[data-theme="dark"] code span.in { color: #8b949e; }
+  :root[data-theme="dark"] code span.bu, :root[data-theme="dark"] code span.fu,
+  :root[data-theme="dark"] code span.ex { color: #d2a8ff; }
+  :root[data-theme="dark"] code span.va { color: #ffa657; }
+  :root[data-theme="dark"] code span.op, :root[data-theme="dark"] code span.ot { color: #c9d1d9; }
+  :root[data-theme="dark"] code span.er, :root[data-theme="dark"] code span.al { color: #f85149; }
+  :root[data-theme="dark"] code span.wa { color: #d29922; }
