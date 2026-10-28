@@ -32,8 +32,7 @@
     color: var(--brand);
   }
   .toc-subpart { margin: 0.7rem 0 0.15rem; padding: 0 0.6rem; font-style: italic; color: var(--muted); font-size: 0.82rem; }
-  :lang(zh-Hans) .toc-subpart, :lang(zh-Hans) .book-body em { font-style: normal; }
-  :lang(zh-Hans) .book-body em { font-weight: 600; }
+  :lang(zh-Hans) .toc-subpart { font-style: normal; }
   .toc-num { display: inline-block; min-width: 2.1em; color: var(--muted); font-variant-numeric: tabular-nums; }
   .toc-chapter > a { display: flex; }
   .toc-chapter > a .toc-num { flex: none; }

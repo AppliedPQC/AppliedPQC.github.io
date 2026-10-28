@@ -44,6 +44,8 @@ out with no token.
 pages/build_site.py     builds the whole site
 pages/book.py           renders the book's chapters as web pages, in English and,
                         from chapters/zh, in Chinese
+pages/i18n.py           the site's languages; every page is also built in Chinese,
+                        with the strings in pages/i18n/zh.json
 pages/check_site.py     asserts the result is what it should be
 pages/templates/        Jinja templates; the chrome is defined once
 pages/styles/           stylesheets

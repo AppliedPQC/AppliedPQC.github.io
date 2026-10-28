@@ -7,9 +7,6 @@ window.MathJax = {
 };
 </script>
 <script defer src="mathjax/tex-chtml.js"></script>
-{%- for a in alternates %}
-<link rel="alternate" hreflang="{{ a.lang }}" href="{{ site }}/{{ a.page }}" />
-{%- endfor %}
 {%- endblock %}
 {% block content %}
 <div class="book-layout">
@@ -51,9 +48,6 @@ window.MathJax = {
   {%- endif %}
   <a href="{{ source }}">{{ ed.source }}</a>
   <a href="#comments">{{ ed.comments }}</a>
-  {%- for a in alternates if a.lang != ed.lang %}
-  <a href="{{ a.page }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}">{{ a.name }}</a>
-  {%- endfor %}
 </p>
 {%- if chapter.stale %}
 <p class="book-stale"><a href="{{ english }}">{{ ed.stale }}</a></p>
@@ -62,10 +56,7 @@ window.MathJax = {
 {%- else %}
 <h1>{{ ed.title }}</h1>
 <p><a class="button" href="{{ next.page }}">{{ ed.start }}</a>
-<a class="button ghost" href="apqc.pdf">{{ ed.download }}</a>
-{%- for a in alternates if a.lang != ed.lang %}
-<a class="button ghost" href="{{ a.page }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}">{{ a.name }}</a>
-{%- endfor %}</p>
+<a class="button ghost" href="apqc.pdf">{{ ed.download }}</a></p>
 <ol class="book-contents">
   {%- for it in items %}
   {%- if it.kind == 'part' %}

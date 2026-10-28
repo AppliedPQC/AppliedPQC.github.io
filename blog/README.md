@@ -31,5 +31,10 @@ carries a note pointing back to the original.
 ```
 
 `repo` is a repository under `github.com/AppliedPQC`, `path` is the file inside
-it. Both kinds appear together on the blog index and the landing page, newest
+it. An optional `summary_zh` is the summary on the Chinese index.
+
+**Chinese.** Every post also has a Chinese page, `zh-blog-<slug>.html`. For a
+sourced post its text is `zh/<name>` beside the original in the other
+repository; for a post written here it is `blog/zh/<name>.md`. Until that file
+exists, the Chinese page shows the English with a note saying so. Both kinds appear together on the blog index and the landing page, newest
 first.

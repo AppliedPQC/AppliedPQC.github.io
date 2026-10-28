@@ -35,10 +35,12 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 
 import art
 import book
+import i18n
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
@@ -214,6 +216,18 @@ def localise_images(body, dest, slug):
         body = body.replace(url, name)
     return body
 
+def fetch_translation(url):
+    """A post's Chinese translation, or None if it has not been written yet."""
+    try:
+        return urllib.request.urlopen(url, timeout=30).read().decode()
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return None
+        raise SystemExit("could not fetch %s\n%s" % (url, exc))
+    except Exception as exc:                           # noqa: BLE001 - reported as-is
+        raise SystemExit("could not fetch %s\n%s" % (url, exc))
+
+
 def fetch_sourced(build, dest):
     """Posts whose text lives in another repository.
 
@@ -242,13 +256,35 @@ def fetch_sourced(build, dest):
                 "maintained. This page renders that document.*\n\n"
                 % (e["repo"], home, e["path"]))
         # Keep the heading first so the page leads with the title, then the note.
+        english = body
         body = body.replace(m.group(0), m.group(0) + "\n\n" + note, 1)
         body = localise_images(body, dest, e["slug"])
         path = os.path.join(build, "sourced-%s.md" % e["slug"])
         open(path, "w").write(body)
+
+        # The Chinese translation sits beside the original as zh/<name>. Until it
+        # is written, the Chinese page carries the English with a note saying so.
+        zh_path = "/".join(filter(None, [os.path.dirname(e["path"]), "zh",
+                                         os.path.basename(e["path"])]))
+        zh_body = fetch_translation(RAW_REPO % (e["repo"], zh_path))
+        zm = re.search(r"^#\s+(.+)", zh_body, re.M) if zh_body else None
+        if zm:
+            zh_note = ("*本文原载于 [%s](%s/blob/main/%s)，并在那里维护；此页面呈现其中文译文。*\n\n"
+                       % (e["repo"], home, zh_path))
+            zh_text = zh_body.replace(zm.group(0), zm.group(0) + "\n\n" + zh_note, 1)
+        else:
+            zh_note = ("*本文暂无中文译文，以下为英文原文。原文载于 [%s](%s/blob/main/%s)，"
+                       "并在那里维护。*\n\n" % (e["repo"], home, e["path"]))
+            zh_text = english.replace(m.group(0), m.group(0) + "\n\n" + zh_note, 1)
+        zh_text = localise_images(zh_text, dest, e["slug"])
+        zh_file = os.path.join(build, "sourced-zh-%s.md" % e["slug"])
+        open(zh_file, "w").write(zh_text)
         out.append(dict(title=title, date=e["date"], summary=e.get("summary", ""),
                         slug=e["slug"], path=path, source=home,
-                        cat=e.get("cat", "research")))
+                        cat=e.get("cat", "research"),
+                        zh=dict(title=zm.group(1).strip() if zm else title,
+                                summary=e.get("summary_zh") or e.get("summary", ""),
+                                path=zh_file)))
     return out
 
 
@@ -275,6 +311,12 @@ def read_posts():
         meta.setdefault("summary", "")
         meta["slug"] = f[:-3]
         meta["path"] = path
+        zh = os.path.join(POSTS, "zh", f)
+        zm = FRONT.match(open(zh).read()) if os.path.exists(zh) else None
+        zmeta = dict(l.split(":", 1) for l in zm.group(1).split("\n") if ":" in l) if zm else {}
+        meta["zh"] = dict(title=zmeta.get("title", meta["title"]).strip(),
+                          summary=zmeta.get("summary", meta["summary"]).strip(),
+                          path=zh if zm else path)
         out.append(meta)
     out.sort(key=lambda p: p["date"], reverse=True)
     return out
@@ -285,12 +327,16 @@ TOC_MIN_SECTIONS = 6
 
 
 def pandoc(src, out, template, title, toc=False, description="", page="",
-           ogtype="article", header=None):
+           ogtype="article", header=None, code="en"):
+    ch = i18n.chrome(code, page)
     cmd = ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
            "--standalone", "--template=" + template,
-           "--variable=pagetitle=" + title, "--variable=lang=en",
+           "--variable=pagetitle=" + title, "--variable=lang=" + ch["lang"],
            "--variable=description=" + description,
-           "--variable=page=" + page, "--variable=ogtype=" + ogtype,
+           "--variable=page=" + ch["page"], "--variable=ogtype=" + ogtype,
+           "--variable=altpage=" + ch["alt"],
+           "--variable=enpage=" + ch["alternates"][0]["page"],
+           "--variable=zhpage=" + ch["alternates"][1]["page"],
            "--output=" + out]
     if toc:
         cmd += ["--toc", "--toc-depth=2"]
@@ -365,31 +411,29 @@ def main():
                          "url": SITE + "/apqc.pdf"}],
         "publisher": {"@id": SITE + "/#org"},
     }]}, separators=(",", ":"))
-    open(os.path.join(dest, "index.html"), "w").write(
-        env.get_template("home.html").render(
-            base, title=HOME_TITLE,
-            css=css("site.css", "home.css"), main_class="home", here="home",
-            n_listings=n_listings, pages=pages, posts=posts,
-            standards=STANDARDS, description=SITE_DESC, page="",
-            og_type="website", og_title=HOME_TITLE,
-            jsonld=book_ld))
+    zh_listings = os.path.join(ROOT, "sage", "playground", "book_listings.zh.json")
+    zh_chapters = {c["stem"]: c for c in json.load(open(zh_listings))["chapters"]} \
+        if os.path.exists(zh_listings) else {}
 
-    # --- chapter pages ----------------------------------------------------
-    tpl = env.get_template("chapter.html")
-    for c in chapters:
-        n_run = sum(1 for l in c["listings"] if l["runnable"])
-        page = "playground-%s.html" % c["stem"]
-        open(os.path.join(dest, page), "w").write(
-            tpl.render(base, title="%s — %s" % (c["title"], BRAND),
-                       css=css("site.css", "playground.css"), main_class="",
-                       here="playground", chapter=c, boot=BOOT, n_runnable=n_run,
-                       description="Every code listing from %s, runnable in your "
-                                   "browser: %d snippets, nothing to install."
-                                   % (c["title"], n_run),
-                       page=page, og_type="article",
-                       og_title=c["title"], jsonld=None))
+    def localised(code):
+        """The chapters and posts as a page in this language shows them."""
+        if code == "en":
+            return chapters, posts
+        out = []
+        for c in chapters:
+            z = zh_chapters.get(c["stem"])
+            if not z:
+                out.append(c)
+                continue
+            by_n = {l["n"]: l for l in z["listings"]}
+            out.append(dict(c, title=z["title"], listings=[
+                dict(l, **{k: by_n[l["n"]][k] for k in ("title", "intro", "note")
+                           if l["n"] in by_n and (k != "note" or l["note"])})
+                for l in c["listings"]]))
+        return out, [dict(q, **q["zh"]) for q in posts]
+
     book_chapters, book_warnings = book.build(
-        ROOT, dest, build, env, base, css("site.css", "book.css"), chapters)
+        ROOT, dest, build, env, base, css("site.css", "book.css"), chapters, i18n.chrome)
     for stem, text in sorted(book_warnings.items()):
         print("pandoc on %s:\n  %s" % (stem, text.replace("\n", "\n  ")))
 
@@ -397,66 +441,104 @@ def main():
     open(os.path.join(dest, "book-code.html"), "w").write(
         env.get_template("redirect.html").render(to="playground.html"))
 
-    # --- prose pages, via pandoc -----------------------------------------
-    # One pandoc template per chrome variant, rendered from the same partials
-    # the generated pages use.
-    def pandoc_template(name, sagecell, extra_css, here, mermaid=False):
-        p = os.path.join(build, name)
-        open(p, "w").write(env.get_template("pandoc.html").render(
-            base, css=css("site.css", *extra_css), sagecell=sagecell,
-            mermaid=mermaid, here=here))
-        return p
-
-    play_tpl = pandoc_template("t-playground.html", True, ("playground.css",), "playground")
     # Mermaid and Sage Cell are each loaded only if a post actually uses them,
     # so the blog does not pull a large module for nothing.
     bodies = [open(p["path"]).read() for p in posts]
     any_diagram = any("```mermaid" in b for b in bodies)
     any_sage = any('<div class="sage">' in b for b in bodies)
-    blog_tpl = pandoc_template("t-blog.html", any_sage, (), "blog", mermaid=any_diagram)
 
-    # The playground is the single entry point for running code, so the
-    # generated chapter table is appended to its prose.
-    table = env.get_template("chapters_table.md").render(
-        chapters=chapters, n_listings=n_listings)
-    merged = os.path.join(build, "playground.md")
-    open(merged, "w").write(open(os.path.join(HERE, "playground.md")).read() + table)
-    pandoc(merged, os.path.join(dest, "playground.html"), play_tpl,
-           "Playground — %s" % BRAND,
-           description="Run all %d code listings from the book and the four NIST "
-                       "reference implementations in your browser. Nothing to "
-                       "install." % n_listings,
-           page="playground.html", ogtype="website")
+    for lang in i18n.LANGS:
+        code, pre = lang["code"], lang["prefix"]
+        _ = i18n.gettext(code)
+        l_chapters, l_posts = localised(code)
 
-    for p in posts:
-        page_url = "%s/blog-%s.html" % (SITE, p["slug"])
-        post_ld = json.dumps({
-            "@context": "https://schema.org", "@type": "BlogPosting",
-            "headline": p["title"], "datePublished": p["date"],
-            "dateModified": p["date"], "inLanguage": "en",
-            "description": p.get("summary") or SITE_DESC,
-            "url": page_url, "image": SITE + "/og.png",
-            "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
-            "author": who,
-            "publisher": {"@id": SITE + "/#org"},
-            "isAccessibleForFree": True,
-        }, separators=(",", ":"))
-        ld_file = os.path.join(build, "ld-%s.html" % p["slug"])
-        open(ld_file, "w").write(
-            '<script type="application/ld+json">%s</script>\n' % post_ld)
-        pandoc(p["path"], os.path.join(dest, "blog-%s.html" % p["slug"]), blog_tpl,
-               "%s — %s" % (p["title"], BRAND),
-               toc=wants_toc(p["path"]),
-               description=p.get("summary") or SITE_DESC,
-               page="blog-%s.html" % p["slug"], ogtype="article",
-               header=ld_file)
-    index_md = os.path.join(build, "blog.md")
-    open(index_md, "w").write(env.get_template("blog_index.md").render(posts=posts))
-    pandoc(index_md, os.path.join(dest, "blog.html"), blog_tpl,
-           "Blog — %s" % BRAND,
-           description="Notes and research from the Applied PQC project on "
-                       "post-quantum migration.",
-           page="blog.html", ogtype="website")
+        open(os.path.join(dest, pre + "index.html"), "w").write(
+            env.get_template("home.html").render(
+                base, **i18n.chrome(code, "index.html"), title=_(HOME_TITLE),
+                css=css("site.css", "home.css"), main_class="home", here="home",
+                n_listings=n_listings, pages=pages, posts=l_posts,
+                standards=STANDARDS, description=_(SITE_DESC),
+                og_type="website", og_title=_(HOME_TITLE),
+                jsonld=book_ld if code == "en" else None))
+
+        # --- chapter pages ------------------------------------------------
+        tpl = env.get_template("chapter.html")
+        for c in l_chapters:
+            n_run = sum(1 for l in c["listings"] if l["runnable"])
+            page = "playground-%s.html" % c["stem"]
+            open(os.path.join(dest, pre + page), "w").write(
+                tpl.render(base, **i18n.chrome(code, page),
+                           title="%s — %s" % (c["title"], BRAND),
+                           css=css("site.css", "playground.css"), main_class="",
+                           here="playground", chapter=c, boot=BOOT, n_runnable=n_run,
+                           description=_("Every code listing from %s, runnable in "
+                                         "your browser: %d snippets, nothing to "
+                                         "install.") % (c["title"], n_run),
+                           og_type="article", og_title=c["title"], jsonld=None))
+
+        # --- prose pages, via pandoc ---------------------------------------
+        # One pandoc template per chrome variant, rendered from the same partials
+        # the generated pages use.
+        def pandoc_template(name, sagecell, extra_css, here, mermaid=False):
+            path = os.path.join(build, pre + name)
+            ch = i18n.chrome(code, "index.html")
+            open(path, "w").write(env.get_template("pandoc.html").render(
+                base, css=css("site.css", *extra_css), sagecell=sagecell,
+                mermaid=mermaid, here=here, p=pre, _=_, lang=ch["lang"],
+                alt_lang=ch["alt_lang"], alt_name=ch["alt_name"]))
+            return path
+
+        play_tpl = pandoc_template("t-playground.html", True, ("playground.css",),
+                                   "playground")
+        blog_tpl = pandoc_template("t-blog.html", any_sage, (), "blog",
+                                   mermaid=any_diagram)
+
+        # The playground is the single entry point for running code, so the
+        # generated chapter table is appended to its prose.
+        table = env.get_template("chapters_table.md").render(
+            chapters=l_chapters, n_listings=n_listings, p=pre, _=_)
+        merged = os.path.join(build, pre + "playground.md")
+        prose = os.path.join(HERE, "playground.md" if code == "en"
+                             else "playground.%s.md" % code)
+        open(merged, "w").write(open(prose).read() + table)
+        pandoc(merged, os.path.join(dest, pre + "playground.html"), play_tpl,
+               _("Playground") + " — " + BRAND,
+               description=_("Run all %d code listings from the book and the four "
+                             "NIST reference implementations in your browser. "
+                             "Nothing to install.") % n_listings,
+               page="playground.html", ogtype="website", code=code)
+
+        for q in l_posts:
+            page_url = "%s/%sblog-%s.html" % (SITE, pre, q["slug"])
+            post_ld = json.dumps({
+                "@context": "https://schema.org", "@type": "BlogPosting",
+                "headline": q["title"], "datePublished": q["date"],
+                "dateModified": q["date"], "inLanguage": lang["lang"],
+                "description": q.get("summary") or _(SITE_DESC),
+                "url": page_url, "image": SITE + "/og.png",
+                "mainEntityOfPage": {"@type": "WebPage", "@id": page_url},
+                "author": who,
+                "publisher": {"@id": SITE + "/#org"},
+                "isAccessibleForFree": True,
+            }, separators=(",", ":"), ensure_ascii=False)
+            ld_file = os.path.join(build, "ld-%s%s.html" % (pre, q["slug"]))
+            open(ld_file, "w").write(
+                '<script type="application/ld+json">%s</script>\n' % post_ld)
+            pandoc(q["path"], os.path.join(dest, "%sblog-%s.html" % (pre, q["slug"])),
+                   blog_tpl, "%s — %s" % (q["title"], BRAND),
+                   toc=wants_toc(q["path"]),
+                   description=q.get("summary") or _(SITE_DESC),
+                   page="blog-%s.html" % q["slug"], ogtype="article",
+                   header=ld_file, code=code)
+        index_md = os.path.join(build, pre + "blog.md")
+        open(index_md, "w").write(env.get_template("blog_index.md").render(
+            posts=l_posts, p=pre, _=_))
+        pandoc(index_md, os.path.join(dest, pre + "blog.html"), blog_tpl,
+               _("Blog") + " — " + BRAND,
+               description=_("Notes and research from the Applied PQC project on "
+                             "post-quantum migration."),
+               page="blog.html", ogtype="website", code=code)
+    i18n.check()
 
     # Sitemap and robots, built from the files actually written rather than a
     # hand-kept list, so a new page cannot be left undiscoverable.
@@ -464,13 +546,15 @@ def main():
                   if f.endswith(".html") and f != "book-code.html")
     # lastmod only where a real date exists. Stamping every page with today's
     # date is the classic way to teach a crawler to ignore the field.
-    post_dates = {"blog-%s.html" % q["slug"]: q["date"] for q in posts}
+    post_dates = {"%sblog-%s.html" % (l["prefix"], q["slug"]): q["date"]
+                  for q in posts for l in i18n.LANGS}
     entries = []
     for f in urls:
         loc = SITE + "/" + ("" if f == "index.html" else f)
-        prio = "1.0" if f == "index.html" else (
-            "0.8" if f in ("playground.html", "blog.html", "book.html")
-            or f.startswith(("blog-", "book-", "zh-book"))
+        g = f[3:] if f.startswith("zh-") else f
+        prio = "1.0" if g == "index.html" else (
+            "0.8" if g in ("playground.html", "blog.html", "book.html")
+            or g.startswith(("blog-", "book-"))
             else "0.6")
         mod = ("<lastmod>%s</lastmod>" % post_dates[f]) if f in post_dates else ""
         entries.append("  <url><loc>%s</loc>%s<priority>%s</priority></url>"

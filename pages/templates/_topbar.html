@@ -1,22 +1,24 @@
 <div class="topbar">
   <div class="topbar-inner">
-    <a class="topbar-title" href="index.html">
+    <a class="topbar-title" href="{{ p }}index.html">
       <span class="wordmark">Applied&nbsp;<span class="pqc">PQC</span></span></a>
     {#- The box filters the cards on this page. The script unhides it only where
         there is a grid to filter, so it never offers a search it cannot run. -#}
     <div class="search" data-search hidden>
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input type="search" placeholder="Filter this page…" aria-label="Filter this page" />
+      <input type="search" placeholder="{{ _('Filter this page…') }}" aria-label="{{ _('Filter this page') }}" />
     </div>
     <span class="topbar-links">
       {%- if here != 'home' %}
-      <a href="index.html">Home</a>
+      <a href="{{ p }}index.html">{{ _("Home") }}</a>
       {%- endif %}
-      <a href="book.html"{% if here == 'book' %} class="here"{% endif %}>Book</a>
-      <a href="playground.html"{% if here == 'playground' %} class="here"{% endif %}>Playground</a>
-      <a href="blog.html"{% if here == 'blog' %} class="here"{% endif %}>Blog</a>
+      <a href="{{ p }}book.html"{% if here == 'book' %} class="here"{% endif %}>{{ _("Book") }}</a>
+      <a href="{{ p }}playground.html"{% if here == 'playground' %} class="here"{% endif %}>{{ _("Playground") }}</a>
+      <a href="{{ p }}blog.html"{% if here == 'blog' %} class="here"{% endif %}>{{ _("Blog") }}</a>
       <a href="https://x.com/AppliedPQC" rel="me">@AppliedPQC</a>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode">
+      <a class="lang-switch" href="{{ alt }}" hreflang="{{ alt_lang }}" lang="{{ alt_lang }}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9s1.3-6.3 3.8-9z"/></svg>{{ alt_name }}</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="{{ _('Switch to dark mode') }}">
         <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
@@ -27,7 +29,7 @@
 (function () {
   var root = document.documentElement, btn = document.querySelector('[data-theme-toggle]');
   function label() {
-    btn.setAttribute('aria-label', root.getAttribute('data-theme') === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    btn.setAttribute('aria-label', root.getAttribute('data-theme') === 'dark' ? '{{ _("Switch to light mode") }}' : '{{ _("Switch to dark mode") }}');
   }
   label();
   btn.addEventListener('click', function () {
