@@ -62,7 +62,6 @@
 
   .book-tools { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.85rem; margin: 0 0 1.5rem; }
   .book-tools a { color: var(--muted); }
-  .book-lede { font-size: 1.08rem; color: var(--muted); }
   .button.ghost { background: var(--btn-bg); color: var(--fg); border-color: var(--btn-border); }
   .button.ghost:hover { background: var(--btn-bg-hover); }
   .book-body h1 { font-size: 2.2rem; margin-bottom: 1.5rem; }
