@@ -1,15 +1,24 @@
+import base64
+import hashlib
+import io
 import json
 import os
 import re
 import shutil
 import subprocess
+import tarfile
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CSL = os.path.join(HERE, "book.csl")
 
-DRAWN = ("tikzpicture", "algorithmic", "protocol")
+DRAWN = ("tikzpicture", "protocol")
 VERBATIM = ("lstlisting", "verbatim")
+
+MATHJAX = ("https://registry.npmjs.org/mathjax/-/mathjax-3.2.2.tgz",
+           "sha512-Bt+SSVU8eBG27zChVewOicYs7Xsdt40qm4+UpHyX7k0/O9NliPc+x77k1/FEsPsjKPZGJvtRZM1vO+geW0OhGw==")
+MATHJAX_FILES = ("tex-chtml.js", "input/tex/extensions/", "output/chtml/", "ui/", "a11y/", "sre/")
 
 COMMENTS_REPO = "AppliedPQC/AppliedPQC"
 COMMENTS_LABEL = "book-comment"
@@ -240,10 +249,145 @@ def number_captions(tex, floats, used):
     return "".join(out)
 
 
+ALG_STATEMENT = re.compile(r"\\(State|Statex|Require|Ensure|If|ElsIf|Else|EndIf|For|ForAll|"
+                           r"EndFor|While|EndWhile|Loop|EndLoop|Repeat|Until)(?![A-Za-z])")
+ALG_OPEN = {"If": ("if", "then"), "ElsIf": ("else if", "then"), "For": ("for", "do"),
+            "ForAll": ("for all", "do"), "While": ("while", "do"), "Until": ("until", "")}
+ALG_WORD = {"Else": "else", "EndIf": "end if", "EndFor": "end for", "EndWhile": "end while",
+            "Loop": "loop", "EndLoop": "end loop", "Repeat": "repeat"}
+
+
+def brace_arg(s, i):
+    while i < len(s) and s[i].isspace():
+        i += 1
+    if i >= len(s) or s[i] != "{":
+        return None, i
+    depth = 0
+    for j in range(i, len(s)):
+        if s[j] == "{" and s[j - 1] != "\\":
+            depth += 1
+        elif s[j] == "}" and s[j - 1] != "\\":
+            depth -= 1
+            if depth == 0:
+                return s[i + 1:j], j + 1
+    raise SystemExit("unbalanced braces in an algorithm")
+
+
+def top_level(pattern, s):
+    depth, at, out = 0, 0, []
+    for m in pattern.finditer(s):
+        for ch_i in range(at, m.start()):
+            if s[ch_i] == "{" and s[ch_i - 1] != "\\":
+                depth += 1
+            elif s[ch_i] == "}" and s[ch_i - 1] != "\\":
+                depth -= 1
+        at = m.start()
+        if depth == 0:
+            out.append(m)
+    return out
+
+
+def algorithmic(body, numbered):
+    body = re.sub(r"\\Return(?![A-Za-z])", r"\\textbf{return}", body)
+    marks = top_level(ALG_STATEMENT, body)
+    lines, indent, n = [], 0, 0
+    for k, m in enumerate(marks):
+        kind = m.group(1)
+        end = marks[k + 1].start() if k + 1 < len(marks) else len(body)
+        arg, at = (brace_arg(body, m.end()) if kind in ALG_OPEN else (None, m.end()))
+        rest = re.sub(r"\\hfill(?![A-Za-z])", "", body[at:end]).strip()
+        comment = ""
+        c = top_level(re.compile(r"\\Comment(?![A-Za-z])"), rest)
+        if c:
+            comment, after = brace_arg(rest, c[0].end())
+            rest = (rest[:c[0].start()] + rest[after:]).strip()
+        if kind in ("ElsIf", "Else", "EndIf", "EndFor", "EndWhile", "EndLoop", "Until"):
+            indent = max(indent - 1, 0)
+        if kind in ALG_OPEN:
+            word, tail = ALG_OPEN[kind]
+            text = "\\textbf{%s} %s %s %s" % (word, arg or "", "\\textbf{%s}" % tail if tail else "", rest)
+        elif kind in ALG_WORD:
+            text = "\\textbf{%s} %s" % (ALG_WORD[kind], rest)
+        elif kind == "Require":
+            text = "\\textbf{Input:} " + rest
+        elif kind == "Ensure":
+            text = "\\textbf{Output:} " + rest
+        else:
+            text = rest
+        num = 0
+        if numbered and kind not in ("Statex", "Require", "Ensure"):
+            n += 1
+            num = n
+        lines.append("XALGLx%dx%dX %s%s" % (num, indent, text.strip(),
+                                             " XALGCX " + comment.strip() if comment else ""))
+        if kind in ("If", "ElsIf", "Else", "For", "ForAll", "While", "Loop", "Repeat"):
+            indent += 1
+    return "\n\nXALGBEGINX\n\n" + "\n\n".join(lines) + "\n\nXALGENDX\n\n"
+
+
+def algorithmic_blocks(tex):
+    def one(m):
+        return algorithmic(m.group(2), m.group(1) is not None and m.group(1) != "[0]")
+    return re.sub(r"\\begin\{algorithmic\}(\[\d+\])?(.*?)\\end\{algorithmic\}", one, tex,
+                  flags=re.S)
+
+
+ALG_HTML = re.compile(r"<p>XALGBEGINX</p>(.*?)<p>XALGENDX</p>", re.S)
+ALG_LINE = re.compile(r"<p>XALGLx(\d+)x(\d+)X\s*(.*?)</p>", re.S)
+
+
+def algorithm_html(html):
+    def block(m):
+        out = []
+        for n, indent, text in ALG_LINE.findall(m.group(1)):
+            text, _, comment = text.partition("XALGCX")
+            out.append('<div class="alg-line" style="--i:%s"><span class="alg-no">%s</span>'
+                       '<span class="alg-text">%s</span>%s</div>'
+                       % (indent, n + ":" if n != "0" else "", text.strip(),
+                          '<span class="alg-comment">\u25b7 %s</span>' % comment.strip()
+                          if comment else ""))
+        return '<div class="algorithmic">%s</div>' % "".join(out)
+    return ALG_HTML.sub(block, html)
+
+
+MATH = re.compile(r"(?<!\\)\$\$.*?(?<!\\)\$\$|(?<!\\)\$.*?(?<!\\)\$|\\\(.*?\\\)|\\\[.*?\\\]|"
+                  r"\\begin\{(equation|align|gather|multline)(\*?)\}.*?\\end\{\1\2\}", re.S)
+
+
+def small_caps(word):
+    out = []
+    for run in re.findall(r"[a-z]+|[^a-z]+", word):
+        out.append("{\\small\\text{%s}}" % run.upper() if run.islower() else "\\text{%s}" % run)
+    return "".join(out)
+
+
+def math_aware(tex):
+    def text(s):
+        return re.sub(r"\\qquad(?![A-Za-z])\s*", "\u2003\u2003",
+                      re.sub(r"\\quad(?![A-Za-z])\s*", "\u2003", s))
+
+    def math(s):
+        return re.sub(r"\\textsc\{([^{}]*)\}", lambda m: small_caps(m.group(1)), s)
+
+    out, at = [], 0
+    for a, b in verbatim_spans(tex) + [(len(tex), len(tex))]:
+        chunk, pos = tex[at:a], 0
+        for m in MATH.finditer(chunk):
+            out.append(text(chunk[pos:m.start()]))
+            out.append(math(m.group(0)))
+            pos = m.end()
+        out.append(text(chunk[pos:]))
+        out.append(tex[a:b])
+        at = b
+    return "".join(out)
+
+
 def prepare(tex, stem, drawn, labels, floats, used, missing):
     tex, badges = take_badges(tex)
+    tex = algorithmic_blocks(tex)
     tex = splice(tex, drawn_spans(tex),
                  lambda i, s: "\\includegraphics{%s}" % drawn[i])
+    tex = math_aware(tex)
     tex = number_captions(tex, floats, used)
     tex = re.sub(r"\\(begin|end)\{algorithm\}", r"\\\1{figure}", tex)
     tex = re.sub(r"\\chaptermark\{[^{}]*\}", "", tex)
@@ -355,6 +499,7 @@ def finish(html, chapter, where, badges, figdir_url, sizes):
         return 'href="%s#%s"' % (page, key)
     html = re.sub(r'href="#([^"]+)"', link, html)
 
+    html = algorithm_html(html)
     html = re.sub(r"<strong>(Definition|Example|Theorem|Proposition|Lemma) 1\.(\d+)</strong>",
                   lambda m: "<strong>%s %s.%s</strong>" % (m.group(1), chapter["num"], m.group(2)),
                   html)
@@ -402,6 +547,33 @@ def search_index(html, chapter):
                         c="%s %s" % (chapter["num"], chapter["title"]),
                         t=t, x=text))
     return out
+
+
+def vendor_mathjax(dest):
+    url, integrity = MATHJAX
+    try:
+        data = urllib.request.urlopen(url, timeout=60).read()
+    except Exception as exc:
+        raise SystemExit("could not fetch MathJax from %s\n%s" % (url, exc))
+    algo, want = integrity.split("-", 1)
+    if base64.b64encode(hashlib.new(algo, data).digest()).decode() != want:
+        raise SystemExit("MathJax from %s does not match its pinned %s hash" % (url, algo))
+    out = os.path.join(dest, "mathjax")
+    n = 0
+    with tarfile.open(fileobj=io.BytesIO(data)) as tar:
+        for m in tar.getmembers():
+            if not m.isfile() or not m.name.startswith("package/es5/"):
+                continue
+            rel = m.name[len("package/es5/"):]
+            if not rel.startswith(MATHJAX_FILES) or ".." in rel.split("/"):
+                continue
+            path = os.path.join(out, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            open(path, "wb").write(tar.extractfile(m).read())
+            n += 1
+    if not os.path.exists(os.path.join(out, "tex-chtml.js")):
+        raise SystemExit("the MathJax package has no es5/tex-chtml.js")
+    return n
 
 
 def build(root, dest, build, env, base, css, listings):
@@ -491,6 +663,7 @@ def build(root, dest, build, env, base, css, listings):
         page="book.html", og_type="book", og_title="Applied Post-Quantum Cryptography",
         jsonld=None))
 
+    vendor_mathjax(dest)
     open(os.path.join(dest, "book-search.json"), "w").write(
         json.dumps(index, ensure_ascii=False, separators=(",", ":")))
     return chapters, warnings

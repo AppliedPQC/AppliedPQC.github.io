@@ -138,3 +138,17 @@
     .book-body { padding-top: 1.5rem; }
     .book-body figure > figure { max-width: 100%; display: block; margin: 1rem 0; }
   }
+
+  .book-body .algorithmic {
+    text-align: left; margin: 0 auto; max-width: 44rem;
+    padding: 0.7rem 0.9rem; border-top: 2px solid var(--fg); border-bottom: 1px solid var(--fg);
+    font-size: 0.95rem; line-height: 1.55;
+  }
+  .alg-line { display: flex; gap: 0.6rem; padding-left: calc(var(--i) * 1.5em); }
+  .alg-no { flex: none; width: 1.9em; margin-left: calc(var(--i) * -1.5em); padding-right: calc(var(--i) * 1.5em); box-sizing: content-box; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .alg-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .alg-comment { flex: none; max-width: 45%; color: var(--muted); text-align: right; }
+  @media (max-width: 40rem) {
+    .alg-line { flex-wrap: wrap; }
+    .alg-comment { max-width: none; flex-basis: 100%; padding-left: 2.5em; text-align: left; }
+  }

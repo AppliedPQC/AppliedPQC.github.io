@@ -148,12 +148,18 @@ def main():
                         re.sub(r"<pre.*?</pre>", "", body, flags=re.S)) is None,
               "%s has LaTeX environments left in its text" % name)
         check("BADGE" not in body, "%s has a status badge left unrendered" % name)
+        check(re.search(r'class="math[^"]*">[^<]*\\textsc', body) is None,
+              "%s has \\textsc in math, which MathJax cannot render" % name)
+        check("XALG" not in body, "%s has an algorithm line left unrendered" % name)
         check("utteranc.es/client.js" in html, "%s lost its comments" % name)
+        check('src="mathjax/tex-chtml.js"' in html, "%s does not load the site\'s own MathJax" % name)
         for src in re.findall(r'<img[^>]+src="(book-figures/[^"]+)"', body):
             figures += 1
             check(os.path.exists(p(src)), "%s references %s, which was not published"
                   % (name, src))
     check(figures >= 50, "the online book shows only %d drawn figures" % figures)
+    check(os.path.exists(p("mathjax", "tex-chtml.js")) and os.path.isdir(p("mathjax", "output", "chtml", "fonts")),
+          "MathJax was not published with the online book")
     check(os.path.getsize(p("book-search.json")) > 100_000,
           "the online book's search index is missing or truncated")
 

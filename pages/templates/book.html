@@ -3,11 +3,10 @@
 <script>
 window.MathJax = {
   tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
-  chtml: { scale: 0.97 },
-  options: { ignoreHtmlClass: 'book-nav' }
+  chtml: { scale: 0.97 }
 };
 </script>
-<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+<script defer src="mathjax/tex-chtml.js"></script>
 {%- endblock %}
 {% block content %}
 <div class="book-layout">
@@ -27,11 +26,11 @@ window.MathJax = {
     <li class="toc-subpart">{{ it.title }}</li>
     {%- else %}
     <li class="toc-chapter{% if chapter and it.stem == chapter.stem %} open{% endif %}">
-      <a href="{{ it.page }}"{% if chapter and it.stem == chapter.stem %} aria-current="page"{% endif %}><span class="toc-num">{{ it.num }}</span>{{ it.title }}</a>
+      <a href="{{ it.page }}"{% if chapter and it.stem == chapter.stem %} aria-current="page"{% endif %}><span class="toc-num">{{ it.num }}</span><span>{{ it.title }}</span></a>
       {%- if chapter and it.stem == chapter.stem %}
       <ol>
         {%- for s in chapter.toc if s.level == 2 %}
-        <li><a href="#{{ s.id }}" data-section="{{ s.id }}">{% if s.num %}<span class="toc-num">{{ s.num }}</span>{% endif %}{{ s.title }}</a></li>
+        <li><a href="#{{ s.id }}" data-section="{{ s.id }}">{% if s.num %}<span class="toc-num">{{ s.num }}</span>{% endif %}<span>{{ s.title }}</span></a></li>
         {%- endfor %}
       </ol>
       {%- endif %}
@@ -68,7 +67,7 @@ so that every one is followed up.</p>
   {%- elif it.kind == 'subpart' %}
   <li class="toc-subpart">{{ it.title }}</li>
   {%- else %}
-  <li class="toc-chapter"><a href="{{ it.page }}"><span class="toc-num">{{ it.num }}</span>{{ it.title }}</a></li>
+  <li class="toc-chapter"><a href="{{ it.page }}"><span class="toc-num">{{ it.num }}</span><span>{{ it.title }}</span></a></li>
   {%- endif %}
   {%- endfor %}
 </ol>
