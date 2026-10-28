@@ -23,6 +23,7 @@
     "repo": "pqc-research",
     "path": "nist-ir-8547-final.md",
     "summary": "NIST's final transition report keeps 2030 and 2035 but deprecates quantum-vulnerable public-key cryptography at every key size, builds in the federal 2030 and 2031 deadlines, and names ML-KEM-768 as the default. What changed from the 2024 draft, sentence by sentence.",
+    "summary_zh": "NIST 的最终版过渡报告保留了 2030 年和 2035 年这两个日期，但把所有密钥长度的量子脆弱公钥密码都纳入弃用范围，写入了联邦政府 2030 年和 2031 年的截止日期，并把 ML-KEM-768 定为默认选择。逐句对照 2024 年草案，看看改了什么。",
     "cat": "standard"
   }
 ]
