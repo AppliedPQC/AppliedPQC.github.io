@@ -16,5 +16,13 @@
     "summary": "SHRINCS demotes SLH-DSA to a fallback path and puts a 548-byte stateful signature on the primary one. What the draft reuses from FIPS 205, what it only reparameterises, what it constructs anew, and what it gives up.",
     "summary_zh": "SHRINCS 把 SLH-DSA 降为后备路径，在主路径上采用 548 字节的有状态签名。该草案从 FIPS 205 中复用了什么、只是重新参数化了什么、全新构造了什么，又放弃了什么。",
     "cat": "research"
+  },
+  {
+    "slug": "nist-ir-8547-final",
+    "date": "2026-10-28",
+    "repo": "pqc-research",
+    "path": "nist-ir-8547-final.md",
+    "summary": "NIST's final transition report keeps 2030 and 2035 but deprecates quantum-vulnerable public-key cryptography at every key size, builds in the federal 2030 and 2031 deadlines, and names ML-KEM-768 as the default. What changed from the 2024 draft, sentence by sentence.",
+    "cat": "standard"
   }
 ]
