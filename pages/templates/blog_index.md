@@ -8,7 +8,7 @@
 <li class="card" data-cat="writing" data-text="{{ post.title|lower }} {{ (post.summary or '')|lower }}">
 {{ art('post', loop.index0) }}
 <div class="card-body">
-<h3><a class="stretch" href="{{ p }}blog-{{ post.slug }}.html">{{ post.title }}</a></h3>
+<h3><a class="stretch" href="blog-{{ post.slug }}.html">{{ post.title }}</a></h3>
 {% if post.summary %}<p>{{ post.summary }}</p>{% endif %}
 <p class="meta"><span class="tag">{{ _("Post") }}</span><span>{{ post.date }}</span></p>
 </div>

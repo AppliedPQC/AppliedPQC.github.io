@@ -106,7 +106,7 @@ need.") }}</p>
   <li class="card" data-cat="{{ post.cat }}" data-text="{{ post.title|lower }} {{ (post.summary or '')|lower }} blog research">
     {{ art('post', loop.index0 + 7) }}
     <div class="card-body">
-      <h3><a class="stretch" href="{{ p }}blog-{{ post.slug }}.html">{{ post.title }}</a></h3>
+      <h3><a class="stretch" href="blog-{{ post.slug }}.html">{{ post.title }}</a></h3>
       {%- if post.summary %}<p>{{ post.summary }}</p>{% endif %}
       <p class="meta"><span class="tag">{{ _("Writing") }}</span><span>{{ post.date }}</span></p>
     </div>
@@ -115,6 +115,6 @@ need.") }}</p>
 </ul>
 <p class="empty" hidden>{{ _("Nothing matches that.") }}</p>
 <p class="after"><a href="{{ gh }}/AppliedPQC/tree/main/sage">{{ _("The implementations
-on GitHub →") }}</a> · {{ _("462 checks, 0 failures against ACVP") }} · <a href="{{ p }}blog.html">{{ _("all posts →") }}</a></p>
+on GitHub →") }}</a> · {{ _("462 checks, 0 failures against ACVP") }} · <a href="blog.html">{{ _("all posts →") }}</a></p>
 </div></section>
 {% endblock %}

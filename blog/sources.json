@@ -5,7 +5,6 @@
     "repo": "pqc-research",
     "path": "bitcoin-l2-pq-migration.md",
     "summary": "A Bitcoin layer 2 settles to a base layer it cannot change, borrows consensus from a third ecosystem, and runs a bridge whose trust root is cryptography of its own choosing. Where the post-quantum exposure actually sits, and who can fix each part.",
-    "summary_zh": "比特币二层网络结算到一个它无法改变的基础层，从第三个生态借用共识，还运行着一座以自选密码学为信任根的跨链桥。后量子暴露究竟在哪里，每一部分又该由谁来修复。",
     "cat": "deploy"
   },
   {
@@ -14,7 +13,6 @@
     "repo": "pqc-research",
     "path": "shrincs-construction.md",
     "summary": "SHRINCS demotes SLH-DSA to a fallback path and puts a 548-byte stateful signature on the primary one. What the draft reuses from FIPS 205, what it only reparameterises, what it constructs anew, and what it gives up.",
-    "summary_zh": "SHRINCS 把 SLH-DSA 降为后备路径，在主路径上采用 548 字节的有状态签名。该草案从 FIPS 205 中复用了什么、只是重新参数化了什么、全新构造了什么，又放弃了什么。",
     "cat": "research"
   },
   {
