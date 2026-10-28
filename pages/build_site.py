@@ -5,7 +5,7 @@ Build the whole site: landing page, playground, chapter pages, and the blog.
 Everything the site needs is produced here, so the workflow is one command.
 There are two kinds of page and each is built the way it should be:
 
-* **Generated pages** -- the landing page and the 18 chapter pages -- come from
+* **Generated pages** -- the landing page and the playground's chapter pages -- come from
   Jinja templates in ``templates/``. Their content is structural (hero, card
   grids, one Sage cell per listing), and putting book code through a Markdown
   parser is what silently shredded a quarter of the cells before: CommonMark
@@ -38,6 +38,7 @@ import sys
 import urllib.request
 
 import art
+import book
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
@@ -384,6 +385,11 @@ def main():
                                    % (c["title"], n_run),
                        page=page, og_type="article",
                        og_title=c["title"], jsonld=None))
+    book_chapters, book_warnings = book.build(
+        ROOT, dest, build, env, base, css("site.css", "book.css"), chapters)
+    for stem, text in sorted(book_warnings.items()):
+        print("pandoc on %s:\n  %s" % (stem, text.replace("\n", "\n  ")))
+
     # book-code.html was a published URL before the pages merged.
     open(os.path.join(dest, "book-code.html"), "w").write(
         env.get_template("redirect.html").render(to="playground.html"))
@@ -460,7 +466,8 @@ def main():
     for f in urls:
         loc = SITE + "/" + ("" if f == "index.html" else f)
         prio = "1.0" if f == "index.html" else (
-            "0.8" if f in ("playground.html", "blog.html") or f.startswith("blog-")
+            "0.8" if f in ("playground.html", "blog.html", "book.html")
+            or f.startswith("blog-") or f.startswith("book-")
             else "0.6")
         mod = ("<lastmod>%s</lastmod>" % post_dates[f]) if f in post_dates else ""
         entries.append("  <url><loc>%s</loc>%s<priority>%s</priority></url>"
@@ -519,6 +526,7 @@ def main():
     print("landing page: %d listings, %d chapters, %s"
           % (n_listings, len(chapters), "%d pages" % pages if pages else "no PDF"))
     print("chapter pages: %d" % len(chapters))
+    print("book: %d chapters online" % len(book_chapters))
     print("blog: %d post(s)" % len(posts))
 
 

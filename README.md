@@ -42,6 +42,7 @@ out with no token.
 
 ```text
 pages/build_site.py     builds the whole site
+pages/book.py           renders the book's chapters as web pages
 pages/check_site.py     asserts the result is what it should be
 pages/templates/        Jinja templates; the chrome is defined once
 pages/styles/           stylesheets

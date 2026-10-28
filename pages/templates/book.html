@@ -1,0 +1,184 @@
+{% extends "page.html" %}
+{% block head %}
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  chtml: { scale: 0.97 },
+  options: { ignoreHtmlClass: 'book-nav' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+{%- endblock %}
+{% block content %}
+<div class="book-layout">
+<button class="book-nav-toggle" type="button" aria-controls="book-nav" aria-expanded="false">Contents</button>
+<nav class="book-nav" id="book-nav" aria-label="Book contents">
+  <div class="book-search" data-book-search hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input type="search" placeholder="Search the book…" aria-label="Search the book" />
+  </div>
+  <ol class="book-results" data-book-results hidden></ol>
+  <ol class="book-toc" data-book-toc>
+    <li class="toc-book"><a href="book.html"{% if not chapter %} aria-current="page"{% endif %}>Applied Post-Quantum Cryptography</a></li>
+    {%- for it in items %}
+    {%- if it.kind == 'part' %}
+    <li class="toc-part">{% if it.num %}Part {{ it.num }} · {% endif %}{{ it.title }}</li>
+    {%- elif it.kind == 'subpart' %}
+    <li class="toc-subpart">{{ it.title }}</li>
+    {%- else %}
+    <li class="toc-chapter{% if chapter and it.stem == chapter.stem %} open{% endif %}">
+      <a href="{{ it.page }}"{% if chapter and it.stem == chapter.stem %} aria-current="page"{% endif %}><span class="toc-num">{{ it.num }}</span>{{ it.title }}</a>
+      {%- if chapter and it.stem == chapter.stem %}
+      <ol>
+        {%- for s in chapter.toc if s.level == 2 %}
+        <li><a href="#{{ s.id }}" data-section="{{ s.id }}">{% if s.num %}<span class="toc-num">{{ s.num }}</span>{% endif %}{{ s.title }}</a></li>
+        {%- endfor %}
+      </ol>
+      {%- endif %}
+    </li>
+    {%- endif %}
+    {%- endfor %}
+  </ol>
+</nav>
+<article class="book-body">
+{%- if chapter %}
+<p class="book-tools">
+  <a href="apqc.pdf">PDF</a>
+  {%- if playground %}
+  <a href="{{ playground }}">Run this chapter's code</a>
+  {%- endif %}
+  <a href="{{ source }}">LaTeX source</a>
+  <a href="#comments">Comments</a>
+</p>
+{{ chapter.html }}
+{%- else %}
+<h1>Applied Post-Quantum Cryptography</h1>
+<p class="book-lede">The whole book, free to read here, one chapter to a page.
+It is rendered from the same LaTeX as <a href="apqc.pdf">the PDF</a>, and every
+figure, algorithm and reference number matches it. Each chapter's code runs in
+<a href="playground.html">the playground</a>, and each chapter takes comments,
+which are filed as issues on <a href="{{ gh }}/AppliedPQC/issues?q=label%3A{{ comments_label }}">the book's repository</a>
+so that every one is followed up.</p>
+<p><a class="button" href="{{ next.page }}">Start reading</a>
+<a class="button ghost" href="apqc.pdf">Download the PDF</a></p>
+<ol class="book-contents">
+  {%- for it in items %}
+  {%- if it.kind == 'part' %}
+  <li class="toc-part">{% if it.num %}Part {{ it.num }}: {% endif %}{{ it.title }}</li>
+  {%- elif it.kind == 'subpart' %}
+  <li class="toc-subpart">{{ it.title }}</li>
+  {%- else %}
+  <li class="toc-chapter"><a href="{{ it.page }}"><span class="toc-num">{{ it.num }}</span>{{ it.title }}</a></li>
+  {%- endif %}
+  {%- endfor %}
+</ol>
+{%- endif %}
+{%- if chapter %}
+<nav class="book-pager" aria-label="Chapters">
+  {%- if prev %}
+  <a class="prev" href="{{ prev.page }}"><span>Previous</span>{{ prev.num }} {{ prev.title }}</a>
+  {%- else %}
+  <a class="prev" href="book.html"><span>Previous</span>Contents</a>
+  {%- endif %}
+  {%- if next %}
+  <a class="next" href="{{ next.page }}"><span>Next</span>{{ next.num }} {{ next.title }}</a>
+  {%- endif %}
+</nav>
+<section class="book-comments" id="comments" aria-label="Comments">
+<h2 class="unnumbered">Comments</h2>
+<p>Found a mistake, or something unclear? Comment below with a GitHub account.
+Each chapter's comments are kept as one issue on
+<a href="{{ gh }}/AppliedPQC/issues?q=label%3A{{ comments_label }}">the book's repository</a>,
+labelled <code>{{ comments_label }}</code>, so every one is tracked until it is
+answered or fixed.</p>
+<script src="https://utteranc.es/client.js"
+        repo="{{ comments_repo }}"
+        issue-term="Book: {{ chapter.title }}"
+        label="{{ comments_label }}"
+        theme="github-light"
+        crossorigin="anonymous"
+        async></script>
+</section>
+{%- endif %}
+</article>
+</div>
+<script>
+(function () {
+  var nav = document.getElementById('book-nav');
+  var toggle = document.querySelector('.book-nav-toggle');
+  toggle.addEventListener('click', function () {
+    var open = nav.classList.toggle('shown');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  nav.addEventListener('click', function (e) {
+    if (e.target.closest('a')) { nav.classList.remove('shown'); toggle.setAttribute('aria-expanded', 'false'); }
+  });
+  var links = {};
+  nav.querySelectorAll('[data-section]').forEach(function (a) { links[a.getAttribute('data-section')] = a; });
+  var heads = Array.prototype.filter.call(document.querySelectorAll('.book-body h2[id]'),
+                                          function (h) { return links[h.id]; });
+  if (heads.length && 'IntersectionObserver' in window) {
+    var current = null;
+    function mark() {
+      var pick = heads[0];
+      heads.forEach(function (h) { if (h.getBoundingClientRect().top < 120) pick = h; });
+      if (pick !== current) {
+        if (current) links[current.id].classList.remove('here');
+        links[pick.id].classList.add('here');
+        current = pick;
+      }
+    }
+    var io = new IntersectionObserver(mark, { rootMargin: '0px 0px -60% 0px' });
+    heads.forEach(function (h) { io.observe(h); });
+    mark();
+  }
+  var here = nav.querySelector('[aria-current="page"]');
+  if (here && here.scrollIntoView) here.scrollIntoView({ block: 'center' });
+  var box = document.querySelector('[data-book-search]');
+  var results = document.querySelector('[data-book-results]');
+  var toc = document.querySelector('[data-book-toc]');
+  if (!window.fetch) return;
+  box.hidden = false;
+  var input = box.querySelector('input');
+  var index = null, loading = null;
+  function load() {
+    if (!loading) loading = fetch('book-search.json').then(function (r) { return r.json(); })
+      .then(function (d) { index = d; });
+    return loading;
+  }
+  input.addEventListener('focus', load);
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function snippet(text, term) {
+    var i = text.toLowerCase().indexOf(term);
+    if (i < 0) return esc(text.slice(0, 120));
+    var a = Math.max(0, i - 50), s = text.slice(a, i + term.length + 70);
+    var j = s.toLowerCase().indexOf(term);
+    return (a ? '…' : '') + esc(s.slice(0, j)) + '<mark>' + esc(s.slice(j, j + term.length)) + '</mark>' + esc(s.slice(j + term.length)) + '…';
+  }
+  function run() {
+    var q = input.value.trim().toLowerCase();
+    if (!q) { results.hidden = true; toc.hidden = false; return; }
+    load().then(function () {
+      var terms = q.split(/\s+/), hits = [];
+      index.forEach(function (r) {
+        var t = r.t.toLowerCase(), x = r.x.toLowerCase(), score = 0;
+        for (var k = 0; k < terms.length; k++) {
+          var inT = t.indexOf(terms[k]) >= 0, inX = x.indexOf(terms[k]) >= 0;
+          if (!inT && !inX) return;
+          score += inT ? 10 : 1;
+        }
+        hits.push({ r: r, s: score });
+      });
+      hits.sort(function (a, b) { return b.s - a.s; });
+      results.innerHTML = hits.length ? hits.slice(0, 30).map(function (h) {
+        return '<li><a href="' + h.r.u + '"><strong>' + esc(h.r.t || h.r.c) + '</strong>' +
+               '<span class="where">' + esc(h.r.c) + '</span>' +
+               '<span class="snip">' + snippet(h.r.x, terms[0]) + '</span></a></li>';
+      }).join('') : '<li class="none">Nothing found.</li>';
+      results.hidden = false; toc.hidden = true;
+    });
+  }
+  input.addEventListener('input', run);
+})();
+</script>
+{% endblock %}
