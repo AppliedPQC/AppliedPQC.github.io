@@ -355,11 +355,14 @@ def main():
         "name": "Applied Post-Quantum Cryptography",
         "author": who,
         "description": BOOK_DESC, "inLanguage": "en",
-        "url": SITE + "/", "isAccessibleForFree": True,
+        "url": SITE + "/book.html", "isAccessibleForFree": True,
         "numberOfPages": pages,
-        "workExample": {"@type": "Book", "bookFormat": "https://schema.org/EBook",
-                        "encodingFormat": "application/pdf",
-                        "url": SITE + "/apqc.pdf"},
+        "workExample": [{"@type": "Book", "bookFormat": "https://schema.org/EBook",
+                         "encodingFormat": "text/html",
+                         "url": SITE + "/book.html"},
+                        {"@type": "Book", "bookFormat": "https://schema.org/EBook",
+                         "encodingFormat": "application/pdf",
+                         "url": SITE + "/apqc.pdf"}],
         "publisher": {"@id": SITE + "/#org"},
     }]}, separators=(",", ":"))
     open(os.path.join(dest, "index.html"), "w").write(
