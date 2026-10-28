@@ -129,40 +129,55 @@ def main():
         check(re.search(r"<p>[a-z_]+ = ", read(f)) is None,
               "%s: a listing was mangled out of its cell" % os.path.basename(f))
 
-    contents = read(p("book.html"))
-    online = re.findall(r'<li class="toc-chapter"><a href="(book-[^"]+\.html)"', contents)
-    inputs = re.findall(r"^\\input\{chapters/(?!00_style)", read(book_tex), re.M) \
-        if os.path.exists(book_tex) else online
-    check(len(online) == len(inputs),
-          "the online book has %d chapters, apqc.tex inputs %d" % (len(online), len(inputs)))
-    figures = 0
-    for name in online:
-        html = read(p(name)) if os.path.exists(p(name)) else ""
-        check(html, "%s is listed in the book's contents but was not built" % name)
-        if not html:
+    editions = [("book.html", "book-", "en")]
+    if os.path.isdir(os.path.join(root, "chapters", "zh")):
+        editions.append(("zh-book.html", "zh-book-", "zh-Hans"))
+    shown = {}
+    for home, prefix, lang in editions:
+        check(os.path.exists(p(home)), "%s was not built" % home)
+        if not os.path.exists(p(home)):
             continue
-        body = html.split('<article class="book-body">', 1)[-1]
-        check(re.search(r"<h1[ >]", body) is not None, "%s has no chapter title" % name)
-        check("??" not in body, "%s has an unresolved cross-reference" % name)
-        check(re.search(r"\\(begin|end)\{(?!aligned|bmatrix|pmatrix|smallmatrix|cases|array)",
-                        re.sub(r"<pre.*?</pre>", "", body, flags=re.S)) is None,
-              "%s has LaTeX environments left in its text" % name)
-        check("BADGE" not in body, "%s has a status badge left unrendered" % name)
-        check(re.search(r'class="math[^"]*">[^<]*\\textsc', body) is None,
-              "%s has \\textsc in math, which MathJax cannot render" % name)
-        check("XALG" not in body, "%s has an algorithm line left unrendered" % name)
-        check("utteranc.es/client.js" in html and 'data-utterances' in html,
-              "%s lost its comments" % name)
-        check('src="mathjax/tex-chtml.js"' in html, "%s does not load the site\'s own MathJax" % name)
-        for src in re.findall(r'<img[^>]+src="(book-figures/[^"]+)"', body):
-            figures += 1
-            check(os.path.exists(p(src)), "%s references %s, which was not published"
-                  % (name, src))
-    check(figures >= 50, "the online book shows only %d drawn figures" % figures)
-    check(os.path.exists(p("mathjax", "tex-chtml.js")) and os.path.isdir(p("mathjax", "output", "chtml", "fonts")),
-          "MathJax was not published with the online book")
-    check(os.path.getsize(p("book-search.json")) > 100_000,
-          "the online book's search index is missing or truncated")
+        contents = read(p(home))
+        online = re.findall(r'<li class="toc-chapter"><a href="(%s[^"]+\.html)"' % prefix,
+                            contents)
+        inputs = re.findall(r"^\\input\{chapters/(?!00_style)", read(book_tex), re.M) \
+            if os.path.exists(book_tex) else online
+        check(len(online) == len(inputs),
+              "%s lists %d chapters, apqc.tex inputs %d" % (home, len(online), len(inputs)))
+        figures = 0
+        for name in online:
+            html = read(p(name)) if os.path.exists(p(name)) else ""
+            check(html, "%s is listed in the book's contents but was not built" % name)
+            if not html:
+                continue
+            body = html.split('<article class="book-body">', 1)[-1]
+            check(re.search(r"<h1[ >]", body) is not None, "%s has no chapter title" % name)
+            check("??" not in body, "%s has an unresolved cross-reference" % name)
+            check(re.search(r"\\(begin|end)\{(?!aligned|bmatrix|pmatrix|smallmatrix|cases|array)",
+                            re.sub(r"<pre.*?</pre>", "", body, flags=re.S)) is None,
+                  "%s has LaTeX environments left in its text" % name)
+            check("BADGE" not in body, "%s has a status badge left unrendered" % name)
+            check(re.search(r'class="math[^"]*">[^<]*\\textsc', body) is None,
+                  "%s has \\textsc in math, which MathJax cannot render" % name)
+            check("XALG" not in body, "%s has an algorithm line left unrendered" % name)
+            check("utteranc.es/client.js" in html and 'data-utterances' in html,
+                  "%s lost its comments" % name)
+            check('src="mathjax/tex-chtml.js"' in html, "%s does not load the site\'s own MathJax" % name)
+            check('<html lang="%s">' % lang in html, "%s is not marked as %s" % (name, lang))
+            check(len(editions) == 1 or html.count('<link rel="alternate" hreflang=') == len(editions),
+                  "%s does not point to its other editions" % name)
+            for src in re.findall(r'<img[^>]+src="(book-figures/[^"]+)"', body):
+                figures += 1
+                check(os.path.exists(p(src)), "%s references %s, which was not published"
+                      % (name, src))
+        check(figures >= 50, "%s shows only %d drawn figures" % (home, figures))
+        shown[home] = (online, figures)
+        check(os.path.exists(p("mathjax", "tex-chtml.js")) and os.path.isdir(p("mathjax", "output", "chtml", "fonts")),
+              "MathJax was not published with the online book")
+        check(os.path.exists(p(prefix + "search.json"))
+              and os.path.getsize(p(prefix + "search.json")) > 100_000,
+              "the search index of %s is missing or truncated" % home)
+    online, figures = shown.get("book.html", ([], 0))
 
     # --- blog -------------------------------------------------------------
     blog = read(p("blog.html"))

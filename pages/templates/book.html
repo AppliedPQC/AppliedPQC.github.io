@@ -7,21 +7,24 @@ window.MathJax = {
 };
 </script>
 <script defer src="mathjax/tex-chtml.js"></script>
+{%- for a in alternates %}
+<link rel="alternate" hreflang="{{ a.lang }}" href="{{ site }}/{{ a.page }}" />
+{%- endfor %}
 {%- endblock %}
 {% block content %}
 <div class="book-layout">
-<button class="book-nav-toggle" type="button" aria-controls="book-nav" aria-expanded="false">Contents</button>
+<button class="book-nav-toggle" type="button" aria-controls="book-nav" aria-expanded="false">{{ ed.contents }}</button>
 <nav class="book-nav" id="book-nav" aria-label="Book contents">
-  <div class="book-search" data-book-search hidden>
+  <div class="book-search" data-book-search data-index="{{ search_index }}" data-none="{{ ed.nothing }}" hidden>
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <input type="search" placeholder="Search the book…" aria-label="Search the book" />
+    <input type="search" placeholder="{{ ed.search }}" aria-label="{{ ed.search }}" />
   </div>
   <ol class="book-results" data-book-results hidden></ol>
   <ol class="book-toc" data-book-toc>
-    <li class="toc-book"><a href="book.html"{% if not chapter %} aria-current="page"{% endif %}>Applied Post-Quantum Cryptography</a></li>
+    <li class="toc-book"><a href="{{ home }}"{% if not chapter %} aria-current="page"{% endif %}>{{ ed.title }}</a></li>
     {%- for it in items %}
     {%- if it.kind == 'part' %}
-    <li class="toc-part">{% if it.num %}Part {{ it.num }} · {% endif %}{{ it.title }}</li>
+    <li class="toc-part">{% if it.num %}{{ ed.part|format(it.num) }} · {% endif %}{{ it.title }}</li>
     {%- elif it.kind == 'subpart' %}
     <li class="toc-subpart">{{ it.title }}</li>
     {%- else %}
@@ -42,22 +45,31 @@ window.MathJax = {
 <article class="book-body">
 {%- if chapter %}
 <p class="book-tools">
-  <a href="apqc.pdf">PDF</a>
+  <a href="apqc.pdf">{{ ed.pdf }}</a>
   {%- if playground %}
-  <a href="{{ playground }}">Run this chapter's code</a>
+  <a href="{{ playground }}">{{ ed.run }}</a>
   {%- endif %}
-  <a href="{{ source }}">LaTeX source</a>
-  <a href="#comments">Comments</a>
+  <a href="{{ source }}">{{ ed.source }}</a>
+  <a href="#comments">{{ ed.comments }}</a>
+  {%- for a in alternates if a.lang != ed.lang %}
+  <a href="{{ a.page }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}">{{ a.name }}</a>
+  {%- endfor %}
 </p>
+{%- if chapter.stale %}
+<p class="book-stale"><a href="{{ english }}">{{ ed.stale }}</a></p>
+{%- endif %}
 {{ chapter.html }}
 {%- else %}
-<h1>Applied Post-Quantum Cryptography</h1>
-<p><a class="button" href="{{ next.page }}">Start reading</a>
-<a class="button ghost" href="apqc.pdf">Download the PDF</a></p>
+<h1>{{ ed.title }}</h1>
+<p><a class="button" href="{{ next.page }}">{{ ed.start }}</a>
+<a class="button ghost" href="apqc.pdf">{{ ed.download }}</a>
+{%- for a in alternates if a.lang != ed.lang %}
+<a class="button ghost" href="{{ a.page }}" hreflang="{{ a.lang }}" lang="{{ a.lang }}">{{ a.name }}</a>
+{%- endfor %}</p>
 <ol class="book-contents">
   {%- for it in items %}
   {%- if it.kind == 'part' %}
-  <li class="toc-part">{% if it.num %}Part {{ it.num }}: {% endif %}{{ it.title }}</li>
+  <li class="toc-part">{% if it.num %}{{ ed.part|format(it.num) }}{{ ed.colon }}{% endif %}{{ it.title }}</li>
   {%- elif it.kind == 'subpart' %}
   <li class="toc-subpart">{{ it.title }}</li>
   {%- else %}
@@ -69,18 +81,18 @@ window.MathJax = {
 {%- if chapter %}
 <nav class="book-pager" aria-label="Chapters">
   {%- if prev %}
-  <a class="prev" href="{{ prev.page }}"><span>Previous</span>{{ prev.num }} {{ prev.title }}</a>
+  <a class="prev" href="{{ prev.page }}"><span>{{ ed.previous }}</span>{{ prev.num }} {{ prev.title }}</a>
   {%- else %}
-  <a class="prev" href="book.html"><span>Previous</span>Contents</a>
+  <a class="prev" href="{{ home }}"><span>{{ ed.previous }}</span>{{ ed.contents }}</a>
   {%- endif %}
   {%- if next %}
-  <a class="next" href="{{ next.page }}"><span>Next</span>{{ next.num }} {{ next.title }}</a>
+  <a class="next" href="{{ next.page }}"><span>{{ ed.next }}</span>{{ next.num }} {{ next.title }}</a>
   {%- endif %}
 </nav>
 <section class="book-comments" id="comments" aria-label="Comments">
-<h2 class="unnumbered">Comments</h2>
+<h2 class="unnumbered">{{ ed.comments }}</h2>
 <div class="book-comments-box" data-utterances
-     data-repo="{{ comments_repo }}" data-term="Book: {{ chapter.title }}" data-label="{{ comments_label }}"></div>
+     data-repo="{{ comments_repo }}" data-term="Book: {{ chapter.title_en }}" data-label="{{ comments_label }}"></div>
 <script>
 (function () {
   var box = document.querySelector('[data-utterances]');
@@ -144,7 +156,7 @@ window.MathJax = {
   var input = box.querySelector('input');
   var index = null, loading = null;
   function load() {
-    if (!loading) loading = fetch('book-search.json').then(function (r) { return r.json(); })
+    if (!loading) loading = fetch(box.getAttribute('data-index')).then(function (r) { return r.json(); })
       .then(function (d) { index = d; });
     return loading;
   }
@@ -176,7 +188,7 @@ window.MathJax = {
         return '<li><a href="' + h.r.u + '"><strong>' + esc(h.r.t || h.r.c) + '</strong>' +
                '<span class="where">' + esc(h.r.c) + '</span>' +
                '<span class="snip">' + snippet(h.r.x, terms[0]) + '</span></a></li>';
-      }).join('') : '<li class="none">Nothing found.</li>';
+      }).join('') : '<li class="none">' + esc(box.getAttribute('data-none')) + '</li>';
       results.hidden = false; toc.hidden = true;
     });
   }

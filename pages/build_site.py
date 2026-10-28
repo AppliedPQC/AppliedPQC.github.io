@@ -470,7 +470,7 @@ def main():
         loc = SITE + "/" + ("" if f == "index.html" else f)
         prio = "1.0" if f == "index.html" else (
             "0.8" if f in ("playground.html", "blog.html", "book.html")
-            or f.startswith("blog-") or f.startswith("book-")
+            or f.startswith(("blog-", "book-", "zh-book"))
             else "0.6")
         mod = ("<lastmod>%s</lastmod>" % post_dates[f]) if f in post_dates else ""
         entries.append("  <url><loc>%s</loc>%s<priority>%s</priority></url>"

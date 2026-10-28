@@ -32,6 +32,8 @@
     color: var(--brand);
   }
   .toc-subpart { margin: 0.7rem 0 0.15rem; padding: 0 0.6rem; font-style: italic; color: var(--muted); font-size: 0.82rem; }
+  :lang(zh-Hans) .toc-subpart, :lang(zh-Hans) .book-body em { font-style: normal; }
+  :lang(zh-Hans) .book-body em { font-weight: 600; }
   .toc-num { display: inline-block; min-width: 2.1em; color: var(--muted); font-variant-numeric: tabular-nums; }
   .toc-chapter > a { display: flex; }
   .toc-chapter > a .toc-num { flex: none; }
@@ -62,6 +64,8 @@
 
   .book-tools { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.85rem; margin: 0 0 1.5rem; }
   .book-tools a { color: var(--muted); }
+  .book-stale { font-size: 0.9rem; padding: 0.6rem 0.9rem; border-left: 3px solid var(--brand); background: var(--btn-bg); margin: -0.75rem 0 1.5rem; }
+  .book-stale a { color: var(--fg); }
   .button.ghost { background: var(--btn-bg); color: var(--fg); border-color: var(--btn-border); }
   .button.ghost:hover { background: var(--btn-bg-hover); }
   .book-body h1 { font-size: 2.2rem; margin-bottom: 1.5rem; }
