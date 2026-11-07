@@ -73,6 +73,17 @@ BRAND = "Applied PQC"
 HOME_TITLE = "Applied PQC: where post-quantum cryptography actually stands"
 STATIC = os.path.join(HERE, "static")
 
+# The home page summarises awesome-pqc, which changes daily and is not checked
+# out here, so the page says which day it was last checked against the list.
+HOME_CHECKED = (2026, 11, 7)
+MONTHS = ("January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December")
+
+
+def checked_on(code):
+    y, m, d = HOME_CHECKED
+    return "%d 年 %d 月 %d 日" % (y, m, d) if code == "zh" else "%d %s %d" % (d, MONTHS[m - 1], y)
+
 # The site is about getting post-quantum cryptography deployed; the book is one
 # of the things it publishes towards that. SITE_DESC is what the home page and
 # the search engines get, BOOK_DESC only describes the book itself.
@@ -419,7 +430,8 @@ def main():
                 base, **i18n.chrome(code, "index.html"), title=_(HOME_TITLE),
                 css=css("site.css", "home.css"), main_class="home", here="home",
                 n_listings=n_listings, pages=pages, posts=posts,
-                standards=STANDARDS, description=_(SITE_DESC),
+                standards=STANDARDS, checked=checked_on(code),
+                description=_(SITE_DESC),
                 og_type="website", og_title=_(HOME_TITLE),
                 jsonld=book_ld if code == "en" else None))
 

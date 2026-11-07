@@ -1,27 +1,47 @@
   main.home { max-width: none; margin: 0; padding: 0; }
   .band-inner { max-width: 78rem; margin: 0 auto; padding: 3.5rem 1.5rem; }
-  .band.tint { background: var(--bg-muted); }
 
-  /* Hero: text on the left, a strip of the generated art on the right, so the
-     first screen already shows what the cards below are made of. */
+  .hero { border-bottom: 1px solid var(--rule); background: var(--bg-muted); }
   .hero .band-inner {
-    padding: 4.5rem 1.5rem 3.5rem;
+    padding: 3.75rem 1.5rem 3rem;
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     gap: 3.5rem;
     align-items: center;
   }
-  .hero h1 {
-    font-size: clamp(2.4rem, 5.2vw, 4rem);
-    line-height: 1.04;
-    margin: 0 0 1rem;
-    letter-spacing: -0.035em;
-  }
-  .hero p.lede {
-    font-size: clamp(1.05rem, 1.5vw, 1.22rem);
+  .eyebrow {
+    margin: 0 0 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--muted);
-    max-width: 34rem;
-    margin: 0 0 2rem;
+  }
+  .eyebrow .pqc { color: var(--brand); }
+  .hero h1 {
+    font-size: clamp(2.2rem, 4.6vw, 3.5rem);
+    line-height: 1.06;
+    margin: 0 0 1.4rem;
+    letter-spacing: -0.035em;
+    max-width: 18ch;
+  }
+  .lede-points { margin: 0 0 2rem; padding: 0; list-style: none; max-width: 38rem; }
+  .lede-points li {
+    position: relative;
+    padding-left: 1.4rem;
+    margin: 0 0 0.7rem;
+    color: var(--muted);
+    font-size: 1.04rem;
+  }
+  .lede-points li::before {
+    content: "";
+    position: absolute;
+    left: 0.15rem;
+    top: 0.62em;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 2px;
+    background: var(--brand);
   }
   .cta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
   .cta .button.ghost {
@@ -30,29 +50,210 @@
     border: 1px solid var(--btn-border);
   }
   .cta .button.ghost:hover { background: var(--btn-bg-hover); }
+  .stamp {
+    margin: 1.6rem 0 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.6rem;
+  }
 
-  /* Three tiles fanned out. Purely decorative, so it is hidden from assistive
-     technology and dropped entirely when there is no room for it. */
-  .hero-art { position: relative; min-height: 20rem; }
+  .hero-art { position: relative; min-height: 19rem; }
   .hero-art .art {
     position: absolute;
-    width: 62%;
+    width: 66%;
     border-radius: var(--radius);
     box-shadow: var(--shadow-2);
     aspect-ratio: 400 / 260;
   }
   .hero-art .art:nth-child(1) { top: 0; left: 2%; transform: rotate(-7deg); }
-  .hero-art .art:nth-child(2) { top: 22%; left: 34%; transform: rotate(4deg); z-index: 2; }
+  .hero-art .art:nth-child(2) { top: 22%; left: 32%; transform: rotate(4deg); z-index: 2; }
   .hero-art .art:nth-child(3) { top: 52%; left: 8%; transform: rotate(-2deg); }
 
-  .band h2 { margin: 0 0 0.4rem; font-size: 1.75rem; }
-  .band .sub { color: var(--muted); margin: 0 0 2.1rem; max-width: 42rem; }
-  .band .after { margin: 1.9rem 0 0; color: var(--muted); font-size: 0.94rem; }
+  /* The explainer: one reading column with the contents beside it, on the
+     right where the eye goes after a heading, and sticky because the page is
+     long. */
+  .explainer {
+    max-width: 78rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 14rem;
+    gap: 4rem;
+    align-items: start;
+  }
+  .explain { grid-column: 1; grid-row: 1; min-width: 0; max-width: 50rem; }
+  .onpage {
+    grid-column: 2; grid-row: 1;
+    position: sticky;
+    top: 5rem;
+    font-size: 0.88rem;
+    border-left: 1px solid var(--rule);
+    padding-left: 1.1rem;
+  }
+  .onpage-h {
+    margin: 0 0 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .onpage ol { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .onpage li { margin: 0.42rem 0; counter-increment: s; }
+  .onpage a { color: var(--muted); display: flex; gap: 0.55rem; }
+  .onpage a::before { content: counter(s); font-variant-numeric: tabular-nums; min-width: 1ch; opacity: .6; }
+  .onpage a:hover { color: var(--fg); text-decoration: none; }
+  .onpage a[aria-current] { color: var(--brand); font-weight: 600; }
+  .onpage a[aria-current]::before { opacity: 1; }
 
-  /* Category pills. They filter the grid below rather than navigating, so they
-     are buttons; with JS off the script removes them instead of leaving dead
-     controls on the page. */
-  .pills { display: flex; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 1.9rem; }
+  .explain .intro { font-size: 1.1rem; margin: 0 0 1rem; }
+  .explain section { scroll-margin-top: 5rem; padding-top: 1.25rem; }
+  .explain h2 {
+    font-size: 1.75rem;
+    margin: 1.75rem 0 0.9rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .explain h3 { font-size: 1.15rem; margin: 2rem 0 0.6rem; }
+  .explain ul, .explain ol { padding-left: 1.3rem; }
+  .explain li { margin: 0.35rem 0; }
+
+  .breaks { columns: 2; column-gap: 2rem; }
+  .breaks li { break-inside: avoid; }
+
+  .takeaway, .lead {
+    margin: 1.4rem 0;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-muted);
+    border-left: 3px solid var(--brand);
+  }
+
+  /* Tables carry the comparisons. Hairlines between rows only, so a five-row
+     table reads as a list rather than a spreadsheet. */
+  table.facts { margin: 1.2rem 0 1.4rem; font-size: 0.92rem; display: table; }
+  table.facts th, table.facts td { border: 0; border-bottom: 1px solid var(--rule); padding: 0.7rem 0.9rem 0.7rem 0; vertical-align: top; }
+  table.facts th {
+    background: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  table.facts td:first-child { white-space: nowrap; }
+  .was { color: var(--muted); font-size: 0.85rem; }
+  .st {
+    display: inline-block;
+    padding: 0.08rem 0.55rem;
+    margin: 0 0.3rem 0.2rem 0;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .st.ok { background: color-mix(in srgb, var(--brand) 14%, transparent); color: var(--brand); }
+  .st.wait { background: color-mix(in srgb, #c27c0e 16%, transparent); color: #9a5f00; }
+  :root[data-theme="dark"] .st.wait { color: #f0b54a; }
+
+  /* The deadlines as a line, so the convergence on 2035 is visible before any
+     table is read. */
+  .timeline {
+    list-style: none;
+    padding: 0 !important;
+    margin: 1.6rem 0 1.4rem;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    position: relative;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0.95rem;
+    height: 2px;
+    background: var(--rule);
+  }
+  .timeline li { margin: 0; padding: 0 0.6rem 0 0; position: relative; }
+  .timeline .yr {
+    display: inline-block;
+    position: relative;
+    font-weight: 700;
+    font-size: 0.86rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    font-variant-numeric: tabular-nums;
+  }
+  .timeline .hot .yr { background: var(--brand); color: #fff; border-color: var(--brand); }
+  :root[data-theme="dark"] .timeline .hot .yr { color: #0b0c0f; }
+  .timeline .ev { display: block; margin-top: 0.6rem; font-size: 0.8rem; line-height: 1.4; color: var(--muted); }
+
+  .area {
+    margin: 1.4rem 0;
+    padding: 0.2rem 1.4rem 0.8rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  .area h3 { display: flex; align-items: center; gap: 0.7rem; margin-top: 1.1rem; }
+  .area .n {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 1.75rem; height: 1.75rem;
+    border-radius: 50%;
+    background: var(--btn-primary);
+    color: var(--accent-fg);
+    font-size: 0.85rem;
+  }
+
+  .steps { counter-reset: st; list-style: none; padding-left: 0 !important; }
+  .steps li { counter-increment: st; position: relative; padding-left: 2.6rem; margin: 1rem 0; }
+  .steps li::before {
+    content: counter(st);
+    position: absolute; left: 0; top: 0.05rem;
+    width: 1.75rem; height: 1.75rem;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--btn-border);
+    font-weight: 700; font-size: 0.85rem;
+  }
+
+  details {
+    border-bottom: 1px solid var(--rule);
+    padding: 0.2rem 0;
+  }
+  details:first-of-type { border-top: 1px solid var(--rule); }
+  summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 0.85rem 2rem 0.85rem 0;
+    font-weight: 600;
+    position: relative;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "+";
+    position: absolute; right: 0.3rem; top: 0.7rem;
+    font-size: 1.25rem; font-weight: 400; color: var(--muted);
+  }
+  details[open] summary::after { content: "−"; }
+  details p { margin: 0 0 1rem; color: var(--muted); }
+
+  /* The project's own work, after the explainer and at full width, because
+     a card grid squeezed into the reading column is five rows of thumbnails. */
+  .band.tint { background: var(--bg-muted); border-top: 1px solid var(--rule); margin-top: 3rem; scroll-margin-top: 4rem; }
+  #work h2 { margin: 0 0 0.4rem; font-size: 1.75rem; }
+  #work .sub { color: var(--muted); margin: 0 0 1.6rem; max-width: 44rem; }
+  #work .pill:not([aria-pressed="true"]) { background: var(--surface); }
+  #work .after { margin: 1.9rem 0 0; color: var(--muted); font-size: 0.94rem; }
+
+  .reading { list-style: none; padding: 0 !important; }
+  .reading li { padding: 0.55rem 0; border-bottom: 1px solid var(--rule); margin: 0; display: flex; flex-wrap: wrap; gap: 0.2rem 0.7rem; justify-content: space-between; }
+  .reading span { color: var(--muted); font-style: italic; font-size: 0.9rem; }
+
+  .pills { display: flex; gap: 0.55rem; flex-wrap: wrap; margin: 0 0 1.6rem; }
   .pill {
     font: inherit;
     font-size: 0.875rem;
@@ -65,16 +266,42 @@
     cursor: pointer;
     transition: background .14s ease, color .14s ease;
   }
-  .band.tint .pill { background: var(--surface); }
   .pill:hover { color: var(--fg); }
   .pill[aria-pressed="true"] {
     background: var(--btn-primary);
     color: var(--accent-fg);
   }
-
   .empty { color: var(--muted); margin: 0; }
 
-  @media (max-width: 60rem) {
-    .hero .band-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  @media (max-width: 64rem) {
+    .hero .band-inner { grid-template-columns: 1fr; gap: 2rem; }
     .hero-art { display: none; }
+    .explainer { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 2rem; }
+    .explain { grid-row: 2; max-width: none; }
+    .onpage {
+      grid-column: 1; grid-row: 1; position: static;
+      border: 1px solid var(--rule); border-radius: var(--radius-sm);
+      padding: 0.9rem 1.1rem;
+    }
+    .onpage ol { columns: 2; column-gap: 1.5rem; }
+    .onpage li { margin: 0.2rem 0; break-inside: avoid; }
   }
+  @media (max-width: 44rem) {
+    .hero .band-inner { padding: 2.5rem 1rem 2rem; }
+    .explainer { padding-left: 1rem; padding-right: 1rem; }
+    .breaks { columns: 1; }
+    .timeline { grid-template-columns: 1fr; gap: 0.9rem; }
+    .timeline::before { left: 1.6rem; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+    .timeline li { display: flex; gap: 0.9rem; align-items: baseline; }
+    .timeline .yr { flex: none; }
+    .timeline .ev { margin: 0; }
+    /* Rows become small blocks: four columns do not fit a phone, and a table
+       that scrolls sideways hides the column that says whether it is final. */
+    table.facts, table.facts tbody, table.facts tr, table.facts td { display: block; }
+    table.facts thead { display: none; }
+    table.facts tr { padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+    table.facts td { border: 0; padding: 0.1rem 0; }
+    table.facts td:first-child { white-space: normal; font-weight: 650; }
+    .area { padding: 0.1rem 1rem 0.6rem; }
+  }
+  main.home ~ .sitefooter { margin-top: 0; }

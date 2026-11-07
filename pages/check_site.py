@@ -70,8 +70,19 @@ def main():
     check("<title>Applied PQC:" in index, "landing page lost its title")
     check('href="apqc.pdf"' in index, "landing page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
-    check(len(re.findall(r'<section class="band', index)) >= 2,
-          "landing page has fewer than two section bands")
+    check('<section class="band hero"' in index, "landing page lost its hero")
+    # The contents beside the explainer must only point at sections that exist,
+    # or a renamed section leaves a link that scrolls nowhere.
+    toc = re.search(r'<aside class="onpage".*?</aside>', index, re.S)
+    check(toc is not None, "landing page lost its contents")
+    if toc:
+        targets = re.findall(r'href="#([^"]+)"', toc.group(0))
+        check(len(targets) >= 6, "landing page contents has only %d entries" % len(targets))
+        for t in targets:
+            check(re.search(r'<section id="%s"[ >]' % re.escape(t), index) is not None,
+                  "landing page contents links to #%s, which is not a section" % t)
+    check("Checked against awesome-pqc on " in index,
+          "landing page no longer says when it was checked against awesome-pqc")
     # The grid is the landing page. Every entry must carry cover art and a
     # stretched link, or the card is a dead tile.
     cards = re.findall(r'<li class="card"', index)
