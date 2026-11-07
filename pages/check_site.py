@@ -67,11 +67,27 @@ def main():
 
     # --- landing page -----------------------------------------------------
     index = read(p("index.html"))
-    check("<title>Applied PQC:" in index, "landing page lost its title")
+    check(re.search(r"<title>Post-Quantum Cryptography[^<]*\| Applied PQC</title>", index),
+          "landing page title no longer leads with the topic and ends with the brand")
+    check(re.search(r'<script type="application/ld\+json">[^<]*"@type":"WebPage"[^<]*"dateModified"', index),
+          "landing page structured data does not describe the page and its date")
+    check(re.search(r"<url><loc>https://appliedpqc.io/</loc><lastmod>", read(p("sitemap.xml"))),
+          "sitemap gives the home page no date")
     check('href="apqc.pdf"' in index, "landing page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
-    check(len(re.findall(r'<section class="band', index)) >= 2,
-          "landing page has fewer than two section bands")
+    check('<section class="band hero"' in index, "landing page lost its hero")
+    # The contents beside the explainer must only point at sections that exist,
+    # or a renamed section leaves a link that scrolls nowhere.
+    toc = re.search(r'<aside class="onpage".*?</aside>', index, re.S)
+    check(toc is not None, "landing page lost its contents")
+    if toc:
+        targets = re.findall(r'href="#([^"]+)"', toc.group(0))
+        check(len(targets) >= 6, "landing page contents has only %d entries" % len(targets))
+        for t in targets:
+            check(re.search(r'<section id="%s"[ >]' % re.escape(t), index) is not None,
+                  "landing page contents links to #%s, which is not a section" % t)
+    check("Checked against awesome-pqc on " in index,
+          "landing page no longer says when it was checked against awesome-pqc")
     # The grid is the landing page. Every entry must carry cover art and a
     # stretched link, or the card is a dead tile.
     cards = re.findall(r'<li class="card"', index)
@@ -302,8 +318,8 @@ def main():
     check('content="summary_large_image"' in index,
           "landing page is not using the large share card")
     check('rel="icon"' in index, "landing page links no icon")
-    check(re.search(r"<title>[^<]{25,90}</title>", index) is not None,
-          "landing page title is missing or a bad length for search results")
+    check(re.search(r"<title>[^<]{25,60}</title>", index) is not None,
+          "landing page title is missing or longer than search results show")
 
     # The Run button takes its colours from --btn-primary. A literal label
     # colour once went white-on-white against it and the button disappeared,
