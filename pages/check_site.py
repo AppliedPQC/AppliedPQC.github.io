@@ -67,7 +67,12 @@ def main():
 
     # --- landing page -----------------------------------------------------
     index = read(p("index.html"))
-    check("<title>Applied PQC:" in index, "landing page lost its title")
+    check(re.search(r"<title>Post-Quantum Cryptography[^<]*\| Applied PQC</title>", index),
+          "landing page title no longer leads with the topic and ends with the brand")
+    check(re.search(r'<script type="application/ld\+json">[^<]*"@type":"WebPage"[^<]*"dateModified"', index),
+          "landing page structured data does not describe the page and its date")
+    check(re.search(r"<url><loc>https://appliedpqc.io/</loc><lastmod>", read(p("sitemap.xml"))),
+          "sitemap gives the home page no date")
     check('href="apqc.pdf"' in index, "landing page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
     check('<section class="band hero"' in index, "landing page lost its hero")
@@ -313,8 +318,8 @@ def main():
     check('content="summary_large_image"' in index,
           "landing page is not using the large share card")
     check('rel="icon"' in index, "landing page links no icon")
-    check(re.search(r"<title>[^<]{25,90}</title>", index) is not None,
-          "landing page title is missing or a bad length for search results")
+    check(re.search(r"<title>[^<]{25,60}</title>", index) is not None,
+          "landing page title is missing or longer than search results show")
 
     # The Run button takes its colours from --btn-primary. A literal label
     # colour once went white-on-white against it and the button disappeared,

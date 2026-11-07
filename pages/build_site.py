@@ -67,10 +67,15 @@ GH = "https://github.com/AppliedPQC"
 SITE = "https://appliedpqc.io"
 
 BRAND = "Applied PQC"
-# Search results truncate around sixty characters, so the suffix is the short
-# brand rather than the full book title, and the home page leads with what the
-# site is instead of repeating the name twice.
-HOME_TITLE = "Applied PQC: where post-quantum cryptography actually stands"
+# Search results truncate around sixty characters. The home page leads with
+# the phrase people search for, and the short brand goes last, where a
+# truncated title loses it first.
+HOME_TITLE = "Post-Quantum Cryptography: Where It Stands | Applied PQC"
+# The share card already names the site, so the shared title is the headline.
+HOME_OG_TITLE = "Post-quantum cryptography, where it actually stands"
+HOME_DESC = ("Where post-quantum cryptography stands: NIST standards, the RFCs "
+             "that carry them, the 2030 and 2035 deadlines, and what has shipped "
+             "in TLS, SSH and blockchains.")
 STATIC = os.path.join(HERE, "static")
 
 # The home page summarises awesome-pqc, which changes daily and is not checked
@@ -80,13 +85,38 @@ MONTHS = ("January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December")
 
 
+def checked_iso():
+    return "%04d-%02d-%02d" % HOME_CHECKED
+
+
 def checked_on(code):
     y, m, d = HOME_CHECKED
-    return "%d 年 %d 月 %d 日" % (y, m, d) if code == "zh" else "%d %s %d" % (d, MONTHS[m - 1], y)
+    text = "%d 年 %d 月 %d 日" % (y, m, d) if code == "zh" else "%d %s %d" % (d, MONTHS[m - 1], y)
+    return '<time datetime="%s">%s</time>' % (checked_iso(), text)
+
+
+def home_ld(code, title, desc, page):
+    """The home page as a page, as well as the site it belongs to."""
+    url = SITE + "/" + page
+    return {
+        "@type": "WebPage", "@id": url + "#page", "url": url,
+        "name": title, "description": desc,
+        "inLanguage": "zh-Hans" if code == "zh" else "en",
+        "isPartOf": {"@id": SITE + "/#website"},
+        "publisher": {"@id": SITE + "/#org"},
+        "dateModified": checked_iso(),
+        "primaryImageOfPage": {"@type": "ImageObject", "url": SITE + "/og.png",
+                               "width": 1200, "height": 630},
+        "about": {"@type": "Thing", "name": "Post-quantum cryptography",
+                  "sameAs": "https://en.wikipedia.org/wiki/Post-quantum_cryptography"},
+        "isBasedOn": "https://github.com/AppliedPQC/awesome-pqc",
+    }
 
 # The site is about getting post-quantum cryptography deployed; the book is one
-# of the things it publishes towards that. SITE_DESC is what the home page and
-# the search engines get, BOOK_DESC only describes the book itself.
+# of the things it publishes towards that. SITE_DESC describes the site as a
+# whole, in its structured data and its feed; the home page has HOME_DESC,
+# because it is now about the field rather than the site. BOOK_DESC only
+# describes the book itself.
 SITE_DESC = ("Where post-quantum cryptography actually stands: what has shipped, "
              "what is still a draft, and what breaks when you deploy it. "
              "Byte-exact implementations of all four standards.")
@@ -425,15 +455,19 @@ def main():
         _ = i18n.gettext(code)
         l_chapters = localised(code)
 
+        home_page = i18n.chrome(code, "index.html")["page"]
+        ld = json.loads(book_ld) if code == "en" else {
+            "@context": "https://schema.org", "@graph": []}
+        ld["@graph"].insert(0, home_ld(code, _(HOME_TITLE), _(HOME_DESC), home_page))
         open(os.path.join(dest, pre + "index.html"), "w").write(
             env.get_template("home.html").render(
                 base, **i18n.chrome(code, "index.html"), title=_(HOME_TITLE),
                 css=css("site.css", "home.css"), main_class="home", here="home",
                 n_listings=n_listings, pages=pages, posts=posts,
                 standards=STANDARDS, checked=checked_on(code),
-                description=_(SITE_DESC),
-                og_type="website", og_title=_(HOME_TITLE),
-                jsonld=book_ld if code == "en" else None))
+                description=_(HOME_DESC),
+                og_type="website", og_title=_(HOME_OG_TITLE),
+                jsonld=json.dumps(ld, ensure_ascii=False, separators=(",", ":"))))
 
         # --- chapter pages ------------------------------------------------
         tpl = env.get_template("chapter.html")
@@ -523,6 +557,7 @@ def main():
     # lastmod only where a real date exists. Stamping every page with today's
     # date is the classic way to teach a crawler to ignore the field.
     post_dates = {"blog-%s.html" % q["slug"]: q["date"] for q in posts}
+    post_dates["index.html"] = post_dates["zh-index.html"] = checked_iso()
     entries = []
     for f in urls:
         loc = SITE + "/" + ("" if f == "index.html" else f)
