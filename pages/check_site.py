@@ -73,7 +73,9 @@ def main():
           "landing page structured data does not describe the page and its date")
     check(re.search(r"<url><loc>https://appliedpqc.io/</loc><lastmod>", read(p("sitemap.xml"))),
           "sitemap gives the home page no date")
-    check('href="apqc.pdf"' in index, "landing page does not link the PDF")
+    # The PDF is one step away, on the book page, rather than in every footer.
+    check('href="book.html"' in index, "landing page does not link the book")
+    check('href="apqc.pdf"' in read(p("book.html")), "book page does not link the PDF")
     check('<main class="home">' in index, "landing page is not using the home layout")
     check('<section class="band hero"' in index, "landing page lost its hero")
     # The contents beside the explainer must only point at sections that exist,
