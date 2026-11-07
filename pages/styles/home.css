@@ -247,7 +247,6 @@
   #work h2 { margin: 0 0 0.4rem; font-size: 1.75rem; }
   #work .sub { color: var(--muted); margin: 0 0 1.6rem; max-width: 44rem; }
   #work .pill:not([aria-pressed="true"]) { background: var(--surface); }
-  #work .after { margin: 1.9rem 0 0; color: var(--muted); font-size: 0.94rem; }
 
   .reading { list-style: none; padding: 0 !important; }
   .reading li { padding: 0.55rem 0; border-bottom: 1px solid var(--rule); margin: 0; display: flex; flex-wrap: wrap; gap: 0.2rem 0.7rem; justify-content: space-between; }
