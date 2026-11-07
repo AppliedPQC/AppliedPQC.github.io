@@ -75,18 +75,10 @@ HOME_DESC = ("Where post-quantum cryptography stands: NIST standards, the RFCs "
 STATIC = os.path.join(HERE, "static")
 
 HOME_CHECKED = (2026, 11, 7)
-MONTHS = ("January", "February", "March", "April", "May", "June", "July",
-          "August", "September", "October", "November", "December")
 
 
 def checked_iso():
     return "%04d-%02d-%02d" % HOME_CHECKED
-
-
-def checked_on(code):
-    y, m, d = HOME_CHECKED
-    text = "%d 年 %d 月 %d 日" % (y, m, d) if code == "zh" else "%d %s %d" % (d, MONTHS[m - 1], y)
-    return '<time datetime="%s">%s</time>' % (checked_iso(), text)
 
 
 def home_ld(code, title, desc, page):
@@ -510,7 +502,7 @@ def main():
                 base, **i18n.chrome(code, "index.html"), title=_(HOME_TITLE),
                 css=css("site.css", "home.css"), main_class="home", here="home",
                 n_listings=n_listings, pages=pages, posts=posts,
-                standards=STANDARDS, checked=checked_on(code), people=people,
+                standards=STANDARDS, people=people,
                 description=_(HOME_DESC),
                 og_type="website", og_title=_(HOME_OG_TITLE),
                 jsonld=json.dumps(ld, ensure_ascii=False, separators=(",", ":"))))
