@@ -67,19 +67,13 @@ GH = "https://github.com/AppliedPQC"
 SITE = "https://appliedpqc.io"
 
 BRAND = "Applied PQC"
-# Search results truncate around sixty characters. The home page leads with
-# the phrase people search for, and the short brand goes last, where a
-# truncated title loses it first.
 HOME_TITLE = "Post-Quantum Cryptography: Where It Stands | Applied PQC"
-# The share card already names the site, so the shared title is the headline.
 HOME_OG_TITLE = "Post-quantum cryptography, where it actually stands"
 HOME_DESC = ("Where post-quantum cryptography stands: NIST standards, the RFCs "
              "that carry them, the 2030 and 2035 deadlines, and what has shipped "
              "in TLS, SSH and blockchains.")
 STATIC = os.path.join(HERE, "static")
 
-# The home page summarises awesome-pqc, which changes daily and is not checked
-# out here, so the page says which day it was last checked against the list.
 HOME_CHECKED = (2026, 11, 7)
 MONTHS = ("January", "February", "March", "April", "May", "June", "July",
           "August", "September", "October", "November", "December")
@@ -96,7 +90,6 @@ def checked_on(code):
 
 
 def home_ld(code, title, desc, page):
-    """The home page as a page, as well as the site it belongs to."""
     url = SITE + "/" + page
     return {
         "@type": "WebPage", "@id": url + "#page", "url": url,
@@ -113,10 +106,7 @@ def home_ld(code, title, desc, page):
     }
 
 # The site is about getting post-quantum cryptography deployed; the book is one
-# of the things it publishes towards that. SITE_DESC describes the site as a
-# whole, in its structured data and its feed; the home page has HOME_DESC,
-# because it is now about the field rather than the site. BOOK_DESC only
-# describes the book itself.
+# of the things it publishes towards that.
 SITE_DESC = ("Where post-quantum cryptography actually stands: what has shipped, "
              "what is still a draft, and what breaks when you deploy it. "
              "Byte-exact implementations of all four standards.")

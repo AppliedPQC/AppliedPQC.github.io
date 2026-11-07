@@ -71,9 +71,6 @@
   .hero-art .art:nth-child(2) { top: 22%; left: 32%; transform: rotate(4deg); z-index: 2; }
   .hero-art .art:nth-child(3) { top: 52%; left: 8%; transform: rotate(-2deg); }
 
-  /* The explainer: one reading column with the contents beside it, on the
-     right where the eye goes after a heading, and sticky because the page is
-     long. */
   .explainer {
     max-width: 78rem;
     margin: 0 auto;
@@ -131,8 +128,6 @@
     border-left: 3px solid var(--brand);
   }
 
-  /* Tables carry the comparisons. Hairlines between rows only, so a five-row
-     table reads as a list rather than a spreadsheet. */
   table.facts { margin: 1.2rem 0 1.4rem; font-size: 0.92rem; display: table; }
   table.facts th, table.facts td { border: 0; border-bottom: 1px solid var(--rule); padding: 0.7rem 0.9rem 0.7rem 0; vertical-align: top; }
   table.facts th {
@@ -157,8 +152,6 @@
   .st.wait { background: color-mix(in srgb, #c27c0e 16%, transparent); color: #9a5f00; }
   :root[data-theme="dark"] .st.wait { color: #f0b54a; }
 
-  /* The deadlines as a line, so the convergence on 2035 is visible before any
-     table is read. */
   .timeline {
     list-style: none;
     padding: 0 !important;
@@ -241,13 +234,10 @@
   details[open] summary::after { content: "−"; }
   details p { margin: 0 0 1rem; color: var(--muted); }
 
-  /* The project's own work, after the explainer and at full width, because
-     a card grid squeezed into the reading column is five rows of thumbnails. */
   .band.tint { background: var(--bg-muted); border-top: 1px solid var(--rule); margin-top: 3rem; scroll-margin-top: 4rem; }
   #work h2 { margin: 0 0 0.4rem; font-size: 1.75rem; }
   #work .sub { color: var(--muted); margin: 0 0 1.6rem; max-width: 44rem; }
   #work .pill:not([aria-pressed="true"]) { background: var(--surface); }
-  #work .after { margin: 1.9rem 0 0; color: var(--muted); font-size: 0.94rem; }
 
   .reading { list-style: none; padding: 0 !important; }
   .reading li { padding: 0.55rem 0; border-bottom: 1px solid var(--rule); margin: 0; display: flex; flex-wrap: wrap; gap: 0.2rem 0.7rem; justify-content: space-between; }
@@ -295,8 +285,6 @@
     .timeline li { display: flex; gap: 0.9rem; align-items: baseline; }
     .timeline .yr { flex: none; }
     .timeline .ev { margin: 0; }
-    /* Rows become small blocks: four columns do not fit a phone, and a table
-       that scrolls sideways hides the column that says whether it is final. */
     table.facts, table.facts tbody, table.facts tr, table.facts td { display: block; }
     table.facts thead { display: none; }
     table.facts tr { padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
