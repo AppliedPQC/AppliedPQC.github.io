@@ -22,6 +22,7 @@
 <li><a href="#standards">{{ _("The standards") }}</a></li>
 <li><a href="#deadlines">{{ _("The deadlines") }}</a></li>
 <li><a href="#shipped">{{ _("What has shipped") }}</a></li>
+<li><a href="#tls">TLS</a></li>
 <li><a href="#chains">{{ _("Blockchains") }}</a></li>
 <li><a href="#now">{{ _("What to do now") }}</a></li>
 <li><a href="#faq">{{ _("Questions") }}</a></li>
@@ -91,9 +92,7 @@
 <h3><span class="n" aria-hidden="true">1</span>{{ _("Key exchange: on by default") }}</h3>
 <ul>
 <li>{{ _("<strong>OpenSSH</strong> 10.0+: <code>mlkem768x25519-sha256</code>") }}</li>
-<li>{{ _("<strong>Apple</strong> OS 26: X25519MLKEM768 for every app on URLSession") }}</li>
-<li>{{ _("<strong>JDK 27</strong>: X25519MLKEM768 first") }}</li>
-<li>{{ _("<strong>Cloudflare</strong>: about 45 billion origin connections a day") }}</li>
+<li>{{ _("<strong>TLS</strong>: default in Apple OS 26, JDK 27, Cloudflare and rustls (<a href=\"#tls\">tracker</a>)") }}</li>
 <li>{{ _("<strong>Signal</strong>: ML-KEM-1024 in key agreement and the ratchet") }}</li>
 </ul>
 </div>
@@ -110,11 +109,33 @@
 <h3><span class="n" aria-hidden="true">3</span>{{ _("Authentication: the harder half") }}</h3>
 <p>{{ _("An ML-DSA-44 signature is 2,420 bytes. ECDSA's is 64.") }}</p>
 <ul>
-<li>{{ _("<strong>Chrome</strong>, <strong>Let's Encrypt</strong>, <strong>Cloudflare</strong>: moving to Merkle Tree Certificates") }}</li>
+<li>{{ _("<strong>Web PKI</strong>: waiting for Merkle Tree Certificates (<a href=\"#tls\">tracker</a>)") }}</li>
 <li>{{ _("<strong>OpenSSH</strong> 10.6: ML-DSA-44 + Ed25519 keys and CAs") }}</li>
 <li>{{ _("<strong>Private PKI</strong>: ML-DSA certificates work today") }}</li>
 </ul>
 </div>
+</section>
+
+<section id="tls">
+<h2>TLS</h2>
+<p>{{ _("Key exchange is on by default in the major stacks. Certificates are not: the public web is waiting for Merkle Tree Certificates.") }}</p>
+<p class="sources">{{ _("Specs:") }} <a href="https://www.rfc-editor.org/rfc/rfc10024.html">RFC 10024</a> {{ _("hybrid groups") }} · <a href="https://www.rfc-editor.org/rfc/rfc9954.html">RFC 9954</a> {{ _("framework") }} · <a href="https://datatracker.ietf.org/doc/draft-ietf-tls-mlkem/">draft-ietf-tls-mlkem</a> {{ _("ML-KEM alone, in the RFC Editor queue") }} · <a href="https://www.rfc-editor.org/rfc/rfc10073.html">RFC 10073</a> {{ _("composite certificates") }}</p>
+<table class="facts tls">
+<thead><tr><th>{{ _("Who") }}</th><th>{{ _("Key exchange") }}</th><th>{{ _("Certificates") }}</th></tr></thead>
+<tbody>
+<tr><td><strong>Apple</strong> OS 26</td><td data-label="{{ _("Key exchange") }}"><span class="st ok">{{ _("Default") }}</span> X25519MLKEM768</td><td data-label="{{ _("Certificates") }}"><span class="st none">—</span></td></tr>
+<tr><td><strong>Java</strong> JDK 27</td><td data-label="{{ _("Key exchange") }}"><span class="st ok">{{ _("Default") }}</span> X25519MLKEM768</td><td data-label="{{ _("Certificates") }}"><span class="st none">—</span></td></tr>
+<tr><td><strong>Cloudflare</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st ok">{{ _("Default") }}</span> {{ _("to origins, about 45 billion connections a day") }}</td><td data-label="{{ _("Certificates") }}"><span class="st wait">{{ _("Planned") }}</span> {{ _("public MTC CA, free from Q1 2027") }}</td></tr>
+<tr><td><strong>rustls</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st ok">{{ _("Default") }}</span> {{ _("since 0.23.27; ML-KEM-1024 in 0.23.37") }}</td><td data-label="{{ _("Certificates") }}"><span class="st ok">{{ _("Default") }}</span> {{ _("ML-DSA since 0.23.44, private PKI") }}</td></tr>
+<tr><td><strong>Chrome</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("ML-KEM in BoringSSL") }}</td><td data-label="{{ _("Certificates") }}"><span class="st wait">{{ _("Planned") }}</span> {{ _("MTC root store, phases through Q3 2027") }}</td></tr>
+<tr><td><strong>Let's Encrypt</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st none">—</span></td><td data-label="{{ _("Certificates") }}"><span class="st wait">{{ _("Planned") }}</span> {{ _("Merkle Tree Certificates, chosen June 2026") }}</td></tr>
+<tr><td><strong>Go</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("ML-KEM since 1.24, ML-KEM-1024 in 1.27") }}</td><td data-label="{{ _("Certificates") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("ML-DSA in 1.27") }}</td></tr>
+<tr><td><strong>OpenSSL</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("ML-KEM since 3.5") }}</td><td data-label="{{ _("Certificates") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("ML-DSA, SLH-DSA since 3.5") }}</td></tr>
+<tr><td><strong>wolfSSL</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st none">—</span></td><td data-label="{{ _("Certificates") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("SLH-DSA in 5.9.4, all 12 parameter sets") }}</td></tr>
+<tr><td><strong>s2n-tls</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("hybrid") }}</td><td data-label="{{ _("Certificates") }}"><span class="st none">—</span></td></tr>
+</tbody>
+</table>
+<p class="sources">{{ _("— means awesome-pqc lists nothing yet, not that nothing exists.") }}</p>
 </section>
 
 <section id="chains">
@@ -271,10 +292,14 @@
 </div></section>
 <section id="contributors" class="band"><div class="band-inner">
 <h2>{{ _("Contributors") }}</h2>
-<p class="sub">{{ _("Everyone with a commit in an AppliedPQC repository, and the book's authors.") }}</p>
+<p class="sub">{{ _("Everyone who has committed to, or opened an issue in, an AppliedPQC repository.") }}</p>
 <ul class="people">
 {%- for c in people %}
-<li>{% if c.url %}<a class="person" href="{{ c.url }}">{% else %}<div class="person">{% endif %}{% if c.image %}<img src="{{ c.image }}" alt="" width="48" height="48" loading="lazy">{% else %}<span class="avatar" aria-hidden="true">{{ c.initials }}</span>{% endif %}<span class="who"><strong>{{ c.name }}</strong><span>{% if c.author %}{{ _("Book author") }}{% elif c.commits == 1 %}{{ _("1 commit") }}{% else %}{{ _("%d commits")|format(c.commits) }}{% endif %}</span></span>{% if c.url %}</a>{% else %}</div>{% endif %}</li>
+<li><a class="person" href="{{ c.url }}"><img src="{{ c.image }}" alt="" width="48" height="48" loading="lazy"><span class="who"><strong>{{ c.name }}</strong><span>
+{%- if c.commits %}{% if c.commits == 1 %}{{ _("1 commit") }}{% else %}{{ _("%d commits")|format(c.commits) }}{% endif %}{% endif %}
+{%- if c.commits and c.issues %} · {% endif %}
+{%- if c.issues %}{% if c.issues == 1 %}{{ _("1 issue") }}{% else %}{{ _("%d issues")|format(c.issues) }}{% endif %}{% endif -%}
+</span></span></a></li>
 {%- endfor %}
 </ul>
 </div></section>

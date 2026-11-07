@@ -254,44 +254,51 @@ def gh_api(path):
     return json.loads(body) if body.strip() else []
 
 
-def initials(name):
-    return "".join(w[0] for w in name.split()[:2]).upper()
-
-
-def contributors(dest, book_authors):
+def contributors(dest):
     try:
         repos = [r["name"] for r in gh_api("/orgs/AppliedPQC/repos?per_page=100&type=public")
                  if not r["fork"] and not r["archived"]]
-        commits, avatar = {}, {}
+        commits, issues, avatar = {}, {}, {}
+
+        def counted(user):
+            login = user["login"]
+            if (user.get("type") != "User" or login.endswith("[bot]")
+                    or login.lower() in NOT_CONTRIBUTORS):
+                return None
+            avatar[login] = user["avatar_url"]
+            return login
+
         for repo in sorted(repos):
             for c in gh_api("/repos/AppliedPQC/%s/contributors?per_page=100" % repo):
-                login = c["login"]
-                if (c.get("type") != "User" or login.endswith("[bot]")
-                        or login.lower() in NOT_CONTRIBUTORS):
-                    continue
-                commits[login] = commits.get(login, 0) + c["contributions"]
-                avatar[login] = c["avatar_url"]
+                login = counted(c)
+                if login:
+                    commits[login] = commits.get(login, 0) + c["contributions"]
+            page = 1
+            while True:
+                batch = gh_api("/repos/AppliedPQC/%s/issues?state=all&per_page=100&page=%d"
+                               % (repo, page))
+                for issue in batch:
+                    login = None if "pull_request" in issue else counted(issue["user"])
+                    if login:
+                        issues[login] = issues.get(login, 0) + 1
+                if len(batch) < 100:
+                    break
+                page += 1
         people = []
-        for login in sorted(commits, key=lambda l: (-commits[l], l.lower())):
+        logins = set(commits) | set(issues)
+        total = lambda l: commits.get(l, 0) + issues.get(l, 0)
+        for login in sorted(logins, key=lambda l: (-total(l), l.lower())):
             name = gh_api("/users/%s" % login).get("name") or login
             image = "avatar-%s.png" % login.lower()
             sep = "&" if "?" in avatar[login] else "?"
             data = urllib.request.urlopen(avatar[login] + sep + "s=96", timeout=30).read()
             open(os.path.join(dest, image), "wb").write(data)
             people.append(dict(name=name, login=login, url="https://github.com/" + login,
-                               image=image, commits=commits[login], author=False))
+                               image=image, commits=commits.get(login, 0),
+                               issues=issues.get(login, 0)))
     except Exception as exc:
         raise SystemExit("could not read the contributors from GitHub\n%s" % exc)
-    authors = []
-    for n in book_authors:
-        match = next((q for q in people if q["name"].lower() == n.lower()), None)
-        if match:
-            people.remove(match)
-            authors.append(dict(match, author=True))
-        else:
-            authors.append(dict(name=n, login="", url="", image="", initials=initials(n),
-                                commits=0, author=True))
-    return authors + people
+    return people
 
 
 def fetch_sourced(build, dest):
@@ -422,7 +429,7 @@ def main():
     pages = pdf_pages(os.path.join(dest, "apqc.pdf"))
 
     who = authors()
-    people = contributors(dest, [w["name"] for w in who])
+    people = contributors(dest)
     base = dict(gh=GH, site=SITE, css=css("site.css"))
 
     # --- landing page -----------------------------------------------------
@@ -658,7 +665,7 @@ def main():
     open(os.path.join(dest, ".nojekyll"), "w").close()
     shutil.rmtree(build)
 
-    print("contributors: %s" % ", ".join(q["login"] or q["name"] for q in people))
+    print("contributors: %s" % ", ".join("%s (%d/%d)" % (q["login"], q["commits"], q["issues"]) for q in people))
     print("landing page: %d listings, %d chapters, %s"
           % (n_listings, len(chapters), "%d pages" % pages if pages else "no PDF"))
     print("chapter pages: %d" % len(chapters))
