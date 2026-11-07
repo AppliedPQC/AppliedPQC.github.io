@@ -5,9 +5,9 @@
 <p class="eyebrow">Applied <span class="pqc">PQC</span></p>
 <h1>{{ _("Post-quantum cryptography, where it actually stands") }}</h1>
 <ul class="lede-points">
-<li>{{ _("A large enough quantum computer breaks RSA and elliptic-curve cryptography, which protect nearly every key exchange and signature in use today. Traffic recorded now can be decrypted then.") }}</li>
-<li>{{ _("The replacements are standards: ML-KEM, ML-DSA and SLH-DSA since August 2024. NIST deprecates the vulnerable algorithms after 2030 and disallows them after 2035.") }}</li>
-<li>{{ _("Key exchange has largely shipped. Authentication, the certificates and signatures, is the half still being built.") }}</li>
+<li>{{ _("A large enough quantum computer breaks RSA and elliptic curves. Data recorded today can be decrypted then.") }}</li>
+<li>{{ _("The replacements are final: ML-KEM, ML-DSA and SLH-DSA. The old algorithms are disallowed after 2035.") }}</li>
+<li>{{ _("Key exchange has shipped. Certificates and signatures have not.") }}</li>
 </ul>
 <div class="cta">
 <a class="button" href="#shipped">{{ _("What has shipped") }}</a>
@@ -34,145 +34,119 @@
 <li><a href="#faq">{{ _("Questions") }}</a></li>
 <li><a href="#reading">{{ _("Further reading") }}</a></li>
 <li><a href="#work">{{ _("What we build") }}</a></li>
+<li><a href="#contributors">{{ _("Contributors") }}</a></li>
 </ol>
 </aside>
 
 <article class="explain">
-<p class="intro">{{ _("This page is the short version of <a href=\"https://github.com/AppliedPQC/awesome-pqc\">awesome-pqc</a>, our curated list of what post-quantum cryptography you can actually build against. Every fact below comes from an entry there, and every entry there is checked against its primary source: the standard, the RFC, the release notes or the code.") }}</p>
+<p class="intro">{{ _("A summary of <a href=\"https://github.com/AppliedPQC/awesome-pqc\">awesome-pqc</a>. Every fact is checked against its primary source.") }}</p>
 
 <section id="why">
 <h2>{{ _("Why it matters") }}</h2>
-<p>{{ _("Shor's algorithm, run on a cryptographically relevant quantum computer, recovers private keys from public ones. NIST's transition schedule names every public-key algorithm that falls to it:") }}</p>
-<ul class="breaks">
-<li>{{ _("<strong>RSA</strong>, for encryption and signatures") }}</li>
-<li>{{ _("<strong>ECDSA</strong> and <strong>EdDSA</strong>, the signatures behind TLS certificates, SSH keys and blockchains") }}</li>
-<li>{{ _("<strong>Diffie-Hellman</strong>, over finite fields and elliptic curves, X25519 included") }}</li>
-<li>{{ _("<strong>MQV</strong>, an authenticated key agreement") }}</li>
-</ul>
-<p>{{ _("The two halves fail on different clocks. Key exchange is exposed today, because ciphertext recorded now can be decrypted once the machine exists: <em>harvest now, decrypt later</em>. Forging a signature needs the machine at the time of the forgery, so authentication becomes urgent when the machine is near. Long-lived keys, such as roots of trust and firmware signing keys, are the exception.") }}</p>
-<p class="takeaway"><strong>{{ _("The takeaway.") }}</strong> {{ _("Anything that must stay secret into the 2030s should be using post-quantum key exchange already. That is why deployment so far is almost entirely key exchange.") }}</p>
+<p>{{ _("Shor's algorithm on a quantum computer recovers private keys from public ones. It breaks:") }}</p>
+<p class="chips"><span>RSA</span><span>ECDSA</span><span>EdDSA</span><span>Diffie-Hellman</span><span>X25519</span><span>MQV</span></p>
+<p class="takeaway"><strong>{{ _("Key exchange first.") }}</strong> {{ _("Traffic recorded now can be decrypted later: <em>harvest now, decrypt later</em>. Signatures can wait longer, except long-lived keys such as firmware roots.") }}</p>
 </section>
 
 <section id="standards">
 <h2>{{ _("The standards") }}</h2>
-<p>{{ _("NIST published three post-quantum standards in August 2024. A fourth is still being written.") }}</p>
 <table class="facts">
 <thead><tr><th>{{ _("Standard") }}</th><th>{{ _("Algorithm") }}</th><th>{{ _("Type") }}</th><th>{{ _("Status") }}</th></tr></thead>
 <tbody>
-<tr><td><a href="https://csrc.nist.gov/pubs/fips/203/final">FIPS 203</a></td><td><strong>ML-KEM</strong><br><span class="was">{{ _("from CRYSTALS-Kyber") }}</span></td><td>{{ _("Lattice key encapsulation") }}</td><td><span class="st ok">{{ _("Final") }}</span> {{ _("August 2024") }}</td></tr>
-<tr><td><a href="https://csrc.nist.gov/pubs/fips/204/final">FIPS 204</a></td><td><strong>ML-DSA</strong><br><span class="was">{{ _("from CRYSTALS-Dilithium") }}</span></td><td>{{ _("Lattice signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> {{ _("August 2024") }}</td></tr>
-<tr><td><a href="https://csrc.nist.gov/pubs/fips/205/final">FIPS 205</a></td><td><strong>SLH-DSA</strong><br><span class="was">{{ _("from SPHINCS+") }}</span></td><td>{{ _("Stateless hash-based signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> {{ _("August 2024") }}</td></tr>
-<tr><td>FIPS 206</td><td><strong>FN-DSA</strong><br><span class="was">{{ _("from Falcon") }}</span></td><td>{{ _("Lattice signatures, compact") }}</td><td><span class="st wait">{{ _("Not published") }}</span> {{ _("no public draft yet") }}</td></tr>
-<tr><td>{{ _("FIPS to come") }}</td><td><strong>HQC</strong></td><td>{{ _("Code-based key encapsulation") }}</td><td><span class="st wait">{{ _("Selected") }}</span> {{ _("March 2025, as a backup to ML-KEM") }}</td></tr>
-<tr><td><a href="https://csrc.nist.gov/pubs/sp/800/208/final">SP 800-208</a></td><td><strong>LMS, XMSS</strong></td><td>{{ _("Stateful hash-based signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> {{ _("narrow use, such as firmware") }}</td></tr>
+<tr><td><a href="https://csrc.nist.gov/pubs/fips/203/final">FIPS 203</a></td><td><strong>ML-KEM</strong></td><td>{{ _("Lattice key encapsulation") }}</td><td><span class="st ok">{{ _("Final") }}</span> 2024</td></tr>
+<tr><td><a href="https://csrc.nist.gov/pubs/fips/204/final">FIPS 204</a></td><td><strong>ML-DSA</strong></td><td>{{ _("Lattice signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> 2024</td></tr>
+<tr><td><a href="https://csrc.nist.gov/pubs/fips/205/final">FIPS 205</a></td><td><strong>SLH-DSA</strong></td><td>{{ _("Stateless hash-based signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> 2024</td></tr>
+<tr><td>FIPS 206</td><td><strong>FN-DSA</strong></td><td>{{ _("Lattice signatures, compact") }}</td><td><span class="st wait">{{ _("Not published") }}</span></td></tr>
+<tr><td>{{ _("FIPS to come") }}</td><td><strong>HQC</strong></td><td>{{ _("Code-based key encapsulation") }}</td><td><span class="st wait">{{ _("Selected") }}</span> 2025</td></tr>
+<tr><td><a href="https://csrc.nist.gov/pubs/sp/800/208/final">SP 800-208</a></td><td><strong>LMS, XMSS</strong></td><td>{{ _("Stateful hash-based signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span></td></tr>
 </tbody>
 </table>
-<p>{{ _("A second signature competition is looking for schemes that do not rest on lattices. <a href=\"https://csrc.nist.gov/pubs/ir/8610/final\">NIST IR 8610</a> (May 2026) moved nine of them to a third round: FAEST, HAWK, MAYO, MQOM, QR-UOV, SDitH, SNOVA, SQIsign and UOV.") }}</p>
+<p>{{ _("Nine more signature schemes are in round 3 (<a href=\"https://csrc.nist.gov/pubs/ir/8610/final\">NIST IR 8610</a>).") }}</p>
 
 <h3>{{ _("In the protocols") }}</h3>
-<p>{{ _("A standard algorithm is not usable until a protocol says how to carry it. The IETF has now done that for the protocols most systems depend on.") }}</p>
 <table class="facts">
 <thead><tr><th>{{ _("Where") }}</th><th>{{ _("Specification") }}</th><th>{{ _("What it adds") }}</th></tr></thead>
 <tbody>
-<tr><td>TLS 1.3</td><td><a href="https://www.rfc-editor.org/rfc/rfc10024.html">RFC 10024</a>, <a href="https://www.rfc-editor.org/rfc/rfc9954.html">RFC 9954</a></td><td>{{ _("The hybrid groups deployed today, X25519MLKEM768 among them, and the construction they share") }}</td></tr>
-<tr><td>SSH</td><td><a href="https://www.rfc-editor.org/rfc/rfc10042.html">RFC 10042</a></td><td>{{ _("Hybrid ML-KEM key exchange, the <code>mlkem768x25519-sha256</code> method OpenSSH uses by default") }}</td></tr>
-<tr><td>{{ _("X.509 certificates") }}</td><td><a href="https://www.rfc-editor.org/rfc/rfc9881.html">RFC 9881</a>, <a href="https://www.rfc-editor.org/rfc/rfc9935.html">9935</a>, <a href="https://www.rfc-editor.org/rfc/rfc9909.html">9909</a>, <a href="https://www.rfc-editor.org/rfc/rfc10073.html">10073</a></td><td>{{ _("Identifiers for ML-DSA, ML-KEM and SLH-DSA, and 18 composite ML-DSA pairings with RSA, ECDSA, Ed25519 or Ed448") }}</td></tr>
-<tr><td>{{ _("Signed and encrypted data") }}</td><td><a href="https://www.rfc-editor.org/rfc/rfc9814.html">RFC 9814</a>, <a href="https://www.rfc-editor.org/rfc/rfc9882.html">9882</a>, <a href="https://www.rfc-editor.org/rfc/rfc9936.html">9936</a></td><td>{{ _("The three standards in CMS, which underlies S/MIME and code signing") }}</td></tr>
-<tr><td>JOSE, COSE</td><td><a href="https://www.rfc-editor.org/rfc/rfc9964.html">RFC 9964</a></td><td>{{ _("ML-DSA for JSON and CBOR signatures, such as tokens and device attestations") }}</td></tr>
-<tr><td>OpenPGP</td><td><a href="https://www.rfc-editor.org/rfc/rfc9980.html">RFC 9980</a></td><td>{{ _("ML-KEM and ML-DSA composites, and SLH-DSA on its own") }}</td></tr>
+<tr><td>TLS 1.3</td><td><a href="https://www.rfc-editor.org/rfc/rfc10024.html">RFC 10024</a>, <a href="https://www.rfc-editor.org/rfc/rfc9954.html">9954</a></td><td>{{ _("Hybrid groups such as X25519MLKEM768") }}</td></tr>
+<tr><td>SSH</td><td><a href="https://www.rfc-editor.org/rfc/rfc10042.html">RFC 10042</a></td><td>{{ _("<code>mlkem768x25519-sha256</code>, OpenSSH's default") }}</td></tr>
+<tr><td>X.509</td><td><a href="https://www.rfc-editor.org/rfc/rfc9881.html">RFC 9881</a>, <a href="https://www.rfc-editor.org/rfc/rfc9935.html">9935</a>, <a href="https://www.rfc-editor.org/rfc/rfc9909.html">9909</a>, <a href="https://www.rfc-editor.org/rfc/rfc10073.html">10073</a></td><td>{{ _("ML-DSA, ML-KEM and SLH-DSA certificates, and 18 composites") }}</td></tr>
+<tr><td>CMS</td><td><a href="https://www.rfc-editor.org/rfc/rfc9814.html">RFC 9814</a>, <a href="https://www.rfc-editor.org/rfc/rfc9882.html">9882</a>, <a href="https://www.rfc-editor.org/rfc/rfc9936.html">9936</a></td><td>{{ _("S/MIME and code signing") }}</td></tr>
+<tr><td>JOSE, COSE</td><td><a href="https://www.rfc-editor.org/rfc/rfc9964.html">RFC 9964</a></td><td>{{ _("ML-DSA for tokens and attestations") }}</td></tr>
+<tr><td>OpenPGP</td><td><a href="https://www.rfc-editor.org/rfc/rfc9980.html">RFC 9980</a></td><td>{{ _("ML-KEM and ML-DSA composites, and SLH-DSA") }}</td></tr>
 </tbody>
 </table>
 </section>
 
 <section id="deadlines">
 <h2>{{ _("The deadlines") }}</h2>
-<p>{{ _("Governments have turned the standards into dates. They differ in detail and agree on the end: by 2035, nothing quantum-vulnerable should be left.") }}</p>
 <ol class="timeline">
 <li><span class="yr">2024</span><span class="ev">{{ _("FIPS 203, 204 and 205 published") }}</span></li>
-<li><span class="yr">2026</span><span class="ev">{{ _("EU: national strategies and inventories started") }}</span></li>
-<li><span class="yr">2027</span><span class="ev">{{ _("France: PQC required in newly qualified products. NSA: new national security system purchases quantum-resistant") }}</span></li>
-<li><span class="yr">2028</span><span class="ev">{{ _("UK: discovery and migration plan done") }}</span></li>
-<li class="hot"><span class="yr">2030</span><span class="ev">{{ _("NIST deprecates RSA and elliptic curves. US high-value systems use PQC key establishment") }}</span></li>
-<li><span class="yr">2031</span><span class="ev">{{ _("US high-value systems use PQC signatures. UK: priority migrations done") }}</span></li>
-<li class="hot"><span class="yr">2035</span><span class="ev">{{ _("NIST disallows them. US, EU and UK migrations complete") }}</span></li>
+<li><span class="yr">2026</span><span class="ev">{{ _("EU: inventories start") }}</span></li>
+<li><span class="yr">2027</span><span class="ev">{{ _("France, NSA: PQC in new products") }}</span></li>
+<li><span class="yr">2028</span><span class="ev">{{ _("UK: migration plan done") }}</span></li>
+<li class="hot"><span class="yr">2030</span><span class="ev">{{ _("NIST deprecates RSA and ECC. US high-value systems: PQC key exchange") }}</span></li>
+<li><span class="yr">2031</span><span class="ev">{{ _("US high-value systems: PQC signatures") }}</span></li>
+<li class="hot"><span class="yr">2035</span><span class="ev">{{ _("NIST disallows them. Migration complete") }}</span></li>
 </ol>
-<table class="facts">
-<thead><tr><th>{{ _("Who") }}</th><th>{{ _("Document") }}</th><th>{{ _("What it requires") }}</th></tr></thead>
-<tbody>
-<tr><td>{{ _("NIST") }}</td><td><a href="https://csrc.nist.gov/pubs/ir/8547/final">IR 8547</a>, {{ _("October 2026") }}</td><td>{{ _("Every quantum-vulnerable public-key algorithm deprecated after 2030 and disallowed after 2035, at every key size. ML-KEM-768 as the default.") }}</td></tr>
-<tr><td>{{ _("US federal") }}</td><td><a href="https://www.whitehouse.gov/presidential-actions/2026/06/securing-the-nation-against-advanced-cryptographic-attacks/">EO 14412</a>, <a href="https://www.whitehouse.gov/wp-content/uploads/2026/06/M-26-15-Execution-of-the-Migration-to-Post-Quantum-Cryptography.pdf">OMB M-26-15</a>, {{ _("June 2026") }}</td><td>{{ _("PQC key establishment by 31 December 2030 and PQC signatures by 31 December 2031 for the most sensitive systems, the rest by 2035, and an inventory as a cryptographic bill of materials.") }}</td></tr>
-<tr><td>{{ _("European Union") }}</td><td><a href="https://digital-strategy.ec.europa.eu/en/library/coordinated-implementation-roadmap-transition-post-quantum-cryptography">{{ _("Coordinated roadmap") }}</a>, {{ _("June 2025") }}</td><td>{{ _("Strategies and inventories started by the end of 2026, high-risk systems migrated by 2030, the rest by 2035.") }}</td></tr>
-<tr><td>{{ _("United Kingdom") }}</td><td><a href="https://www.ncsc.gov.uk/guidance/pqc-migration-timelines">{{ _("NCSC timelines") }}</a>, {{ _("March 2025") }}</td><td>{{ _("Discovery and plan by 2028, highest-priority migrations by 2031, complete by 2035.") }}</td></tr>
-<tr><td>{{ _("France") }}</td><td><a href="https://cyber.gouv.fr/enjeux-technologiques/cryptographie-post-quantique/faq-pqc/">{{ _("ANSSI") }}</a></td><td>{{ _("PQC obligations for products entering qualification from 2027, and buying products without PQC \"not reasonable\" after 2030.") }}</td></tr>
-</tbody>
-</table>
-<p class="takeaway"><strong>{{ _("Hybrid or not.") }}</strong> {{ _("Germany's BSI and France's ANSSI want post-quantum algorithms combined with a classical one. The UK's NCSC prefers a single move to post-quantum alone. NIST accepts a hybrid in FIPS 140 validation as long as one component is approved.") }}</p>
+<p class="sources">{{ _("Sources:") }} <a href="https://csrc.nist.gov/pubs/ir/8547/final">NIST IR 8547</a> · <a href="https://www.whitehouse.gov/presidential-actions/2026/06/securing-the-nation-against-advanced-cryptographic-attacks/">EO 14412</a> · <a href="https://www.whitehouse.gov/wp-content/uploads/2026/06/M-26-15-Execution-of-the-Migration-to-Post-Quantum-Cryptography.pdf">OMB M-26-15</a> · <a href="https://digital-strategy.ec.europa.eu/en/library/coordinated-implementation-roadmap-transition-post-quantum-cryptography">{{ _("EU roadmap") }}</a> · <a href="https://www.ncsc.gov.uk/guidance/pqc-migration-timelines">NCSC</a> · <a href="https://cyber.gouv.fr/enjeux-technologiques/cryptographie-post-quantique/faq-pqc/">ANSSI</a></p>
+<p class="takeaway"><strong>{{ _("Hybrid?") }}</strong> {{ _("BSI and ANSSI require it, NCSC prefers pure post-quantum, NIST accepts both.") }}</p>
 </section>
 
 <section id="shipped">
 <h2>{{ _("What has shipped") }}</h2>
-<p>{{ _("Post-quantum cryptography is no longer a research project. These are released versions and live services, not announcements.") }}</p>
-
 <div class="area">
 <h3><span class="n" aria-hidden="true">1</span>{{ _("Key exchange: on by default") }}</h3>
 <ul>
-<li>{{ _("<strong>OpenSSH</strong> has used <code>mlkem768x25519-sha256</code> by default since 10.0.") }}</li>
-<li>{{ _("<strong>Apple</strong>'s operating systems, from version 26, offer X25519MLKEM768 from URLSession and the Network framework, so every app on those APIs sends a hybrid key share.") }}</li>
-<li>{{ _("<strong>Java</strong>: JDK 27 puts X25519MLKEM768 first in its default TLS 1.3 groups.") }}</li>
-<li>{{ _("<strong>Cloudflare</strong> leads with X25519MLKEM768 to every origin that speaks it, which moved some 45 billion daily connections without customer action.") }}</li>
-<li>{{ _("<strong>Signal</strong> uses X25519 with ML-KEM-1024 for initial key agreement, and extends that protection into the ratchet.") }}</li>
+<li>{{ _("<strong>OpenSSH</strong> 10.0+: <code>mlkem768x25519-sha256</code>") }}</li>
+<li>{{ _("<strong>Apple</strong> OS 26: X25519MLKEM768 for every app on URLSession") }}</li>
+<li>{{ _("<strong>JDK 27</strong>: X25519MLKEM768 first") }}</li>
+<li>{{ _("<strong>Cloudflare</strong>: about 45 billion origin connections a day") }}</li>
+<li>{{ _("<strong>Signal</strong>: ML-KEM-1024 in key agreement and the ratchet") }}</li>
 </ul>
 </div>
-
 <div class="area">
-<h3><span class="n" aria-hidden="true">2</span>{{ _("Libraries: in the standard ones") }}</h3>
+<h3><span class="n" aria-hidden="true">2</span>{{ _("Libraries") }}</h3>
 <ul>
-<li>{{ _("<strong>OpenSSL</strong> has native ML-KEM, ML-DSA and SLH-DSA since 3.5. 4.1 (October 2026) makes them faster.") }}</li>
-<li>{{ _("<strong>Go</strong> has <code>crypto/mlkem</code> since 1.24, and 1.27 adds <code>crypto/mldsa</code> and ML-DSA in X.509 and TLS, with no third-party dependency.") }}</li>
-<li>{{ _("<strong>rustls</strong> prefers X25519MLKEM768 since 0.23.27 and enables ML-DSA certificates since 0.23.44.") }}</li>
-<li>{{ _("<strong>AWS-LC</strong> ships <code>mlkem-native</code>, whose assembly is proved correct and constant-time in HOL-Light. <strong>BoringSSL</strong> holds Chrome's ML-KEM.") }}</li>
-<li>{{ _("<strong>liboqs</strong> and Bouncy Castle cover the widest range of algorithms, in C and on the JVM.") }}</li>
+<li>{{ _("<strong>OpenSSL</strong> 3.5+: ML-KEM, ML-DSA, SLH-DSA") }}</li>
+<li>{{ _("<strong>Go</strong> 1.24+: <code>crypto/mlkem</code>; 1.27 adds <code>crypto/mldsa</code>") }}</li>
+<li>{{ _("<strong>rustls</strong>: hybrid by default, ML-DSA certificates since 0.23.44") }}</li>
+<li><strong>AWS-LC</strong>, <strong>BoringSSL</strong>, <strong>liboqs</strong>, <strong>Bouncy Castle</strong></li>
 </ul>
 </div>
-
 <div class="area">
 <h3><span class="n" aria-hidden="true">3</span>{{ _("Authentication: the harder half") }}</h3>
-<p>{{ _("An ML-DSA-44 signature is 2,420 bytes, against 64 for ECDSA, and a TLS handshake carries several. So the web is not simply swapping algorithms in its certificates.") }}</p>
+<p>{{ _("An ML-DSA-44 signature is 2,420 bytes. ECDSA's is 64.") }}</p>
 <ul>
-<li>{{ _("<strong>Chrome</strong> will not add post-quantum X.509 chains to its root store. It is building a separate store for Merkle Tree Certificates instead, in phases through 2027.") }}</li>
-<li>{{ _("<strong>Let's Encrypt</strong> chose Merkle Tree Certificates in June 2026, and <strong>Cloudflare</strong> is becoming a public CA to issue them free from early 2027.") }}</li>
-<li>{{ _("<strong>OpenSSH</strong> 10.6 made ML-DSA-44 with Ed25519 a regular key type, and 10.6p2 accepts it for SSH certificate authorities.") }}</li>
-<li>{{ _("<strong>Cloudflare's 1.1.1.1</strong> resolver validates ML-DSA-44 DNSSEC signatures.") }}</li>
+<li>{{ _("<strong>Chrome</strong>, <strong>Let's Encrypt</strong>, <strong>Cloudflare</strong>: moving to Merkle Tree Certificates") }}</li>
+<li>{{ _("<strong>OpenSSH</strong> 10.6: ML-DSA-44 + Ed25519 keys and CAs") }}</li>
+<li>{{ _("<strong>Private PKI</strong>: ML-DSA certificates work today") }}</li>
 </ul>
-<p>{{ _("Private PKI can move now: rustls, Go and OpenSSH all accept ML-DSA certificates you issue yourself. The public web cannot until browsers trust a post-quantum CA.") }}</p>
 </div>
 </section>
 
 <section id="chains">
 <h2>{{ _("Blockchains") }}</h2>
-<p>{{ _("Chains keep public keys on a ledger that cannot be rewritten, and changing a signature scheme means changing consensus. Each major chain has a different version of the problem, and progress runs the opposite way to exposure: the chain most exposed has the least shipped.") }}</p>
+<p>{{ _("The most exposed chain has shipped the least.") }}</p>
 <table class="facts">
 <thead><tr><th>{{ _("Chain") }}</th><th>{{ _("Where it is") }}</th><th>{{ _("What") }}</th></tr></thead>
 <tbody>
-<tr><td><strong>Bitcoin</strong></td><td><span class="st wait">{{ _("Draft BIPs") }}</span></td><td>{{ _("BIP-360 removes the exposed Taproot key path and BIP-361 sunsets legacy signatures, but neither is activated and no post-quantum signature scheme is a BIP yet. Over 34% of all bitcoin sit behind a public key already revealed on chain.") }}</td></tr>
-<tr><td><strong>Ethereum</strong></td><td><span class="st wait">{{ _("Research, Draft EIPs") }}</span></td><td>{{ _("Hash-based signatures aggregated by a zkVM, leanVM, so they fit at validator scale. EIP-8355 proposes an ML-DSA precompile for the Hegotá upgrade.") }}</td></tr>
-<tr><td><strong>GOAT Network</strong></td><td><span class="st wait">{{ _("In progress") }}</span></td><td>{{ _("A Bitcoin layer 2 moving its validator consensus keys from secp256k1 to ML-DSA-65, with the design and measurements published, and its bridge proof to a hash-based STARK verifier.") }}</td></tr>
-<tr><td><strong>Cosmos</strong></td><td><span class="st ok">{{ _("Released code") }}</span></td><td>{{ _("SDK v0.55 registers ML-DSA-65 as an opt-in validator and account key type. Counterparty chains must be able to verify it first, or IBC stops.") }}</td></tr>
-<tr><td><strong>Algorand</strong></td><td><span class="st ok">{{ _("Mainnet") }}</span></td><td>{{ _("Falcon-1024 account signatures since go-algorand v5.0.0.") }}</td></tr>
-<tr><td><strong>NEAR</strong></td><td><span class="st ok">{{ _("Mainnet") }}</span></td><td>{{ _("ML-DSA-65 access keys since nearcore 2.13.0, with no change of address. Validators still sign with ed25519.") }}</td></tr>
+<tr><td><strong>Bitcoin</strong></td><td><span class="st wait">{{ _("Draft BIPs") }}</span></td><td>{{ _("BIP-360 and BIP-361, not activated. Over 34% of bitcoin sits behind an exposed public key.") }}</td></tr>
+<tr><td><strong>Ethereum</strong></td><td><span class="st wait">{{ _("Research, Draft EIPs") }}</span></td><td>{{ _("Hash-based signatures aggregated by leanVM. ML-DSA precompile proposed (EIP-8355).") }}</td></tr>
+<tr><td><strong>GOAT Network</strong></td><td><span class="st wait">{{ _("In progress") }}</span></td><td>{{ _("Bitcoin L2. Consensus keys moving to ML-DSA-65, bridge to a hash-based STARK verifier.") }}</td></tr>
+<tr><td><strong>Cosmos</strong></td><td><span class="st ok">{{ _("Released code") }}</span></td><td>{{ _("SDK v0.55: opt-in ML-DSA-65 keys.") }}</td></tr>
+<tr><td><strong>Algorand</strong></td><td><span class="st ok">{{ _("Mainnet") }}</span></td><td>{{ _("Falcon-1024 accounts.") }}</td></tr>
+<tr><td><strong>NEAR</strong></td><td><span class="st ok">{{ _("Mainnet") }}</span></td><td>{{ _("ML-DSA-65 access keys.") }}</td></tr>
 </tbody>
 </table>
-<p>{{ _("Our own work is on the hardest of these, Bitcoin: a <a href=\"https://github.com/AppliedPQC/bitcoin-stark-verifier\">STARK verifier in Bitcoin Script</a> that needs no soft fork, and the <a href=\"blog-bitcoin-l2-post-quantum.html\">analysis</a> of where a layer 2's exposure sits.") }}</p>
 </section>
 
 <section id="now">
 <h2>{{ _("What to do now") }}</h2>
-<p class="lead"><strong>{{ _("Start with an inventory.") }}</strong> {{ _("Every timeline above assumes you can say where RSA and the elliptic curves are in your systems. Most organisations cannot yet.") }}</p>
 <ol class="steps">
-<li><strong>{{ _("Find the vulnerable cryptography.") }}</strong> {{ _("A static scan cannot see dynamically loaded code, vendored binaries or hardware modules, so zero findings means nothing matched, not that nothing is there.") }}</li>
-<li><strong>{{ _("Turn on hybrid key exchange.") }}</strong> {{ _("Current TLS and SSH stacks already offer it. Check that your middleboxes accept the larger handshake.") }}</li>
-<li><strong>{{ _("Test against NIST's vectors.") }}</strong> {{ _("An implementation is not correct because it agrees with itself. NIST's ACVP vectors carry inputs and expected outputs for ML-KEM, ML-DSA and SLH-DSA.") }}</li>
-<li><strong>{{ _("Plan signatures on a longer clock.") }}</strong> {{ _("Private PKI can issue ML-DSA certificates today. Public certificates wait for Merkle Tree Certificates, from 2027.") }}</li>
+<li><strong>{{ _("Inventory.") }}</strong> {{ _("Find every use of RSA and elliptic curves. A clean scan is not proof.") }}</li>
+<li><strong>{{ _("Hybrid key exchange.") }}</strong> {{ _("Turn it on, and check middleboxes accept the larger handshake.") }}</li>
+<li><strong>{{ _("Test vectors.") }}</strong> {{ _("Test against NIST's ACVP vectors, not against yourself.") }}</li>
+<li><strong>{{ _("Signatures.") }}</strong> {{ _("Private PKI now. Public certificates wait for Merkle Tree Certificates.") }}</li>
 </ol>
 </section>
 
@@ -180,35 +154,34 @@
 <h2>{{ _("Questions") }}</h2>
 <details>
 <summary>{{ _("Is FN-DSA (Falcon) a standard yet?") }}</summary>
-<p>{{ _("No. NIST lists FIPS 206 as in development, with no public draft and no test vectors. Until it appears the round-3 Falcon submission is the specification, which is why Algorand's signatures are Falcon rather than FN-DSA.") }}</p>
+<p>{{ _("No. FIPS 206 has no public draft yet. The round-3 Falcon specification is the reference.") }}</p>
 </details>
 <details>
 <summary>{{ _("Does my connection already use post-quantum cryptography?") }}</summary>
-<p>{{ _("Probably, for key exchange, if both ends are current: Apple's OS 26 networking, JDK 27, OpenSSH 10 and Cloudflare all offer a hybrid by default. The certificate that authenticates the connection is still classical.") }}</p>
+<p>{{ _("For key exchange, probably: Apple OS 26, JDK 27, OpenSSH 10 and Cloudflare use a hybrid by default. Certificates are still classical.") }}</p>
 </details>
 <details>
 <summary>{{ _("Should I use a hybrid or post-quantum alone?") }}</summary>
-<p>{{ _("It depends on whose guidance you follow. BSI and ANSSI insist on hybrids, NCSC prefers pure post-quantum, and NIST accepts either in FIPS 140. For signatures, RFC 9955 sets out what each kind of hybrid does and does not protect.") }}</p>
+<p>{{ _("BSI and ANSSI say hybrid, NCSC says post-quantum alone, NIST accepts both. For signatures, see RFC 9955.") }}</p>
 </details>
 <details>
 <summary>{{ _("Is Classic McEliece still recommended?") }}</summary>
-<p>{{ _("Not for new work in Germany. In October 2026 BSI recommended against it for new developments after new cryptanalysis, while stating that no practical attack exists, and named ML-KEM and FrodoKEM as preferred. It is the first reversal of a national PQC recommendation.") }}</p>
+<p>{{ _("Not for new work, says BSI (October 2026). ML-KEM and FrodoKEM are preferred.") }}</p>
 </details>
 <details>
 <summary>{{ _("Are hash-based signatures safe to deploy?") }}</summary>
-<p>{{ _("They rest on the most conservative assumption there is. SLH-DSA is stateless and can be used like any signature. LMS and XMSS are stateful: signing twice with one key allows forgeries, so they belong where state is managed carefully, such as firmware signing.") }}</p>
+<p>{{ _("SLH-DSA, yes. LMS and XMSS are stateful: reusing a key allows forgeries.") }}</p>
 </details>
 <details>
 <summary>{{ _("When will a quantum computer break RSA?") }}</summary>
-<p>{{ _("Nobody can say, and none of the deadlines above is a forecast of it. They are planning dates, set by how long a migration takes.") }}</p>
+<p>{{ _("Nobody knows. The deadlines are planning dates, not forecasts.") }}</p>
 </details>
 </section>
-
 
 <section id="reading">
 <h2>{{ _("Further reading") }}</h2>
 <ul class="reading">
-<li><a href="{{ gh }}/awesome-pqc">awesome-pqc</a> <span>{{ _("everything on this page, with sources") }}</span></li>
+<li><a href="{{ gh }}/awesome-pqc">awesome-pqc</a> <span>{{ _("sources for this page") }}</span></li>
 <li><a href="https://csrc.nist.gov/Projects/post-quantum-cryptography">{{ _("Post-Quantum Cryptography project") }}</a> <span>NIST</span></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc9958.html">{{ _("RFC 9958, Post-Quantum Cryptography for Engineers") }}</a> <span>IETF</span></li>
 <li><a href="https://blog.cloudflare.com/pq-2025/">{{ _("The state of the post-quantum Internet") }}</a> <span>Cloudflare</span></li>
@@ -223,7 +196,7 @@
 </div>
 <section id="work" class="band tint"><div class="band-inner">
 <h2>{{ _("What we build") }}</h2>
-<p class="sub">{{ _("The list, a book that derives the standards, byte-exact implementations of all four, and the research behind them. Filter by what you need.") }}</p>
+<p class="sub">{{ _("The list, the book, implementations of all four standards, and research.") }}</p>
 <div class="pills" data-pills="all">
   <button class="pill" type="button" data-cat="all" aria-pressed="true">{{ _("All") }}</button>
   <button class="pill" type="button" data-cat="deploy" aria-pressed="false">{{ _("Deploy") }}</button>
@@ -236,9 +209,7 @@
     {{ art('list', 2) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/awesome-pqc">awesome-pqc</a></h3>
-      <p>{{ _("A curated, link-verified list of what is actually available to build
-      against: the standards, the test vectors, the libraries that implement
-      them, and the deployment and migration guidance.") }}</p>
+      <p>{{ _("Standards, test vectors, libraries and deployments, every link verified.") }}</p>
       <p class="meta"><span class="tag">{{ _("List") }}</span><span>{{ _("link-verified") }}</span></p>
     </div>
   </li>
@@ -246,9 +217,7 @@
     {{ art('book', 0) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ p }}book.html">{{ _("The book") }}</a></h3>
-      <p>{{ _("The full arc, from finite fields and lattices through all four
-      standards, then the deployment questions: hybrid TLS, side channels,
-      blockchain exposure, and what migration costs in blockspace.") }}</p>
+      <p>{{ _("From lattices to all four standards, then deployment: hybrid TLS, side channels, blockchains.") }}</p>
       <p class="meta"><span class="tag">{{ _("Online &amp; PDF") }}</span>{% if pages %}<span>{{ _("%d pages")|format(pages) }}</span>{% endif %}</p>
     </div>
   </li>
@@ -256,8 +225,7 @@
     {{ art('code', 1) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ p }}playground.html">{{ _("Runnable code") }}</a></h3>
-      <p>{{ _("All %d code listings and the four reference implementations
-      run in your browser, with nothing to install.")|format(n_listings) }}</p>
+      <p>{{ _("All %d listings and the four reference implementations, in your browser.")|format(n_listings) }}</p>
       <p class="meta"><span class="tag">{{ _("Playground") }}</span><span>{{ _("%d listings")|format(n_listings) }}</span></p>
     </div>
   </li>
@@ -265,10 +233,7 @@
     {{ art('merkle', 3) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier">bitcoin-stark-verifier</a></h3>
-      <p>{{ _("A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2
-      over KoalaBear, and WHIR on top of it. Every challenge is squeezed inside
-      the script and every constraint derived from the transcript, so the
-      verifier ends on its own identity rather than on a hint.") }}</p>
+      <p>{{ _("A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2 over KoalaBear, with WHIR.") }}</p>
       <p class="meta"><span class="tag">Rust</span><span>{{ _("no soft fork") }}</span></p>
     </div>
   </li>
@@ -276,10 +241,7 @@
     {{ art('code', 12) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier#chunks">{{ _("Disproving one step") }}</a></h3>
-      <p>{{ _("The verifier is three hundred blocks and is never run on chain. What is
-      run is one chunk of it, bound by Winternitz signatures: 22 Poseidon2
-      rounds in a standard transaction, about two thousand chunks for the whole
-      verifier.") }}</p>
+      <p>{{ _("One verifier chunk per transaction, bound by Winternitz signatures.") }}</p>
       <p class="meta"><span class="tag">BitVM</span><span>{{ _("~2,000 chunks") }}</span></p>
     </div>
   </li>
@@ -287,10 +249,7 @@
     {{ art('book', 11) }}
     <div class="card-body">
       <h3><a class="stretch" href="{{ gh }}/bitcoin-stark-verifier/blob/main/docs/whir-review.pdf">{{ _("WHIR on Bitcoin Script") }}</a></h3>
-      <p>{{ _("A formal account of the STIR and WHIR proximity tests, and a review of
-      the verifier against them: the algorithm stated formally, the
-      implementation reviewed against it, and completeness and soundness
-      separated into what the protocol proves and what the script checks.") }}</p>
+      <p>{{ _("STIR and WHIR stated formally, and the verifier reviewed against them.") }}</p>
       <p class="meta"><span class="tag">PDF</span><span>{{ _("%d pages")|format(17) }}</span></p>
     </div>
   </li>
@@ -316,6 +275,15 @@
 {%- endfor %}
 </ul>
 <p class="empty" hidden>{{ _("Nothing matches that.") }}</p>
+</div></section>
+<section id="contributors" class="band"><div class="band-inner">
+<h2>{{ _("Contributors") }}</h2>
+<p class="sub">{{ _("Everyone with a commit in an AppliedPQC repository, and the book's authors.") }}</p>
+<ul class="people">
+{%- for c in people %}
+<li>{% if c.url %}<a class="person" href="{{ c.url }}">{% else %}<div class="person">{% endif %}{% if c.image %}<img src="{{ c.image }}" alt="" width="48" height="48" loading="lazy">{% else %}<span class="avatar" aria-hidden="true">{{ c.initials }}</span>{% endif %}<span class="who"><strong>{{ c.name }}</strong><span>{% if c.author %}{{ _("Book author") }}{% elif c.commits == 1 %}{{ _("1 commit") }}{% else %}{{ _("%d commits")|format(c.commits) }}{% endif %}</span></span>{% if c.url %}</a>{% else %}</div>{% endif %}</li>
+{%- endfor %}
+</ul>
 </div></section>
 <script>
 (function () {

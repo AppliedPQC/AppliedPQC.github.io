@@ -106,6 +106,8 @@ jobs:
 
       - name: Build the site
         if: steps.decide.outputs.build == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 -m pip install --quiet "jinja2==3.1.*"

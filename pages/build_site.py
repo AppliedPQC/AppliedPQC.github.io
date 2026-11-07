@@ -247,6 +247,61 @@ def localise_images(body, dest, slug):
         body = body.replace(url, name)
     return body
 
+GH_API = "https://api.github.com"
+NOT_CONTRIBUTORS = {"claude", "duanbing"}
+
+
+def gh_api(path):
+    request = urllib.request.Request(GH_API + path,
+                                     headers={"Accept": "application/vnd.github+json"})
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        request.add_header("Authorization", "Bearer " + token)
+    with urllib.request.urlopen(request, timeout=30) as response:
+        body = response.read()
+    return json.loads(body) if body.strip() else []
+
+
+def initials(name):
+    return "".join(w[0] for w in name.split()[:2]).upper()
+
+
+def contributors(dest, book_authors):
+    try:
+        repos = [r["name"] for r in gh_api("/orgs/AppliedPQC/repos?per_page=100&type=public")
+                 if not r["fork"] and not r["archived"]]
+        commits, avatar = {}, {}
+        for repo in sorted(repos):
+            for c in gh_api("/repos/AppliedPQC/%s/contributors?per_page=100" % repo):
+                login = c["login"]
+                if (c.get("type") != "User" or login.endswith("[bot]")
+                        or login.lower() in NOT_CONTRIBUTORS):
+                    continue
+                commits[login] = commits.get(login, 0) + c["contributions"]
+                avatar[login] = c["avatar_url"]
+        people = []
+        for login in sorted(commits, key=lambda l: (-commits[l], l.lower())):
+            name = gh_api("/users/%s" % login).get("name") or login
+            image = "avatar-%s.png" % login.lower()
+            sep = "&" if "?" in avatar[login] else "?"
+            data = urllib.request.urlopen(avatar[login] + sep + "s=96", timeout=30).read()
+            open(os.path.join(dest, image), "wb").write(data)
+            people.append(dict(name=name, login=login, url="https://github.com/" + login,
+                               image=image, commits=commits[login], author=False))
+    except Exception as exc:
+        raise SystemExit("could not read the contributors from GitHub\n%s" % exc)
+    authors = []
+    for n in book_authors:
+        match = next((q for q in people if q["name"].lower() == n.lower()), None)
+        if match:
+            people.remove(match)
+            authors.append(dict(match, author=True))
+        else:
+            authors.append(dict(name=n, login="", url="", image="", initials=initials(n),
+                                commits=0, author=True))
+    return authors + people
+
+
 def fetch_sourced(build, dest):
     """Posts whose text lives in another repository.
 
@@ -375,6 +430,7 @@ def main():
     pages = pdf_pages(os.path.join(dest, "apqc.pdf"))
 
     who = authors()
+    people = contributors(dest, [w["name"] for w in who])
     base = dict(gh=GH, site=SITE, css=css("site.css"))
 
     # --- landing page -----------------------------------------------------
@@ -454,7 +510,7 @@ def main():
                 base, **i18n.chrome(code, "index.html"), title=_(HOME_TITLE),
                 css=css("site.css", "home.css"), main_class="home", here="home",
                 n_listings=n_listings, pages=pages, posts=posts,
-                standards=STANDARDS, checked=checked_on(code),
+                standards=STANDARDS, checked=checked_on(code), people=people,
                 description=_(HOME_DESC),
                 og_type="website", og_title=_(HOME_OG_TITLE),
                 jsonld=json.dumps(ld, ensure_ascii=False, separators=(",", ":"))))
@@ -610,6 +666,7 @@ def main():
     open(os.path.join(dest, ".nojekyll"), "w").close()
     shutil.rmtree(build)
 
+    print("contributors: %s" % ", ".join(q["login"] or q["name"] for q in people))
     print("landing page: %d listings, %d chapters, %s"
           % (n_listings, len(chapters), "%d pages" % pages if pages else "no PDF"))
     print("chapter pages: %d" % len(chapters))
