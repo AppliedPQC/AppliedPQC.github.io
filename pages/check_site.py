@@ -95,8 +95,6 @@ def main():
         for img in re.findall(r'<img src="([^"]+)"', block):
             check(not img.startswith("http") and os.path.exists(p(img)),
                   "contributor avatar %s is not served from this site" % img)
-    check("Checked against awesome-pqc on " in index,
-          "landing page no longer says when it was checked against awesome-pqc")
     # The grid is the landing page. Every entry must carry cover art and a
     # stretched link, or the card is a dead tile.
     cards = re.findall(r'<li class="card"', index)

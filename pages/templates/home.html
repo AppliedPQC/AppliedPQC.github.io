@@ -4,17 +4,10 @@
 <div>
 <p class="eyebrow">Applied <span class="pqc">PQC</span></p>
 <h1>{{ _("Post-quantum cryptography, where it actually stands") }}</h1>
-<ul class="lede-points">
-<li>{{ _("A large enough quantum computer breaks RSA and elliptic curves. Data recorded today can be decrypted then.") }}</li>
-<li>{{ _("The replacements are final: ML-KEM, ML-DSA and SLH-DSA. The old algorithms are disallowed after 2035.") }}</li>
-<li>{{ _("Key exchange has shipped. Certificates and signatures have not.") }}</li>
-</ul>
 <div class="cta">
-<a class="button" href="#shipped">{{ _("What has shipped") }}</a>
-<a class="button ghost" href="{{ p }}book.html">{{ _("Read the book") }}</a>
+<a class="button" href="{{ p }}book.html">{{ _("Read the book") }}</a>
 <a class="button ghost" href="{{ p }}playground.html">{{ _("Run the code") }}</a>
 </div>
-<p class="stamp">{{ _("Checked against awesome-pqc on %s")|format(checked) }}<span aria-hidden="true">·</span><a href="{{ gh }}/awesome-pqc">{{ _("Every source") }}</a><span aria-hidden="true">·</span><a href="{{ gh }}/AppliedPQC.github.io/blob/main/pages/templates/home.html">{{ _("Edit this page") }}</a></p>
 </div>
 <div class="hero-art" aria-hidden="true">
 {{ art('lattice', 0) }}{{ art('merkle', 4) }}{{ art('ntt', 2) }}
