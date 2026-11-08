@@ -376,7 +376,7 @@ def pandoc(src, out, template, title, toc=False, description="", page="",
            ogtype="article", header=None, code="en", counterpart=True):
     ch = i18n.chrome(code, page, counterpart)
     cmd = ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
-           "--standalone", "--mathjax", "--template=" + template,
+           "--standalone", "--mathjax", "--wrap=none", "--template=" + template,
            "--variable=pagetitle=" + title, "--variable=lang=" + ch["lang"],
            "--variable=description=" + description,
            "--variable=page=" + ch["page"], "--variable=ogtype=" + ogtype,

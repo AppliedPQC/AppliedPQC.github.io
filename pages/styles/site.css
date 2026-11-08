@@ -88,6 +88,7 @@
   }
   /* Gallery pages run edge to edge and set their own inner width. */
   main.wide { max-width: 78rem; }
+  main a { overflow-wrap: break-word; }
 
   /* Sticky chrome: it stays because the grid below it is long, and blurs so
      cards scrolling under it stay legible. */
