@@ -50,7 +50,7 @@
 <tr><td><a href="https://csrc.nist.gov/pubs/fips/203/final">FIPS 203</a></td><td><strong>ML-KEM</strong></td><td>{{ _("Lattice key encapsulation") }}</td><td><span class="st ok">{{ _("Final") }}</span> 2024</td></tr>
 <tr><td><a href="https://csrc.nist.gov/pubs/fips/204/final">FIPS 204</a></td><td><strong>ML-DSA</strong></td><td>{{ _("Lattice signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> 2024</td></tr>
 <tr><td><a href="https://csrc.nist.gov/pubs/fips/205/final">FIPS 205</a></td><td><strong>SLH-DSA</strong></td><td>{{ _("Stateless hash-based signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span> 2024</td></tr>
-<tr><td>FIPS 206</td><td><strong>FN-DSA</strong></td><td>{{ _("Lattice signatures, compact") }}</td><td><span class="st wait">{{ _("Not published") }}</span></td></tr>
+<tr><td>FIPS 206</td><td><strong>FN-DSA</strong></td><td>{{ _("Lattice signatures, compact") }}</td><td><span class="st wait">{{ _("In development") }}</span></td></tr>
 <tr><td>{{ _("FIPS to come") }}</td><td><strong>HQC</strong></td><td>{{ _("Code-based key encapsulation") }}</td><td><span class="st wait">{{ _("Selected") }}</span> 2025</td></tr>
 <tr><td><a href="https://csrc.nist.gov/pubs/sp/800/208/final">SP 800-208</a></td><td><strong>LMS, XMSS</strong></td><td>{{ _("Stateful hash-based signatures") }}</td><td><span class="st ok">{{ _("Final") }}</span></td></tr>
 </tbody>
@@ -109,7 +109,7 @@
 <h3><span class="n" aria-hidden="true">3</span>{{ _("Authentication: the harder half") }}</h3>
 <p>{{ _("An ML-DSA-44 signature is 2,420 bytes. ECDSA's is 64.") }}</p>
 <ul>
-<li>{{ _("<strong>Web PKI</strong>: waiting for Merkle Tree Certificates (<a href=\"#tls\">tracker</a>)") }}</li>
+<li>{{ _("<strong>Web PKI</strong>: Chrome and Let's Encrypt chose Merkle Tree Certificates (<a href=\"#tls\">tracker</a>)") }}</li>
 <li>{{ _("<strong>OpenSSH</strong> 10.6: ML-DSA-44 + Ed25519 keys and CAs") }}</li>
 <li>{{ _("<strong>Private PKI</strong>: ML-DSA certificates work today") }}</li>
 </ul>
@@ -118,7 +118,7 @@
 
 <section id="tls">
 <h2>TLS</h2>
-<p>{{ _("Key exchange is on by default in the major stacks. Certificates are not: the public web is waiting for Merkle Tree Certificates.") }}</p>
+<p>{{ _("Key exchange is on by default in the major stacks. For public certificates, Chrome, Let's Encrypt and Cloudflare chose Merkle Tree Certificates.") }}</p>
 <p class="sources">{{ _("Specs:") }} <a href="https://www.rfc-editor.org/rfc/rfc10024.html">RFC 10024</a> {{ _("hybrid groups") }} · <a href="https://www.rfc-editor.org/rfc/rfc9954.html">RFC 9954</a> {{ _("framework") }} · <a href="https://datatracker.ietf.org/doc/draft-ietf-tls-mlkem/">draft-ietf-tls-mlkem</a> {{ _("ML-KEM alone, in the RFC Editor queue") }} · <a href="https://www.rfc-editor.org/rfc/rfc10073.html">RFC 10073</a> {{ _("composite certificates") }}</p>
 <table class="facts tls">
 <thead><tr><th>{{ _("Who") }}</th><th>{{ _("Key exchange") }}</th><th>{{ _("Certificates") }}</th></tr></thead>
@@ -135,7 +135,6 @@
 <tr><td><strong>s2n-tls</strong></td><td data-label="{{ _("Key exchange") }}"><span class="st sup">{{ _("Supported") }}</span> {{ _("hybrid") }}</td><td data-label="{{ _("Certificates") }}"><span class="st none">—</span></td></tr>
 </tbody>
 </table>
-<p class="sources">{{ _("— means awesome-pqc lists nothing yet, not that nothing exists.") }}</p>
 </section>
 
 <section id="chains">
@@ -144,7 +143,7 @@
 <table class="facts">
 <thead><tr><th>{{ _("Chain") }}</th><th>{{ _("Where it is") }}</th><th>{{ _("What") }}</th></tr></thead>
 <tbody>
-<tr><td><strong>Bitcoin</strong></td><td><span class="st wait">{{ _("Draft BIPs") }}</span></td><td>{{ _("BIP-360 and BIP-361, not activated. Over 34% of bitcoin sits behind an exposed public key.") }}</td></tr>
+<tr><td><strong>Bitcoin</strong></td><td><span class="st wait">{{ _("Draft BIPs") }}</span></td><td>{{ _("BIP-360 and BIP-361 drafted. Over 34% of bitcoin sits behind an exposed public key.") }}</td></tr>
 <tr><td><strong>Ethereum</strong></td><td><span class="st wait">{{ _("Research, Draft EIPs") }}</span></td><td>{{ _("Hash-based signatures aggregated by leanVM. ML-DSA precompile proposed (EIP-8355).") }}</td></tr>
 <tr><td><strong>GOAT Network</strong></td><td><span class="st wait">{{ _("In progress") }}</span></td><td>{{ _("Bitcoin L2. Consensus keys moving to ML-DSA-65, bridge to a hash-based STARK verifier.") }}</td></tr>
 <tr><td><strong>Cosmos</strong></td><td><span class="st ok">{{ _("Released code") }}</span></td><td>{{ _("SDK v0.55: opt-in ML-DSA-65 keys.") }}</td></tr>
@@ -160,26 +159,26 @@
 <li><strong>{{ _("Inventory.") }}</strong> {{ _("Find every use of RSA and elliptic curves. A clean scan is not proof.") }}</li>
 <li><strong>{{ _("Hybrid key exchange.") }}</strong> {{ _("Turn it on, and check middleboxes accept the larger handshake.") }}</li>
 <li><strong>{{ _("Test vectors.") }}</strong> {{ _("Test against NIST's ACVP vectors, not against yourself.") }}</li>
-<li><strong>{{ _("Signatures.") }}</strong> {{ _("Private PKI now. Public certificates wait for Merkle Tree Certificates.") }}</li>
+<li><strong>{{ _("Signatures.") }}</strong> {{ _("Private PKI: ML-DSA certificates work today. Public: Merkle Tree Certificates, free from Cloudflare from Q1 2027.") }}</li>
 </ol>
 </section>
 
 <section id="faq">
 <h2>{{ _("Questions") }}</h2>
 <details>
-<summary>{{ _("Is FN-DSA (Falcon) a standard yet?") }}</summary>
-<p>{{ _("No. FIPS 206 has no public draft yet. The round-3 Falcon specification is the reference.") }}</p>
+<summary>{{ _("Where is FN-DSA (Falcon)?") }}</summary>
+<p>{{ _("NIST lists FIPS 206 as in development. Implementations follow the round-3 Falcon specification, as Algorand's Falcon-1024 accounts do.") }}</p>
 </details>
 <details>
 <summary>{{ _("Does my connection already use post-quantum cryptography?") }}</summary>
-<p>{{ _("For key exchange, probably: Apple OS 26, JDK 27, OpenSSH 10 and Cloudflare use a hybrid by default. Certificates are still classical.") }}</p>
+<p>{{ _("For key exchange, probably: Apple OS 26, JDK 27, OpenSSH 10 and Cloudflare use a hybrid by default.") }}</p>
 </details>
 <details>
 <summary>{{ _("Should I use a hybrid or post-quantum alone?") }}</summary>
 <p>{{ _("BSI and ANSSI say hybrid, NCSC says post-quantum alone, NIST accepts both. For signatures, see RFC 9955.") }}</p>
 </details>
 <details>
-<summary>{{ _("Is Classic McEliece still recommended?") }}</summary>
+<summary>{{ _("Is Classic McEliece recommended?") }}</summary>
 <p>{{ _("Not for new work, says BSI (October 2026). ML-KEM and FrodoKEM are preferred.") }}</p>
 </details>
 <details>
