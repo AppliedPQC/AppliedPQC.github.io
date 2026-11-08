@@ -22,5 +22,21 @@
     "path": "nist-ir-8547-final.md",
     "summary": "NIST's final transition report keeps 2030 and 2035 but deprecates quantum-vulnerable public-key cryptography at every key size, builds in the federal 2030 and 2031 deadlines, and names ML-KEM-768 as the default. What changed from the 2024 draft, sentence by sentence.",
     "cat": "standard"
+  },
+  {
+    "slug": "merkle-tree-certificates",
+    "date": "2026-11-08",
+    "repo": "pqc-research",
+    "path": "merkle-tree-certificates.md",
+    "summary": "Post-quantum signatures are too large to put several in every TLS handshake, so Chrome, Let's Encrypt and Cloudflare chose Merkle Tree Certificates. How the PLANTS draft works, Chrome's root store and its phases to Q3 2027, the Cloudflare–Chrome experiment, and the two CAs building it.",
+    "cat": "deploy"
+  },
+  {
+    "slug": "privacy-pass-post-quantum",
+    "date": "2026-11-08",
+    "repo": "pqc-research",
+    "path": "privacy-pass-post-quantum.md",
+    "summary": "Privacy Pass tokens stay private after Q-day but become forgeable. Cloudflare Research's replacements build on UOV and VOLE-in-the-head: PoMFRIT, VOLE-IHAT and VOLE-ACT, at 4 to 12 KB per token and milliseconds per step.",
+    "cat": "research"
   }
 ]
