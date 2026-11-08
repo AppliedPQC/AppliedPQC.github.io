@@ -22,7 +22,6 @@
  "<strong>Web PKI</strong>: Chrome and Let's Encrypt chose Merkle Tree Certificates (<a href=\"#tls\">tracker</a>)": "<strong>Web PKI</strong>：Chrome 和 Let's Encrypt 选定了 Merkle Tree Certificates（<a href=\"#tls\">追踪表</a>）",
  "<strong>rustls</strong>: hybrid by default, ML-DSA certificates since 0.23.44": "<strong>rustls</strong>：默认混合，0.23.44 起支持 ML-DSA 证书",
  "A STARK verifier in Bitcoin Script with no <code>OP_CAT</code>: Poseidon2 over KoalaBear, with WHIR.": "无需 <code>OP_CAT</code> 的比特币脚本 STARK 验证器：基于 KoalaBear 的 Poseidon2，加上 WHIR。",
- "A summary of <a href=\"https://github.com/AppliedPQC/awesome-pqc\">awesome-pqc</a>. Every fact is checked against its primary source.": "<a href=\"https://github.com/AppliedPQC/awesome-pqc\">awesome-pqc</a> 的摘要。每条事实都与原始来源核对过。",
  "ANSSI": "ANSSI",
  "Algorithm": "算法",
  "All": "全部",
