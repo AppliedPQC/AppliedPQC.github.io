@@ -24,14 +24,6 @@
     "cat": "standard"
   },
   {
-    "slug": "merkle-tree-certificates",
-    "date": "2026-11-08",
-    "repo": "pqc-research",
-    "path": "merkle-tree-certificates.md",
-    "summary": "Post-quantum signatures are too large to put several in every TLS handshake, so Chrome, Let's Encrypt and Cloudflare chose Merkle Tree Certificates. How the PLANTS draft works, Chrome's root store and its phases to Q3 2027, the Cloudflare–Chrome experiment, and the two CAs building it.",
-    "cat": "deploy"
-  },
-  {
     "slug": "privacy-pass-post-quantum",
     "date": "2026-11-08",
     "repo": "pqc-research",
