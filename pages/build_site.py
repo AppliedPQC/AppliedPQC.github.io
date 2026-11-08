@@ -376,7 +376,7 @@ def pandoc(src, out, template, title, toc=False, description="", page="",
            ogtype="article", header=None, code="en", counterpart=True):
     ch = i18n.chrome(code, page, counterpart)
     cmd = ["pandoc", src, "--from=gfm+yaml_metadata_block", "--to=html5",
-           "--standalone", "--template=" + template,
+           "--standalone", "--mathjax", "--template=" + template,
            "--variable=pagetitle=" + title, "--variable=lang=" + ch["lang"],
            "--variable=description=" + description,
            "--variable=page=" + ch["page"], "--variable=ogtype=" + ogtype,
@@ -494,6 +494,7 @@ def main():
     bodies = [open(p["path"]).read() for p in posts]
     any_diagram = any("```mermaid" in b for b in bodies)
     any_sage = any('<div class="sage">' in b for b in bodies)
+    any_math = any(re.search(r"```math|\$`|\$\$", b) for b in bodies)
 
     for lang in i18n.LANGS:
         code, pre = lang["code"], lang["prefix"]
@@ -532,12 +533,12 @@ def main():
         # --- prose pages, via pandoc ---------------------------------------
         # One pandoc template per chrome variant, rendered from the same partials
         # the generated pages use.
-        def pandoc_template(name, sagecell, extra_css, here, mermaid=False):
+        def pandoc_template(name, sagecell, extra_css, here, mermaid=False, math=False):
             path = os.path.join(build, pre + name)
             ch = i18n.chrome(code, "index.html")
             open(path, "w").write(env.get_template("pandoc.html").render(
                 base, css=css("site.css", *extra_css), sagecell=sagecell,
-                mermaid=mermaid, here=here, p=pre, _=_, lang=ch["lang"],
+                mermaid=mermaid, math=math, here=here, p=pre, _=_, lang=ch["lang"],
                 alt_lang=ch["alt_lang"], alt_name=ch["alt_name"]))
             return path
 
@@ -562,7 +563,7 @@ def main():
         if code != "en":
             continue
         blog_tpl = pandoc_template("t-blog.html", any_sage, (), "blog",
-                                   mermaid=any_diagram)
+                                   mermaid=any_diagram, math=any_math)
         for q in posts:
             page_url = "%s/blog-%s.html" % (SITE, q["slug"])
             post_ld = json.dumps({
