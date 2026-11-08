@@ -27,6 +27,9 @@ $endfor$
 {%- if mermaid %}
 {% include "_mermaid.html" %}
 {%- endif %}
+{%- if math %}
+{% include "_mathjax.html" %}
+{%- endif %}
 </head>
 <body>
 {% with alt="$altpage$" %}{% include "_topbar.html" %}{% endwith %}

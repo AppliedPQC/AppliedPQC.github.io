@@ -1,0 +1,15 @@
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  chtml: { scale: 0.97 }
+};
+document.addEventListener("DOMContentLoaded", function () {
+  if (!document.querySelector(".math")) return;
+  var s = document.createElement("script");
+  s.src = "mathjax/tex-chtml.js";
+  document.head.appendChild(s);
+});
+</script>
+<style>
+  mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; }
+</style>
